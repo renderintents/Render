@@ -189,7 +189,7 @@ window:createtab({
                     installation:updatedesc('These are required for render to work properly.')
                     makefolder('vape/Render');
                     makefolder('vape/Render/lib');
-                    for i,v in ({'utils.lua', 'renderlib.lua', 'solarapoop.lua'}) do 
+                    for i,v in ({'utils.lua', 'solarapoop.lua'}) do 
                         installation:updatestatus('Writing vape/Render/lib/'..v)
                         writefile('vape/Render/lib/'..v, getasync('https://storage.rendervape.xyz/lib/settings/'..v..'?ria='..ria))
                     end;
@@ -198,7 +198,7 @@ window:createtab({
                     installation:updatetitle('Downloading default settings')
                     for i,v in next, profiles do 
                         installation:updatestatus('Writing vape/Profiles/'..v)
-                        renderwrite('Profiles/'..v, getasync('https://raw.githubusercontent.com/SystemXVoid/Render/source/Libraries/Settings/'..v))
+                        renderwrite('Profiles/'..v, getasync('https://storage.rendervape.xyz/lib/settings/'..v..'?ria='..ria))
                     end
                 end)
                 installation:addstep(function()
