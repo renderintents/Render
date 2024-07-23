@@ -116,7 +116,7 @@ window:createtab({
             installbutton.MouseButton1Click:Connect(function()
                 local installation = api:install()
                 local profiles, assets, libraries = {}, {}, {}
-                local modules = {'Universal.lua', 'loader.lua', '6872274481.lua', 'GuiLibrary.lua', 'MainScript.lua'}
+                local modules = {};
                 installation:addstep(function() 
                     installation:updatetitle('Testing your Executor')
                     installation:updatedesc('Testing if your functions are good enough for render.')
@@ -148,7 +148,7 @@ window:createtab({
                     end)
                     assert(typeof(response.result) == 'table' and response.success, 'Failed to fetch custom module files')
                     for i,v in next, response.result do
-                        table.insert(profiles, v) 
+                        table.insert(modules, v) 
                     end
                 end)
                 installation:addstep(function()
