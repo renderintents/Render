@@ -174,10 +174,13 @@ window:createtab({
                         local id = v:gsub('.lua', '')
                         if tonumber(id) then 
                             installation:updatestatus('Writing vape/CustomModules/'..v)
-                            renderwrite('CustomModules/'..v, ([[return loadstring(game:HttpGet('renurl'))()]]):gsub('renurl', 'https://storage.manhackwiz.xyz/packages/'..v..'?ria='..ria))
+                            renderwrite('CustomModules/'..v, ([[return loadstring(http_get('renurl'))()]]):gsub('renurl', 'https://storage.rendervape.xyz/packages/'..v..'?ria='..ria))
                         else
-                            installation:updatestatus('Writing vape/CustomModules/'..v)
-                            renderwrite(v, ([[return loadstring(game:HttpGet('renurl'))()]]):gsub('renurl', 'https://storage.manhackwiz.xyz/packages/'..v..'?ria='..ria))
+                            installation:updatestatus('Writing vape/CustomModules/'..v);
+                            if v == 'loader.lua' then 
+                                renderwrite(v, ([[return loadstring(game:HttpGet('renurl'))()]]):gsub('renurl', 'https://storage.rendervape.xyz/packages/'..v..'?ria='..ria))
+                            end;
+                            renderwrite(v, ([[return loadstring(http_get('renurl'))()]]):gsub('renurl', 'https://storage.rendervape.xyz/packages/'..v..'?ria='..ria))
                         end
                     end
                 end)
@@ -188,7 +191,7 @@ window:createtab({
                     makefolder('vape/Render/lib');
                     for i,v in ({'utils.lua', 'renderlib.lua', 'solarapoop.lua'}) do 
                         installation:updatestatus('Writing vape/Render/lib/'..v)
-                        writefile('vape/Render/lib/'..v, getasync('https://storage.manhackwiz.xyz/lib/'..v..'?ria='..ria))
+                        writefile('vape/Render/lib/'..v, getasync('https://storage.rendervape.xyz/lib/'..v..'?ria='..ria))
                     end;
                 end);
                 installation:addstep(function()
