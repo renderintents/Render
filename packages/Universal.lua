@@ -59,6 +59,8 @@ if not isfile('vape/Render/lib/utils.lua') then
 	writefile('vape/Render/lib/utils.lua', body);
 end;
 
+getgenv().render = {};
+
 local render = {
 	events = setmetatable({}, {
 		__index = function(self, method)
