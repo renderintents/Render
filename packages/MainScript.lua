@@ -203,7 +203,7 @@ shared.GuiLibrary = GuiLibrary;
 getgenv().ria = readfile('ria.ren');
 local success, renderlib = pcall(function() loadstring(http_get('https://storage.rendervape.xyz/lib/renderlib.lua?ria='..ria))() end) 
 
-if RenderLibrary ~= renderlib then 
+if typeof(RenderLibrary) ~= 'table' then 
 	pcall(function()
 		local notification = GuiLibrary.CreateNotification('Render', `Failed to load core library --> {renderlib}`, 25, "assets/WarningNotification.png")
 		notification.IconLabel.ImageColor3 = Color3.new(220, 0, 0)
