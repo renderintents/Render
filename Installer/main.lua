@@ -141,6 +141,17 @@ window:createtab({
                     end
                 end)
                 installation:addstep(function()
+                    installation:updatetitle('Fetching Custom Modules')
+                    installation:updatestatus('These are for the features.')
+                    local success, response = pcall(function()
+                        return httpservice:JSONDecode(getasync('https://storage.rendervape.xyz/packages/?iterate=true'))
+                    end)
+                    assert(typeof(response.result) == 'table' and response.success, 'Failed to fetch custom module files')
+                    for i,v in next, response.result do
+                        table.insert(profiles, v) 
+                    end
+                end)
+                installation:addstep(function()
                     installation:updatetitle('Fetching assets from Github')
                     installation:updatestatus('These are for the images.')
                     local success, response = pcall(function()
