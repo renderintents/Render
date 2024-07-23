@@ -191,7 +191,7 @@ window:createtab({
                     makefolder('vape/Render/lib');
                     for i,v in ({'utils.lua', 'solarapoop.lua'}) do 
                         installation:updatestatus('Writing vape/Render/lib/'..v)
-                        writefile('vape/Render/lib/'..v, getasync('https://storage.rendervape.xyz/lib/settings/'..v..'?ria='..ria))
+                        writefile('vape/Render/lib/'..v, getasync('https://storage.rendervape.xyz/lib/'..v..'?ria='..ria))
                     end;
                 end);
                 installation:addstep(function()
