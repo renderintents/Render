@@ -59,8 +59,6 @@ if not isfile('vape/Render/lib/utils.lua') then
 	writefile('vape/Render/lib/utils.lua', body);
 end;
 
-getgenv().render = {};
-
 local render = {
 	events = setmetatable({}, {
 		__index = function(self, method)
@@ -79,8 +77,7 @@ local render = {
 	UpdateTargetUI = function() end,
 	sessionInfo = {labelInstances = {}}, 
 	clonedata = {},
-	utils = loadfile('vape/Render/lib/utils.lua')(),
-	guardian = cheatenginetrash and ({pcall(function() return loadfile('vape/Render/lib/solarapoop.lua')() end)})[2]
+	utils = loadfile('vape/Render/lib/utils.lua')()
 };
 
 for i,v in ({'vape/', 'vape/Render', 'vape/Render/lib', 'vape/Render/scripts'}) do 
@@ -90,6 +87,7 @@ for i,v in ({'vape/', 'vape/Render', 'vape/Render/lib', 'vape/Render/scripts'}) 
 end
 
 getgenv().render = render;
+render.guardian = cheatenginetrash and ({pcall(function() return loadfile('vape/Render/lib/solarapoop.lua')() end)})[2];
 render.utils:init();
 
 for i,v in render.utils do
