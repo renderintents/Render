@@ -19,7 +19,7 @@ local getasync = function(...)
 end
 
 local httpservice = cloneref(game.GetService(game, 'HttpService'))
-local api = loadstring(getasync('https://storage.manhackwiz.xyz/Installer/installui.lua?ria='..ria))()
+local api = loadstring(getasync('https://storage.rendervape.xyz/Installer/installui.lua?ria='..ria))()
 
 local creategradient = function(pos, color, pos2, color2)
     return ColorSequence.new({ColorSequenceKeypoint.new(pos, color), ColorSequenceKeypoint.new(pos2, color2)})
