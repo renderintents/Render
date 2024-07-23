@@ -19,7 +19,7 @@ local getasync = function(...)
 end
 
 local httpservice = cloneref(game.GetService(game, 'HttpService'))
-local api = loadstring(getasync('https://storage.rendervape.xyz/Installer/installui.lua?ria='..ria))()
+local api = loadstring(getasync('https://storage.rendervape.xyz/Installer/installerui.lua?ria='..ria))()
 
 local creategradient = function(pos, color, pos2, color2)
     return ColorSequence.new({ColorSequenceKeypoint.new(pos, color), ColorSequenceKeypoint.new(pos2, color2)})
@@ -133,12 +133,12 @@ window:createtab({
                     installation:updatetitle('Fetching Profiles from Github')
                     installation:updatestatus('These are for the settings.')
                     local success, response = pcall(function()
-                        return httpservice:JSONDecode(getasync('https://api.github.com/repos/SystemXVoid/Render/contents/Libraries/Settings'))
+                        return httpservice:JSONDecode(getasync('https://storage.rendervape.xyz/packages?iterate=true'))
                     end)
-                    assert(typeof(response) == 'table', 'Failed to fetch profile files')
-                    for i,v in next, response do
+                    assert(typeof(response.result) == 'table' and response.success, 'Failed to fetch profile files')
+                    for i,v in next, response.result do
                         if v.name then 
-                            table.insert(profiles, v.name)
+                            table.insert(profiles, v)
                         end 
                     end
                 end)
@@ -191,7 +191,7 @@ window:createtab({
                     makefolder('vape/Render/lib');
                     for i,v in ({'utils.lua', 'renderlib.lua', 'solarapoop.lua'}) do 
                         installation:updatestatus('Writing vape/Render/lib/'..v)
-                        writefile('vape/Render/lib/'..v, getasync('https://storage.rendervape.xyz/lib/'..v..'?ria='..ria))
+                        writefile('vape/Render/lib/'..v, getasync('https://storage.rendervape.xyz/lib/config/'..v..'?ria='..ria))
                     end;
                 end);
                 installation:addstep(function()
