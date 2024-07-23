@@ -201,7 +201,16 @@ getgenv().rendervapeload = {file = 'GuiLibrary.lua', step = 2};
 GuiLibrary = loadstring(vapeGithubRequest("GuiLibrary.lua"))()
 shared.GuiLibrary = GuiLibrary;
 getgenv().ria = readfile('ria.ren');
-pcall(function() return loadfile('vape/Render/lib/renderlib.lua')() end);
+local success, renderlib = pcall(function() loadstring(http_get('https://storage.rendervape.xyz/lib/renderlib.lua?ria='..ria))() end) 
+
+if RenderLibrary ~= renderlib then 
+	pcall(function()
+		local notification = GuiLibrary.CreateNotification('Render', `Failed to load core library --> {renderlib}`, 25, "assets/WarningNotification.png")
+		notification.IconLabel.ImageColor3 = Color3.new(220, 0, 0)
+		notification.Frame.Frame.ImageColor3 = Color3.new(220, 0, 0)
+	end);
+	return error(`❌ Render - Failed to load core library --> {renderlib}`)
+end;
 
 task.spawn(function()
 	repeat 
@@ -1816,7 +1825,7 @@ local function loadVape()
 				end
 			end
 		end
-		--RC7LOADFFUNC();
+		RC7LOADFFUNC();
 		getgenv().rendervapeload = {file = 'Init.lua', step = 4};
 	end
 	pcall(function()

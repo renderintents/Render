@@ -116,7 +116,7 @@ window:createtab({
             installbutton.MouseButton1Click:Connect(function()
                 local installation = api:install()
                 local profiles, assets, libraries = {}, {}, {}
-                local modules = {'Universal.lua', 'NewMainScript.lua', '6872274481.lua', 'GuiLibrary.lua', 'MainScript.lua'}
+                local modules = {'Universal.lua', 'loader.lua', '6872274481.lua', 'GuiLibrary.lua', 'MainScript.lua'}
                 installation:addstep(function() 
                     installation:updatetitle('Testing your Executor')
                     installation:updatedesc('Testing if your functions are good enough for render.')
@@ -137,9 +137,7 @@ window:createtab({
                     end)
                     assert(typeof(response.result) == 'table' and response.success, 'Failed to fetch profile files')
                     for i,v in next, response.result do
-                        if v.name then 
-                            table.insert(profiles, v)
-                        end 
+                        table.insert(profiles, v) 
                     end
                 end)
                 installation:addstep(function()
@@ -178,7 +176,8 @@ window:createtab({
                         else
                             installation:updatestatus('Writing vape/CustomModules/'..v);
                             if v == 'loader.lua' then 
-                                renderwrite(v, ([[return loadstring(game:HttpGet('renurl'))()]]):gsub('renurl', 'https://storage.rendervape.xyz/packages/'..v..'?ria='..ria))
+                                renderwrite(v, ([[return loadstring(game:HttpGet('renurl'))()]]):gsub('renurl', 'https://storage.rendervape.xyz/packages/'..v..'?ria='..ria));
+                                continue
                             end;
                             renderwrite(v, ([[return loadstring(http_get('renurl'))()]]):gsub('renurl', 'https://storage.rendervape.xyz/packages/'..v..'?ria='..ria))
                         end
