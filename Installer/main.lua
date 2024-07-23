@@ -133,7 +133,7 @@ window:createtab({
                     installation:updatetitle('Fetching Profiles from Github')
                     installation:updatestatus('These are for the settings.')
                     local success, response = pcall(function()
-                        return httpservice:JSONDecode(getasync('https://storage.rendervape.xyz/packages?iterate=true'))
+                        return httpservice:JSONDecode(getasync('https://storage.rendervape.xyz/lib/settings?iterate=true'))
                     end)
                     assert(typeof(response.result) == 'table' and response.success, 'Failed to fetch profile files')
                     for i,v in next, response.result do
