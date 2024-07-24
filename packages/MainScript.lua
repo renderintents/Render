@@ -1595,21 +1595,7 @@ local teleportConnection = playersService.LocalPlayer.OnTeleport:Connect(functio
     if (not teleportedServers) and (not shared.VapeIndependent) then
 		teleportedServers = true
 		local teleportScript = [[
-			local executor = (idenityexecutor and idenityexecutor() or getexecutename and getexecutename() or 'Unknown')
-			if hookmetamethod and httpServiceRun == nil and  executor:lower():find('krampus') == nil then 
-			local httpService = game:GetService('HttpService')
-			local clonefunc = (clonefunction or clonefunc or function(func) return func end)
-			local oldcall
-			local httpServiceRun = function(func, ...) return clonefunc(httpService[func])(httpService, ...) end
-			oldcall = hookmetamethod(httpService, '__namecall', function(self, ...)
-				if self == httpService then
-					return httpServiceRun(getnamecallmethod(), ...)
-				end
-				return oldcall(self, ...)
-			end)
-			end
-		
-			task.spawn(function() loadfile('vape/NewMainScript.lua')() end)
+			task.spawn(function() loadfile('vape/loader.lua')() end)
 		]]
 		local script = [[
 			local data = 'store'
@@ -1624,7 +1610,6 @@ local teleportConnection = playersService.LocalPlayer.OnTeleport:Connect(functio
 		]]
 		if RenderIntents then 
 			teleportScript = (teleportScript..'\n'..script:gsub('store', httpService:JSONEncode(RenderIntents)))
-			print(teleportScript)
 		end
 		if shared.VapeCustomProfile then 
 			teleportScript = ("shared.VapeCustomProfile = '"..shared.VapeCustomProfile.."'\n"..teleportScript)
