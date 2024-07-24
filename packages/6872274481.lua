@@ -8116,7 +8116,7 @@ run(function()
 	})
 end)
 
-run(function()
+--[[run(function()
 	local BowExploit = {Enabled = false}
 	local BowExploitTarget = {Value = 'Mouse'}
 	local BowExploitAutoShootFOV = {Value = 1000}
@@ -8200,7 +8200,7 @@ run(function()
 		Max = 1000,
 		Default = 1000
 	})
-end)
+end)]]
 
 run(function()
 	local RavenTP = {Enabled = false}
@@ -10747,7 +10747,7 @@ run(function()
 	})
 end);
 
-run(function()
+--[[run(function()
 	local projectileaura = {};
 	local projauraextra = {ObjectList = {}};
 	local projaurablacklist = {ObjectList = {}};
@@ -10840,6 +10840,8 @@ run(function()
 		local oldtime = tick() + (0.1 * oldval);
 		repeat task.wait() until tick() > oldtime or projauraswitchdelay.Value ~= oldval;
 	end;
+	local getprediction = function(root: BasePart)
+	end;
 	projectileaura = blatant.Api.CreateOptionsButton({
 		Name = 'ProjectileAura',
 		HoverText = 'Automatically shoots projectiles and\nnearby targets.',
@@ -10922,8 +10924,7 @@ run(function()
 		TempText = 'blacklisted projectiles',
 		AddFunction = void
 	})
-end)
-
+end)]]
 
 run(function()
 	local autoqueue = {};
