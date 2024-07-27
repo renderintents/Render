@@ -1810,7 +1810,7 @@ local function loadVape()
 				end
 			end
 		end
-		--RC7LOADFFUNC()
+		pcall(RC7LOADFFUNC);
 		getgenv().rendervapeload = {file = 'Init.lua', step = 4};
 	end
 	pcall(function()
