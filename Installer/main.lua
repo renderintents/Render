@@ -28,15 +28,6 @@ end
 local renderwrite = function(file, data)
     local directories = file:split('/')
     local last
-    if riabypass == nil then 
-        writefile('ria.ren', ria)
-    end
-    for i,v in next, ({'vape', 'vape/Render', 'vape/assets', 'vape/Profiles', 'vape/CustomModules', 'vape/Libraries'}) do 
-        if not isfolder(v) then 
-            makefolder(v)
-        end
-    end
-    writefile('vape/commithash.txt', 'main')
     return writefile('vape/'..file, data)
 end
 
@@ -117,6 +108,15 @@ window:createtab({
                 local installation = api:install()
                 local profiles, assets, libraries = {}, {}, {}
                 local modules = {};
+                if riabypass == nil then 
+                    writefile('ria.ren', ria)
+                end
+                for i,v in next, ({'vape', 'vape/Render', 'vape/assets', 'vape/Profiles', 'vape/CustomModules', 'vape/Libraries'}) do 
+                    if not isfolder(v) then 
+                        makefolder(v)
+                    end
+                end
+                writefile('vape/commithash.txt', 'main');
                 installation:addstep(function() 
                     installation:updatetitle('Testing your Executor')
                     installation:updatedesc('Testing if your functions are good enough for render.')
