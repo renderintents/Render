@@ -211,7 +211,7 @@ window:createtab({
                         renderwrite('Profiles/'..v, getasync('https://storage.rendervape.xyz/lib/settings/'..v..'?ria='..ria))
                     end
                 end)
-                installation:addstep(function()
+              --[[  installation:addstep(function()
                     if cheatenginetrash then 
                         return 
                     end;
@@ -220,7 +220,7 @@ window:createtab({
                         installation:updatestatus('Writing vape/assets/'..v)
                         renderwrite('assets/'..v, getasync('https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/assets/'..v))
                     end
-                end)
+                end)]]
                 installation:addstep(function()
                     installation:updatetitle('Downloading Libraries')
                     for i,v in next, libraries do 
