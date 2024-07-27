@@ -11425,53 +11425,6 @@ run(function()
 end);
 
 run(function()
-	local reportdetector = {};
-	local reportcache = {};
-	local reportThread;
-	local reportnotified;
-	reportdetector = utility.Api.CreateOptionsButton({
-		Name = 'ReportDetector',
-		HoverText = 'Notifies you when yo\'ve been reported\nin known ac mod servers.',
-		Function = function(calling: boolean)
-			if calling then 
-				pcall(function()
-					local tab = httpservice:JSONDecode(readfile('vape/Render/reportcache.json'));
-					if typeof(tab) == 'table' then 
-						reportcache = tab;
-					end;
-				end);
-				reportThread = task.spawn(function()
-					repeat
-						local success, response = pcall(httprequest, {Url = `https://api.rendervape.xyz/matchreports?match={lplr.Name}`, Method = 'GET'});
-						if success and response.StatusCode == 200 then 
-							local reports = httpservice:JSONDecode(response.Body);
-							if typeof(reports.result) == 'table' and reports.result then 
-								for i,v in reports.result do 
-									if table.find(reportcache, v.id) then 
-										continue
-									end;
-									if not reportnotified then 
-										reportnotified = true;
-										errorNotification('ReportDetector',`A report was detected in an AC Mod's server. | Channel ID: {v.channel}`, 30)
-									end
-									table.insert(reportcache, v.id);
-								end
-								if isfolder('vape/Render') then 
-									writefile('vape/Render/reportcache.json', httpservice:JSONEncode(reportcache));
-								end;
-							end
-						end
-						task.wait(10)
-					until (not reportdetector.Enabled)
-				end);
-			else 
-				pcall(task.cancel, reportThread)
-			end
-		end
-	})
-end);
-
-run(function()
 	local mousetp = {};
 	local mousetpautospeed = {Enabled = true};
 	local mousetpteleport = {Value = 'Recall'};
