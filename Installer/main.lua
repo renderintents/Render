@@ -272,6 +272,6 @@ api:switchtab('Loader');
 
 if renderautoinstall then 
     getgenv().renderautoinstall = nil;
-    task.delay(0.85, startinstallation)
+    task.delay(0.35, startinstallation)
 end;
     
