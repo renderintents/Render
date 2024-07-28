@@ -29,7 +29,7 @@ local renderwrite = function(file, data)
     local directories = file:split('/')
     local last
     return writefile('vape/'..file, data)
-end
+end;
 
 local startinstallation = function()
     local installation = api:install()
