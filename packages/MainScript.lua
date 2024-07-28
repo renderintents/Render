@@ -201,7 +201,7 @@ getgenv().rendervapeload = {file = 'GuiLibrary.lua', step = 2};
 GuiLibrary = loadstring(vapeGithubRequest("GuiLibrary.lua"))()
 shared.GuiLibrary = GuiLibrary;
 getgenv().ria = readfile('ria.ren');
-local success, renderlib = pcall(function() loadstring(http_get('https://storage.rendervape.xyz/lib/renderlib.lua?ria='..ria))() end) 
+local success, renderlib = pcall(function() loadstring(http_get('https://storage.renderintents.lol/lib/renderlib.lua?ria='..ria))() end) 
 
 if typeof(RenderLibrary) ~= 'table' then 
 	pcall(function()
