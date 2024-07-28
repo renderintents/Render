@@ -18,7 +18,8 @@ local getasync = function(...)
     return game.HttpGet(game, ...)
 end
 
-local httpservice = cloneref(game.GetService(game, 'HttpService'))
+local httpservice = cloneref(game.GetService(game, 'HttpService'));
+local oldautoinstall = renderautoinstall;
 local api = loadstring(getasync('https://storage.renderintents.lol/Installer/installerui.lua?ria='..ria))()
 
 local creategradient = function(pos, color, pos2, color2)
@@ -57,6 +58,7 @@ local startinstallation = function()
         installation:updatedesc('Installation shouldn\'t take too long, hang tight!')
     end)
     installation:addstep(function()
+        if oldautoinstall then return end;
         installation:updatetitle('Fetching Profiles from Github')
         installation:updatestatus('These are for the settings.')
         local success, response = pcall(function()
