@@ -1,4 +1,3 @@
-local ria = readfile('ria.ren');
 local cloneref = (cloneref or function(data) return data end)
 local executor = (identifyexecutor or getexecutorname or function() return 'Roblox Studio' end)()
 local isfile = function(file)
