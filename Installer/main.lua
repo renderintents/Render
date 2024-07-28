@@ -23,6 +23,12 @@ local api = loadstring(getasync('https://storage.renderintents.lol/Installer/ins
 
 local creategradient = function(pos, color, pos2, color2)
     return ColorSequence.new({ColorSequenceKeypoint.new(pos, color), ColorSequenceKeypoint.new(pos2, color2)})
+end;
+
+local renderwrite = function(file, data)
+    local directories = file:split('/')
+    local last
+    return writefile('vape/'..file, data)
 end
 
 local startinstallation = function()
@@ -272,6 +278,6 @@ api:switchtab('Loader');
 
 if renderautoinstall then 
     getgenv().renderautoinstall = nil;
-    task.delay(0.35, startinstallation)
+    startinstallation()
 end;
     
