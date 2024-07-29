@@ -448,7 +448,6 @@
         local button = Instance.new('ImageButton', typeof(userdata.parent) == 'Instance' and userdata.parent)
         local buttontext = Instance.new('TextLabel', button)
         local buttonicon = Instance.new('ImageLabel', button)
-        local iconloaded
         button.MouseButton1Click:Connect(function()
             if userdata.manual then 
                 return 
