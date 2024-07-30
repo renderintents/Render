@@ -11425,6 +11425,35 @@ run(function()
 end);
 
 run(function()
+	local ccursor = {};
+	local mouse = {Value = ''};
+	ccursor = utility.Api.CreateOptionsButton({
+		Name = 'CustomCursor',
+		HoverText = 'Custom cursor.',
+		Function = function(call: boolean)
+			if call then
+				local mouseobj = lplr:GetMouse()
+				if mouse.Value = '' then
+					mouseobj.Icon = mouse.Value
+				else
+					mouseobj.Icon = mouse.Value
+				end
+			end
+		end,
+	})
+	mouse = ccursor.CreateTextBox({
+		Name = 'Custom Mouse',
+		TempText = 'Asset id? (rbxassetid://4927593)',
+		FocusLost = function(enter)
+			local suc, res = pcall(function() return getservice('HttpService'):JSONDecode(readfile(mouse.Value)) end)
+			if suc then
+				mouse.Value = res
+			end
+		end
+	})
+end)
+
+run(function()
 	local mousetp = {};
 	local mousetpautospeed = {Enabled = true};
 	local mousetpteleport = {Value = 'Recall'};
