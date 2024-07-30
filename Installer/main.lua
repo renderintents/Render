@@ -45,12 +45,7 @@ local startinstallation = function()
         end
     end
     writefile('vape/commithash.txt', 'main');
-    installation:addstep(function() 
-        installation:updatetitle('Testing your Executor')
-        installation:updatedesc('Testing if your functions are good enough for render.')
-        installation:updatestatus('global functions')
-        task.wait(0.5)
-    end)
+    task.wait(0.5)
     installation:addstep(function() 
         if isfolder('vape/Render') then 
             delfolder('vape/Render')
