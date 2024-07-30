@@ -11430,10 +11430,10 @@ run(function()
 	ccursor = utility.Api.CreateOptionsButton({
 		Name = 'CustomCursor',
 		HoverText = 'Custom cursor.',
-		Function = function(call: boolean)
+		Function = function(call)
 			if call then
 				local mouseobj = lplr:GetMouse()
-				if mouse.Value = '' then
+				if mouse.Value == '' then
 					mouseobj.Icon = mouse.Value
 				else
 					mouseobj.Icon = mouse.Value
