@@ -94,8 +94,8 @@ for i,v in render.utils do
 	getfenv()[i] = v;
 end;
 
-pcall(function()
-	if replicated:FindFirstChild('DefaultChatSystemChatEvents') then 
+task.spawn(pcall, function()
+	if replicated:WaitForChild('DefaultChatSystemChatEvents', 9e9) then 
 		vapeConnections[1] = replicated.DefaultChatSystemChatEvents.OnMessageDoneFiltering.OnClientEvent:Connect(function(data: table)
 			local player : Player = players:FindFirstChild(data.FromSpeaker);
 			if player then 
