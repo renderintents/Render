@@ -11432,12 +11432,15 @@ run(function()
 		HoverText = 'Custom cursor.',
 		Function = function(call)
 			if call then
-				local mouseobj = lplr:GetMouse()
-				if mouse.Value == '' then
-					mouseobj.Icon = mouse.Value
-				else
-					mouseobj.Icon = mouse.Value
-				end
+				repeat
+					task.wait(0.1)
+					local mouseobj = lplr:GetMouse()
+					if mouse.Value == '' then
+						mouseobj.Icon = mouse.Value
+					else
+						mouseobj.Icon = mouse.Value
+					end
+				until not ccursor.Enabled
 			end
 		end,
 	})
