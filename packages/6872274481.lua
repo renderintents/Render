@@ -10747,7 +10747,7 @@ run(function()
 	})
 end);
 
---[[run(function()
+run(function()
 	local projectileaura = {};
 	local projauraextra = {ObjectList = {}};
 	local projaurablacklist = {ObjectList = {}};
@@ -10871,10 +10871,18 @@ end);
 										task.wait(0.02)
 									end;
 									betterswitch(v.tool);
-									task.spawn(function() 
-										bedwars.Client:Get(bedwars.ProjectileRemote):CallServerAsync(v.tool, tostring(ammo.tool), tostring(ammo.tool) == 'star' and 'star_projectile' or tostring(ammo.tool) == 'mage_spell_base' and target.RootPart.Position or tostring(ammo.tool), target.RootPart.Position, target.RootPart.Position, Vector3.new(0, -1, 0), httpservice:GenerateGUID(), {drawDurationSeconds = 1}, workspace:GetServerTimeNow(), target);
-										lastfired[v.itemType] = tick();
-									end);
+                                    projdata = projdata or {};
+                                    local selfpos = lplr.Character.PrimaryPart.Position;
+                                    local shootpos, shootvelo = predictGravity(target.RootPart.Position, target.RootPart.Velocity, (target.RootPart.Position - (selfpos + Vector3.new(0, 2, 0))).Magnitude / (projdata.launchVelocity or 100), target, workspace.Gravity);
+                                    local pos = CFrame.lookAt(lplr.Character.PrimaryPart.CFrame.lookVector, target.RootPart.CFrame.lookVector).Position;
+                                    local shootvec = CFrame.new(selfpos + Vector3.new(0, 2, 0), shootpos);
+                                    local predicted = LaunchDirection(selfpos + Vector3.new(0, 2, 0), shootpos, projdata.launchVelocity or 100, projdata.gravitationalAcceleration or 196.2, false);
+                                    if predicted then 
+                                        task.spawn(function() 
+                                            bedwars.Client:Get(bedwars.ProjectileRemote):CallServerAsync(v.tool, tostring(ammo.tool), tostring(ammo.tool), selfpos + Vector3.new(0, 2, 0), selfpos, predicted, getservice('HttpService'):GenerateGUID(), {drawDurationSeconds = 1}, workspace:GetServerTimeNow() - 0.045)
+                                            lastfired[v.itemType] = tick();
+                                        end);
+                                    end
 								end
 							end;
 						end;
@@ -10924,7 +10932,7 @@ end);
 		TempText = 'blacklisted projectiles',
 		AddFunction = void
 	})
-end)]]
+end)
 
 run(function()
 	local autoqueue = {};
@@ -11423,38 +11431,6 @@ run(function()
 		Function = void
 	})
 end);
-
-run(function()
-	local ccursor = {};
-	local mouse = {Value = ''};
-	ccursor = utility.Api.CreateOptionsButton({
-		Name = 'CustomCursor',
-		HoverText = 'Custom cursor.',
-		Function = function(call)
-			if call then
-				repeat
-					task.wait(0.1)
-					local mouseobj = lplr:GetMouse()
-					if mouse.Value == '' then
-						mouseobj.Icon = mouse.Value
-					else
-						mouseobj.Icon = mouse.Value
-					end
-				until not ccursor.Enabled
-			end
-		end,
-	})
-	mouse = ccursor.CreateTextBox({
-		Name = 'Custom Mouse',
-		TempText = 'Asset id? (rbxassetid://4927593)',
-		FocusLost = function(enter)
-			local suc, res = pcall(function() return getservice('HttpService'):JSONDecode(readfile(mouse.Value)) end)
-			if suc then
-				mouse.Value = res
-			end
-		end
-	})
-end)
 
 run(function()
 	local mousetp = {};
