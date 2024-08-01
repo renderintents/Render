@@ -102,7 +102,7 @@ functions.GetTarget = function(args: table?): table
             local magnitude = (pos - v.Character.PrimaryPart.Position).Magnitude;
             if magnitude <= distance and method == 'distance' then 
                 distance = magnitude
-                entity = {RootPart = v.Character.PrimaryPart, Humanoid = v.Character:FindFirstChildWhichIsA('Humanoid'), Player = v}
+                entity = {RootPart = v.Character.PrimaryPart, Humanoid = v.Character:FindFirstChildWhichIsA('Humanoid'), Player = v, JumpTick = tick()}
             end
         end
     end
@@ -125,7 +125,7 @@ functions.GetTarget = function(args: table?): table
                 local magnitude = (pos - v.PrimaryPart.Position).Magnitude;
                 if method == 'distance' and magnitude <= distance then 
                     distance = magnitude;
-                    entity = {RootPart = v.PrimaryPart, Humanoid = v:FindFirstChildWhichIsA('Humanoid'), NPC = true};
+                    entity = {RootPart = v.PrimaryPart, Humanoid = v:FindFirstChildWhichIsA('Humanoid'), NPC = true, JumpTick = tick()};
                     entity.Player = setmetatable({Name = i, DisplayName = i, UserId = 1, Character = v}, {
                         __index = function(self, index)
                             local data = rawget(self, index)
@@ -143,7 +143,7 @@ functions.GetTarget = function(args: table?): table
                 if method == 'highest' and health > distance then 
                     distance = health;
                     entity = {RootPart = v.PrimaryPart, Humanoid = v:FindFirstChildWhichIsA('Humanoid'), NPC = true};
-                    entity.Player = setmetatable({Name = i, DisplayName = i, UserId = 1, Character = v}, {
+                    entity.Player = setmetatable({Name = i, DisplayName = i, UserId = 1, Character = v, JumpTick = tick()}, {
                         __index = function(self, index)
                             local data = rawget(self, index)
                             if data == nil then 
@@ -159,7 +159,7 @@ functions.GetTarget = function(args: table?): table
                 if method == 'lowest' and distance > health then 
                     distance = health;
                     entity = {RootPart = v.PrimaryPart, Humanoid = v:FindFirstChildWhichIsA('Humanoid'), NPC = true};
-                    entity.Player = setmetatable({Name = i, DisplayName = i, UserId = 1, Character = v}, {
+                    entity.Player = setmetatable({Name = i, DisplayName = i, UserId = 1, Character = v, JumpTick = tick()}, {
                         __index = function(self, index)
                             local data = rawget(self, index)
                             if data == nil then 
