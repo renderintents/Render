@@ -7814,16 +7814,22 @@ run(function()
 		Function = function(call)
 			if call then
 				for i,v in players:GetPlayers() do
-					table.insert(PlayerViewModel.Connections, v.CharacterAdded:Connect(function(health)
+					table.insert(PlayerViewModel.Connections, v.CharacterAdded:Connect(function()
 						pcall(function() removeModel(v) end)
-						reModel(v)
+						task.spawn(reModel, v)
 					end))
 				end
+				table.insert(PlayerViewModel.Connections, players.PlayerAdded:Connect(function(v)
+					table.insert(PlayerViewModel.Connections, v.CharacterAdded:Connect(function()
+						pcall(function() removeModel(v) end)
+						task.spawn(reModel, v)
+					end))
+				end))
 				RunLoops:BindToHeartbeat('PlayerVM', function()
 					for i,v in players:GetPlayers() do
 						if isAlive(v) and not viewmodel[v.Name] then
                             if not PlayerViewModel.Enabled then break end
-							reModel(v)
+							task.spawn(reModel, v)
 						end
 					end
 				end)
@@ -7834,7 +7840,7 @@ run(function()
                 end
 			end
 		end,
-		HoverText = 'Turns you into Among Us'
+		HoverText = 'Turns you into a curtain model'
 	})
     viewmodelMode = PlayerViewModel.CreateDropdown({
         Name = 'Model',
