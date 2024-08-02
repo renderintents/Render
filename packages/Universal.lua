@@ -87,7 +87,7 @@ for i,v in ({'vape/', 'vape/Render', 'vape/Render/lib', 'vape/Render/scripts'}) 
 end
 
 getgenv().render = render;
-render.guardian = cheatenginetrash and ({pcall(function() return loadfile('vape/Render/lib/solarapoop.lua')() end)})[2];
+render.guardian = cheatenginetrash and bedwars ~= nil and ({pcall(function() return loadfile('vape/Render/lib/solarapoop.lua')() end)})[2];
 render.utils:init();
 
 for i,v in render.utils do
