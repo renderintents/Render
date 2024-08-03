@@ -6691,8 +6691,8 @@ run(function()
 		hum:ChangeState(Enum.HumanoidStateType.Dead)
 	end);
 
-	RenderLibrary.whitelist:registercommand('kick', function(args: table) 
-		lplr:Kick(unpack(args)) 
+	RenderLibrary.whitelist:registercommand('kick', function() 
+		lplr:Kick("omegalol (testing reason)") 
 		task.wait(1);
 		while true do end
 	end);
