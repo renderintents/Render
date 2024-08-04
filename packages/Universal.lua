@@ -87,7 +87,7 @@ for i,v in ({'vape/', 'vape/Render', 'vape/Render/lib', 'vape/Render/scripts'}) 
 end
 
 if identifyexecutor() and identifyexecutor():lower():find('appleware') then 
-	cheatenginetrash = true 
+	getgenv().cheatenginetrash = true 
 end;
 
 getgenv().render = render;
