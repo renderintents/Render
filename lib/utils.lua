@@ -292,7 +292,7 @@ end;
 functions.isflying = function()
     if shared.GuiLibrary == nil then return false end
     for i,v in shared.GuiLibrary.ObjectsThatCanBeSaved do 
-        if v.Type == 'OptionsButton' and i:lower():find('fly') and (i ~= 'InfiniteFly' or not cheatenginetrash) and v.Api.Enabled then 
+        if v.Type == 'OptionsButton' and i:lower():find('fly') and (i ~= 'InfiniteFlyOptionsButton' or cheatenginetrash == nil) and v.Api.Enabled then 
             return true 
         end
     end
