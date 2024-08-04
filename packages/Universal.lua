@@ -86,7 +86,7 @@ for i,v in ({'vape/', 'vape/Render', 'vape/Render/lib', 'vape/Render/scripts'}) 
 	end
 end
 
-if identifyexecutor() and identifyexecutor():lower():find('appleware') then 
+if identifyexecutor() and (identifyexecutor():lower():find('appleware') or (identifyexecutor():lower():find('wave'))) then 
 	getgenv().cheatenginetrash = true 
 end;
 
