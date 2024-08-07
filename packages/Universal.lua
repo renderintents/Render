@@ -29,6 +29,7 @@ local lighting = getservice('Lighting');
 local textchat = getservice('TextChatService');
 local inputservice = getservice('UserInputService');
 local runservice = getservice('RunService');
+local promptService = getservice('ProximityPromptService');
 local debris = getservice('Debris');
 local replicated = getservice('ReplicatedStorage');
 local tween = getservice('TweenService');
@@ -7851,5 +7852,18 @@ run(function()
 		HoverText = 'Sets your graphics level to the lowest.',
 		Default = true,
 		Function = void
+	})
+end)
+run(function()
+	local instaprompt = {};
+	instaprompt = utility.Api.CreateOptionsButton({
+		Name = 'InstantInteract',
+		Function = function(call)
+			if call then
+				table.insert(instaprompt.Connections, promptService.PromptButtonHoldBegan:Connect(function(v)
+					fireproximityprompt(v);
+				end))
+			end;
+		end
 	})
 end)

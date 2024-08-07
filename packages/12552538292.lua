@@ -43,9 +43,7 @@ end
 
 table.insert(store.connections, lplr.PlayerFolder.Inventory.ChildAdded:Connect(function(v)
 	if v.Name ~= 'Duped' then
-		warningNotification('Inventory', 'You got '.. v.Name.. '!')
 		table.insert(inventories, v)
-		print('[Render]: Item Added')
 	end
 end))
 
@@ -81,19 +79,6 @@ run(function()
 		end
 	})
 end);
-run(function()
-	local instaprompt = {};
-	instaprompt = utility.Api.CreateOptionsButton({
-		Name = 'InstantInteract',
-		Function = function(call)
-			if call then
-				table.insert(instaprompt.Connections, promptService.PromptButtonHoldBegan:Connect(function(v)
-					fireproximityprompt(v);
-				end))
-			end;
-		end
-	})
-end)
 run(function()
 	local Sounds = {};
 	local drop = {};
@@ -225,7 +210,7 @@ run(function()
 	local removeCharm = function(parent)
 		pcall(function() parent:FindFirstChild('render'):Remove() end)
 	end;
-	Chams = render.Api.CreateOptionsButton({
+	Chams = visual.Api.CreateOptionsButton({
 		Name = 'Chams',
 		Function = function(call)
 			if call then
