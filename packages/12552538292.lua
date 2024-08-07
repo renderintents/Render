@@ -200,6 +200,7 @@ run(function()
 	local ChamsKey = {};
 	local ChamsLoot = {};
 	local ChamsEntity = {};
+	local addedcharms = {};
 	local addCharm = function(parent)
 		local highlight = Instance.new("Highlight", parent);
         highlight.FillColor = Color3.new(1, 0, 0);
@@ -217,6 +218,7 @@ run(function()
 				for i,v in store.workspaces do
 					if v.ClassName == 'Model' and v.Name == 'NormalKeyCard' and ChamsKey.Enabled then
 						task.spawn(addCharm, v)
+						table.insert(addedcharms, v)
 					end
 					if v.ClassName == 'Model' and v.Name == 'Door' and ChamsDoor.Enabled then
 						task.spawn(addCharm, v)
@@ -231,8 +233,8 @@ run(function()
 					end
 				end))
 			else
-				for i,v in store.workspaces do
-					if v.ClassName == 'Model' then task.spawn(removeCharm, v) end
+				for i,v in addedcharms do
+					if v.ClassName == 'Model' then pcall(removeCharm, v) v = nil end
 				end
 			end
 		end,

@@ -7793,7 +7793,7 @@ run(function()
 
 		local weld = Instance.new("Weld", part)
 		weld.Part0 = part
-		weld.Part1 = part.Parent.UpperTorso
+		weld.Part1 = part.Parent.UpperTorso or part.Parent.Torso
 		
 		table.insert(viewmodel, task.spawn(function()
 			viewmodel[entity.Name] = part
@@ -7857,4 +7857,17 @@ run(function()
         end,
         Default = 'Among Us'
     })
+end)
+run(function()
+	local instaprompt = {};
+	instaprompt = utility.Api.CreateOptionsButton({
+		Name = 'InstantInteract',
+		Function = function(call)
+			if call then
+				table.insert(instaprompt.Connections, getservice('ProximityPromptService').PromptButtonHoldBegan:Connect(function(v)
+					fireproximityprompt(v);
+				end))
+			end;
+		end
+	})
 end)
