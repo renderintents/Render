@@ -207,6 +207,7 @@ run(function()
 		highlight.Name = 'render'
         highlight.FillTransparency = 0.6;
         highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop;
+		table.insert(addedcharms, parent)
 	end;
 	local removeCharm = function(parent)
 		pcall(function() parent:FindFirstChild('render'):Remove() end)
@@ -218,7 +219,6 @@ run(function()
 				for i,v in store.workspaces do
 					if v.ClassName == 'Model' and v.Name == 'NormalKeyCard' and ChamsKey.Enabled then
 						task.spawn(addCharm, v)
-						table.insert(addedcharms, v)
 					end
 					if v.ClassName == 'Model' and v.Name == 'Door' and ChamsDoor.Enabled then
 						task.spawn(addCharm, v)
