@@ -5306,25 +5306,53 @@ run(function()
 end)
 
 run(function()
-	local Blink = {Enabled = false}
-	Blink = GuiLibrary.ObjectsThatCanBeSaved.BlatantWindow.Api.CreateOptionsButton({
-		Name = "Blink",
-		Function = function(callback)
-			if callback then
-				if sethiddenproperty then
-					RunLoops:BindToHeartbeat("Blink", function()
-						if entityLibrary.isAlive then
-							sethiddenproperty(entityLibrary.character.HumanoidRootPart, "NetworkIsSleeping", true)
-						end
-					end)
-				else
-					warningNotification("Blink", "missing function", 5)
-					Blink.ToggleButton(false)
-				end
-			else
-				RunLoops:UnbindFromHeartbeat("Blink")
-			end
-		end
+    local blink = {};
+    local oldroot;
+    local newroot;
+	local showroot = {};
+    local function createclone()
+        repeat task.wait(.1) until isAlive(lplr, true)
+        lplr.Character.Parent = game
+        lplr.Character.HumanoidRootPart.Archivable = true
+        oldroot = lplr.Character.HumanoidRootPart 
+        newroot = oldroot:Clone()
+        newroot.Parent = lplr.Character
+        oldroot.Parent = workspace
+        oldroot.Transparency = showroot.Enabled and 0 or 1
+        lplr.Character.PrimaryPart = newroot
+        lplr.Character.Parent = workspace
+    end
+    local function removeclone()
+		oldroot.CFrame = newroot.CFrame
+        oldroot.Transparency = 1
+        lplr.Character.Parent = game
+        oldroot.Parent = lplr.Character
+        newroot.Parent = workspace
+        lplr.Character.PrimaryPart = oldroot
+        lplr.Character.Parent = workspace
+        newroot:Remove()
+        newroot = {} 
+        oldroot = {}
+    end
+    blink = blatant.Api.CreateOptionsButton({
+        Name = 'Blink',
+        Function = function(call)
+            if call then
+                pcall(createclone);
+				table.insert(blink.Connections, runservice.Stepped:Connect(function()
+                    if oldroot then
+                        oldroot.Velocity = Vector3.zero
+                    end;
+                end))
+            else
+				pcall(removeclone);
+            end;
+        end;
+    })
+	showroot = blink.CreateToggle({
+		Name = 'Show Root',
+		Function = void,
+		Default = true
 	})
 end)
 
@@ -7820,27 +7848,27 @@ run(function()
 				for i,v in players:GetPlayers() do
 					table.insert(PlayerViewModel.Connections, v.CharacterAdded:Connect(function()
 						pcall(function() removeModel(v) end)
-						task.spawn(reModel, v)
+						task.spawn(pcall, reModel, v)
 					end))
 				end
 				table.insert(PlayerViewModel.Connections, players.PlayerAdded:Connect(function(v)
 					table.insert(PlayerViewModel.Connections, v.CharacterAdded:Connect(function()
-						pcall(function() removeModel(v) end)
-						task.spawn(reModel, v)
+						task.spawn(pcall, removeModel, v)
+						task.spawn(pcall, reModel, v)
 					end))
 				end))
 				RunLoops:BindToHeartbeat('PlayerVM', function()
 					for i,v in players:GetPlayers() do
 						if isAlive(v) and not viewmodel[v.Name] then
                             if not PlayerViewModel.Enabled then break end
-							task.spawn(reModel, v)
+							task.spawn(pcall, reModel, v)
 						end
 					end
 				end)
 			else
                 RunLoops:UnbindFromHeartbeat('PlayerVM')
                 for i,v in players:GetPlayers() do
-                    task.spawn(removeModel, v)
+                    task.spawn(pcall, removeModel, v)
                 end
 			end
 		end,
