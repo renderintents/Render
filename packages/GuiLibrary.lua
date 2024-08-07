@@ -153,7 +153,7 @@ if shared.VapeExecuted then
 	gui.Name = randomString()
 	gui.DisplayOrder = 999
 	gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
-	gui.OnTopOfCoreBlur = true
+	pcall(function() gui.OnTopOfCoreBlur = true end);
 	gui.ResetOnSpawn = false
 	gui.Parent = gethui()
 	GuiLibrary["MainGui"] = gui

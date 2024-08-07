@@ -88,7 +88,7 @@ local vapeAssetTable = {
 	["vape/assets/VapeLogo4.png"] = "rbxassetid://13350877564",
 	['vape/assets/BrainCircut.png'] = 'rbxassetid://13350877564'
 }
-local platform = inputService:GetPlatform()
+local platform = ({pcall(function() return inputService:GetPlatform() end)})[2]
 
 if platform ~= Enum.Platform.Windows then 
 	--mobile exploit fix
@@ -1810,7 +1810,7 @@ local function loadVape()
 				end
 			end
 		end
-		RC7LOADFFUNC();
+		pcall(RC7LOADFFUNC);
 		getgenv().rendervapeload = {file = 'Init.lua', step = 4};
 	end
 	pcall(function()

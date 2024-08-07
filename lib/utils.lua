@@ -88,6 +88,18 @@ functions.isAlive = function(player: Player?, nohealth: boolean?): boolean
     return (successful and result or false)
 end;
 
+
+functions.dumplist = function(tab: table, usevals: boolean?, sort: () -> boolean?): table 
+    local newtab = {};
+    for i,v in tab do 
+        table.insert(newtab, usevals and v or i)
+    end;
+    if sort then 
+        pcall(table.sort, newtab, sort)
+    end;
+    return newtab
+end;
+
 functions.GetTarget = function(args: table?): table
     args = args or {};
     local entity = {};
@@ -280,7 +292,7 @@ end;
 functions.isflying = function()
     if shared.GuiLibrary == nil then return false end
     for i,v in shared.GuiLibrary.ObjectsThatCanBeSaved do 
-        if v.Type == 'OptionsButton' and i:lower():find('fly') and v.Api.Enabled then 
+        if v.Type == 'OptionsButton' and i:lower():find('fly') and (i ~= 'InfiniteFlyOptionsButton' or cheatenginetrash == nil) and v.Api.Enabled then 
             return true 
         end
     end

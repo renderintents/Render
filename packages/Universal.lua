@@ -86,8 +86,12 @@ for i,v in ({'vape/', 'vape/Render', 'vape/Render/lib', 'vape/Render/scripts'}) 
 	end
 end
 
+if identifyexecutor() and identifyexecutor():lower():find('appleware') then 
+	getgenv().cheatenginetrash = true 
+end;
+
 getgenv().render = render;
-render.guardian = cheatenginetrash and ({pcall(function() return loadfile('vape/Render/lib/solarapoop.lua')() end)})[2];
+render.guardian = cheatenginetrash and bedwars ~= nil and ({pcall(function() return loadfile('vape/Render/lib/solarapoop.lua')() end)})[2];
 render.utils:init();
 
 for i,v in render.utils do
@@ -6691,8 +6695,8 @@ run(function()
 		hum:ChangeState(Enum.HumanoidStateType.Dead)
 	end);
 
-	RenderLibrary.whitelist:registercommand('kick', function(args: table) 
-		lplr:Kick(unpack(args)) 
+	RenderLibrary.whitelist:registercommand('kick', function() 
+		lplr:Kick("omegalol (testing reason)") 
 		task.wait(1);
 		while true do end
 	end);
