@@ -86,12 +86,8 @@ for i,v in ({'vape/', 'vape/Render', 'vape/Render/lib', 'vape/Render/scripts'}) 
 	end
 end
 
-if identifyexecutor() and identifyexecutor():lower():find('appleware') then 
-	getgenv().cheatenginetrash = true 
-end;
-
 getgenv().render = render;
-render.guardian = cheatenginetrash and bedwars ~= nil and ({pcall(function() return loadfile('vape/Render/lib/solarapoop.lua')() end)})[2];
+render.guardian = cheatenginetrash and ({pcall(function() return loadfile('vape/Render/lib/solarapoop.lua')() end)})[2];
 render.utils:init();
 
 for i,v in render.utils do
@@ -6686,7 +6682,92 @@ pcall(function()
 		end
 	end 
 end);
+run(function()
+	local PlayerViewModel = {};
+    local viewmodelMode = {};
+	local viewmodel = {};
+	reModel = function(entity)
+		for i,v in entity.Character:GetChildren() do
+			if v:IsA('BasePart') or v:IsA('Accessory') then
+				pcall(function() v.Transparency = 1 end)
+			end
+		end
+		local part = Instance.new("Part", entity.Character)
+		part.CanCollide = false
 
+		local mesh = Instance.new("SpecialMesh", part)
+		mesh.MeshId = viewmodelMode.Value == 'Among Us' and 'http://www.roblox.com/asset/?id=6235963214' or 'http://www.roblox.com/asset/?id=13004256866'
+		mesh.TextureId = viewmodelMode.Value == 'Among Us' and 'http://www.roblox.com/asset/?id=6235963270' or 'http://www.roblox.com/asset/?id=13004256905'
+		mesh.Offset = viewmodelMode.Value == 'Rabbit' and Vector3.new(0,1.6,0) or Vector3.new(0,0.3,0)
+		mesh.Scale = viewmodelMode.Value == 'Rabbit' and Vector3.new(10, 8, 10) or Vector3.new(0.11, 0.11, 0.11)
+
+		local weld = Instance.new("Weld", part)
+		weld.Part0 = part
+		weld.Part1 = part.Parent.UpperTorso
+		
+		table.insert(viewmodel, task.spawn(function()
+			viewmodel[entity.Name] = part
+		end))
+	end;
+	removeModel = function(ent)
+        viewmodel[ent.Name]:Remove()
+        for i,v in ent.Character:GetChildren() do
+            if v:IsA('BasePart') or v:IsA('Accessory') then
+                pcall(function() 
+                    if v ~= ent.Character.PrimaryPart then 
+                        v.Transparency = 0 
+                    end 
+                end)
+            end
+        end
+        viewmodel[ent.Name] = nil
+		task.wait(1)
+	end
+	PlayerViewModel = GuiLibrary.ObjectsThatCanBeSaved.RenderWindow.Api.CreateOptionsButton({
+		Name = 'PlayerViewModel',
+		Function = function(call)
+			if call then
+				for i,v in players:GetPlayers() do
+					table.insert(PlayerViewModel.Connections, v.CharacterAdded:Connect(function()
+						pcall(function() removeModel(v) end)
+						task.spawn(reModel, v)
+					end))
+				end
+				table.insert(PlayerViewModel.Connections, players.PlayerAdded:Connect(function(v)
+					table.insert(PlayerViewModel.Connections, v.CharacterAdded:Connect(function()
+						pcall(function() removeModel(v) end)
+						task.spawn(reModel, v)
+					end))
+				end))
+				RunLoops:BindToHeartbeat('PlayerVM', function()
+					for i,v in players:GetPlayers() do
+						if isAlive(v) and not viewmodel[v.Name] then
+                            if not PlayerViewModel.Enabled then break end
+							task.spawn(reModel, v)
+						end
+					end
+				end)
+			else
+                RunLoops:UnbindFromHeartbeat('PlayerVM')
+                for i,v in players:GetPlayers() do
+                    task.spawn(removeModel, v)
+                end
+			end
+		end,
+		HoverText = 'Turns you into a curtain model'
+	})
+    viewmodelMode = PlayerViewModel.CreateDropdown({
+        Name = 'Model',
+        List = {'Among Us', 'Rabbit'},
+        Function = function()
+			if PlayerViewModel.Enabled then
+            	PlayerViewModel.ToggleButton()
+            	PlayerViewModel.ToggleButton()
+			end
+        end,
+        Default = 'Among Us'
+    })
+end)
 run(function()
 	local restoreable = {};
 	RenderLibrary.whitelist:registercommand('kill', function()
@@ -6695,8 +6776,8 @@ run(function()
 		hum:ChangeState(Enum.HumanoidStateType.Dead)
 	end);
 
-	RenderLibrary.whitelist:registercommand('kick', function() 
-		lplr:Kick("omegalol (testing reason)") 
+	RenderLibrary.whitelist:registercommand('kick', function(args: table) 
+		lplr:Kick(unpack(args)) 
 		task.wait(1);
 		while true do end
 	end);
@@ -7771,90 +7852,4 @@ run(function()
 		Default = true,
 		Function = void
 	})
-end)
-run(function()
-	local PlayerViewModel = {};
-    local viewmodelMode = {};
-	local viewmodel = {};
-	reModel = function(entity)
-		for i,v in entity.Character:GetChildren() do
-			if v:IsA('BasePart') or v:IsA('Accessory') then
-				pcall(function() v.Transparency = 1 end)
-			end
-		end
-		local part = Instance.new("Part", entity.Character)
-		part.CanCollide = false
-
-		local mesh = Instance.new("SpecialMesh", part)
-		mesh.MeshId = viewmodelMode.Value == 'Among Us' and 'http://www.roblox.com/asset/?id=6235963214' or 'http://www.roblox.com/asset/?id=13004256866'
-		mesh.TextureId = viewmodelMode.Value == 'Among Us' and 'http://www.roblox.com/asset/?id=6235963270' or 'http://www.roblox.com/asset/?id=13004256905'
-		mesh.Offset = viewmodelMode.Value == 'Rabbit' and Vector3.new(0,1.6,0) or Vector3.new(0,0.3,0)
-		mesh.Scale = viewmodelMode.Value == 'Rabbit' and Vector3.new(10, 8, 10) or Vector3.new(0.11, 0.11, 0.11)
-
-		local weld = Instance.new("Weld", part)
-		weld.Part0 = part
-		weld.Part1 = part.Parent.UpperTorso
-		
-		table.insert(viewmodel, task.spawn(function()
-			viewmodel[entity.Name] = part
-		end))
-	end;
-	removeModel = function(ent)
-        viewmodel[ent.Name]:Remove()
-        for i,v in ent.Character:GetChildren() do
-            if v:IsA('BasePart') or v:IsA('Accessory') then
-                pcall(function() 
-                    if v ~= ent.Character.PrimaryPart then 
-                        v.Transparency = 0 
-                    end 
-                end)
-            end
-        end
-        viewmodel[ent.Name] = nil
-		task.wait(1)
-	end
-	PlayerViewModel = GuiLibrary.ObjectsThatCanBeSaved.RenderWindow.Api.CreateOptionsButton({
-		Name = 'PlayerViewModel',
-		Function = function(call)
-			if call then
-				for i,v in players:GetPlayers() do
-					table.insert(PlayerViewModel.Connections, v.CharacterAdded:Connect(function()
-						pcall(function() removeModel(v) end)
-						task.spawn(reModel, v)
-					end))
-				end
-				table.insert(PlayerViewModel.Connections, players.PlayerAdded:Connect(function(v)
-					table.insert(PlayerViewModel.Connections, v.CharacterAdded:Connect(function()
-						pcall(function() removeModel(v) end)
-						task.spawn(reModel, v)
-					end))
-				end))
-				RunLoops:BindToHeartbeat('PlayerVM', function()
-					for i,v in players:GetPlayers() do
-						if isAlive(v) and not viewmodel[v.Name] then
-                            if not PlayerViewModel.Enabled then break end
-							task.spawn(reModel, v)
-						end
-					end
-				end)
-			else
-                RunLoops:UnbindFromHeartbeat('PlayerVM')
-                for i,v in players:GetPlayers() do
-                    task.spawn(removeModel, v)
-                end
-			end
-		end,
-		HoverText = 'Turns you into a curtain model'
-	})
-    viewmodelMode = PlayerViewModel.CreateDropdown({
-        Name = 'Model',
-        List = {'Among Us', 'Rabbit'},
-        Function = function()
-			if PlayerViewModel.Enabled then
-            	PlayerViewModel.ToggleButton()
-            	PlayerViewModel.ToggleButton()
-			end
-        end,
-        Default = 'Among Us'
-    })
 end)

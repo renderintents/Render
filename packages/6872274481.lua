@@ -1270,6 +1270,7 @@ run(function()
 		KillEffectMeta = require(replicatedstorage.TS.locker['kill-effect']['kill-effect-meta']).KillEffectMeta,
 		KnockbackUtil = require(replicatedstorage.TS.damage['knockback-util']).KnockbackUtil,
 		MatchEndScreenController = Flamework.resolveDependency('client/controllers/game/match/match-end-screen-controller@MatchEndScreenController'),
+		MinerRemote = dumpRemote(debug.getconstants(debug.getproto(KnitClient.Controllers.MinerController.onKitEnabled, 1))),
 		MageRemote = dumpRemote(debug.getconstants(debug.getproto(KnitClient.Controllers.MageController.registerTomeInteraction, 1))),
 		MageKitUtil = require(replicatedstorage.TS.games.bedwars.kit.kits.mage['mage-kit-util']).MageKitUtil,
 		NotificationController = Flamework.resolveDependency('@easy-games/game-core:client/controllers/notification-controller@NotificationController');
