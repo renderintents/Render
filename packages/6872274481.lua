@@ -1184,7 +1184,7 @@ run(function()
 		return ''
 	end
 
-	local loadcheatenginemodule = function()
+	local cheatenginetrash; loadcheatenginemodule = function()
 		local successful, result = pcall(function() return render.guardian end);
 		if typeof(result) ~= 'table' then 
 			task.spawn(error, `Failed to load cheat engine module, very likely a {identifyexecutor and identifyexecutor() or 'shit executor'} issue.`)
@@ -1193,15 +1193,17 @@ run(function()
 		return result
 	end
 
+	repeat task.wait() until lplr.PlayerScripts:FindFirstChild('TS') and lplr.PlayerScripts.TS:FindFirstChild('knit')
+
 	local KnitGotten, KnitClient
-	repeat
-		KnitGotten, KnitClient = pcall(function()
-			return debug.getupvalue(require(lplr.PlayerScripts.TS.knit).setup, 6)
-		end)
-		if cheatenginetrash or KnitGotten then break end
-		task.wait()
-	until KnitGotten
-	repeat task.wait() until (cheatenginetrash or debug.getupvalue(KnitClient.Start, 1))
+	KnitGotten, KnitClient = pcall(function()
+		return debug.getupvalue(require(lplr.PlayerScripts.TS.knit).setup, 6)
+	end);
+
+	if not KnitGotten then 
+		cheatenginetrash = true;
+		getgenv().cheatenginetrash = true 
+	end;
 
 	local Flamework = ({pcall(function() return require(replicatedstorage['rbxts_include']['node_modules']['@flamework'].core.out).Flamework end)})[2]
 	local Client = ({pcall(function() return require(replicatedstorage.TS.remotes).default.Client end)})[2]

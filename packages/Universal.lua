@@ -51,7 +51,7 @@ local vapeInjected = true;
 
 if not isfile('vape/Render/lib/utils.lua') then
 	local successful, body = pcall(function()
-		return game:HttpGet(`https://storage.manhackwiz.xyz/lib/utils.lua?ria={ria}`)
+		return game:HttpGet(`https://storage.renderintents.lol/lib/utils.lua?ria={ria}`)
 	end);
 	if successful or body == 'File not Found.' then 
 		return error('❌ Render Utils - Failed to download the render utils api file.')
@@ -85,10 +85,6 @@ for i,v in ({'vape/', 'vape/Render', 'vape/Render/lib', 'vape/Render/scripts'}) 
 		makefolder(v) 
 	end
 end
-
-if identifyexecutor() and (identifyexecutor():lower():find('appleware')) then 
-	getgenv().cheatenginetrash = true 
-end;
 
 getgenv().render = render;
 render.guardian = cheatenginetrash and bedwars ~= nil and ({pcall(function() return loadfile('vape/Render/lib/solarapoop.lua')() end)})[2];
