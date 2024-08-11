@@ -154,18 +154,14 @@ local getalltarget = function(dist)
     return ents
 end
 local getneartarget = function(dist)
-    local target;
-    local targetmag = 0;
     for i,v in players:GetPlayers() do
         if v ~= lplr and isAlive(lplr, true) and isAlive(v, true) then
             local mag = (lplr.Character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).Magnitude
-            if mag >= (dist or math.huge) and mag >= targetmag then
-                targetmag = mag;
-                target = v;
+            if mag >= (dist or math.huge) then
+                return v
             end
         end
     end
-    return target
 end
 
 local getfreezepod = function(check)
@@ -183,6 +179,23 @@ local getfreezepod = function(check)
         end
     end
     return nil
+end
+local geteveryfreezepod = function(check)
+    local pods = {};
+    if store.started then
+        for i,v in store.currentmap:GetChildren() do
+            if v.ClassName == 'Model' and v.Name == 'FreezePod' then
+                if not check then 
+                    table.insert(pods, {pod = v})
+                else
+                    if v.PodTrigger.CapturedTorso.Value ~= nil then
+                        table.insert(pods, {pod = v})
+                    end
+                end
+            end
+        end
+    end
+    return pods
 end
 
 createclone = function()
@@ -251,7 +264,7 @@ run(function()
                         for i, ent in enemies do
                             print('test')
                             --pcall(createbox, lplr.Character)
-                            lplr.Character:FindFirstChild('Hammer').HammerEvent:FireServer('HammerClick', true)
+                            lplr.Character:FindFirstChild('Hammer'):Activate()
                             lplr.Character:FindFirstChild('Hammer').HammerEvent:FireServer('HammerHit', ent.Character.HumanoidRootPart)
                         end
                     end
@@ -313,7 +326,7 @@ run(function()
         for i,v in players:GetPlayers() do
             if isAlive(v, true) and v == store.players.beast then
                 local mag = (v.Character.HumanoidRootPart.Position - lplr.Character.HumanoidRootPart.Position).Magnitude;
-                if mag <= 20 then
+                if mag <= 35 then
                     return v;
                 end;
             end;
@@ -326,7 +339,7 @@ run(function()
         Name = 'AntiDeath',
         Function = function(call)
             if call then
-                repeat
+                table.insert(antideath.Connections, runservice.Stepped:Connect(function()
                     if store.players.beast == lplr or not isAlive(lplr, true) then return end;
                     local beast = getactualbeast();
                     if beast and not antideathbeastnear then
@@ -337,7 +350,7 @@ run(function()
                             task.spawn(pcall, warningNotification, 'Render', `the beast ({beast.Name}) is near you `, 6);
                         end
                         task.spawn(function()
-                            task.wait(3)
+                            task.wait(1.5)
                             if not isEnabled('AutoHack') then 
                                 lplr.Character.HumanoidRootPart.CFrame = old;
                                 old = {};
@@ -346,8 +359,7 @@ run(function()
                     else
                         antideathnotification = false;      
                     end;
-                    task.wait()
-                until (not antideath.Enabled)
+                end))
             end;
         end,
         HoverText = 'Automatically teleports you 500 studs away from the beast',
@@ -360,29 +372,36 @@ end)
 run(function()
     local autohack = {};
     local istweening = false;
+    local looping = false;
     autohack = utility.Api.CreateOptionsButton({
         Name = 'AutoHack',
         Function = function(call)
             if call then
-                repeat
-                    if store.players.beast == lplr then return print('ur beast') end
-                    if store.escaped then return print('u escaped') end
-                    if store.status:lower():find("computer") or store.status:lower():find("15 ") then
-                        local computertrigger = getcomputertrigger()
-                        lplr.Character.HumanoidRootPart.Velocity = Vector3.zero
-                        if computertrigger and not istweening then
-                            local tween = tweenservice:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(11), {CFrame = computertrigger.CFrame});
-                            tween:Play()
-                            istweening = true;
-                            tween.Completed:Wait();
-                            lplr.Character.HumanoidRootPart.CFrame = computertrigger.CFrame;
-                            istweening = false;
-                        else
-                            istweening = false;
+                task.spawn(function()
+                    table.insert(autohack.Connections, runservice.Stepped:Connect(function()
+                        if store.players.beast == lplr then return print('ur beast') end
+                        if store.escaped then return print('u escaped') end
+                        if store.status:lower():find("computer") or store.status:lower():find("15 ") then
+                            if not looping then
+                                looping = true;
+                                local computertrigger = getcomputertrigger()
+                                lplr.Character.HumanoidRootPart.Velocity = Vector3.zero
+                                if computertrigger and not istweening then
+                                    local tween = tweenservice:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(math.random(11,17)), {CFrame = computertrigger.CFrame});
+                                    tween:Play()
+                                    istweening = true;
+                                    tween.Completed:Wait();
+                                    lplr.Character.HumanoidRootPart.CFrame = computertrigger.CFrame;
+                                    istweening = false;
+                                else
+                                    istweening = false;
+                                end;
+                                looping = false;
+                                task.wait(4)
+                            end
                         end;
-                    end;
-                    task.wait()
-                until (not autohack.Enabled)
+                    end))
+                end)
             end;
         end,
         HoverText = 'Automatically finishs the computer nearby.',
@@ -409,7 +428,7 @@ run(function()
         Name = 'AutoEscape',
         Function = function(call)
             if call then
-                repeat
+                table.insert(autoescape.Connections, runservice.Stepped:Connect(function()
                     if store.status:lower():find("exit") then
                         local exit = getExit();
                         local partTP = exit.ExitArea
@@ -424,12 +443,13 @@ run(function()
                         end
                         task.spawn(function()
                             task.wait(speed + 1)
-                            lplr.Character.HumanoidRootPart.CFrame = partTP.CFrame
+                            if getbeast(15) == nil then
+                                lplr.Character.HumanoidRootPart.CFrame = partTP.CFrame
+                            end
                         end)
                         tweenservice:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(speed), {CFrame = partTP.CFrame}):Play();
                     end;
-                    task.wait()
-                until (not autoescape.Enabled)
+                end))
             end;
         end;
     })
@@ -460,16 +480,69 @@ run(function()
         Function = function(call)
             if call then
                 repeat
-                    local pod = getfreezepod(true)
-                    if pod and store.players.beast == lplr then
-                        
-                    end
-                    task.wait()
+                    if store.players.beast ~= lplr then
+                        local pods = geteveryfreezepod(true)
+                        if #pods > 0 then
+                            for i, pod in pods do
+                                print(type(pod))
+                                old = lplr.Character.HumanoidRootPart.CFrame;
+                                lplr.Character.HumanoidRootPart.CFrame = pod.PodTrigger.CFrame;
+                                task.wait(0.5);
+                                lplr.Character.HumanoidRootPart.CFrame = old;
+                            end
+                        end
+                    elseif store.players.beast == lplr then
+                        local pod = getfreezepod(true);
+                        if pod and lplr.Character:FindFirstChild('Part') then
+                            old = lplr.Character.HumanoidRootPart.CFrame;
+                            lplr.Character.HumanoidRootPart.CFrame = pod.PodTrigger.CFrame;
+                            task.wait(0.5);
+                            lplr.Character.HumanoidRootPart.CFrame = old;
+                        end;
+                    end;
+                    task.wait();
                 until (not autocapture.Enabled)
             end;
         end,
         ExtraText = function()
             return 'Character'
+        end
+    })
+end)
+
+run(function()
+    local autorope = {};
+    autorope = blatant.Api.CreateOptionsButton({
+        Name = 'AutoRope',
+        Function = function(call)
+            if call then
+                repeat
+                    local target = getneartarget(13)
+                    if store.players.beast == lplr then
+                        lplr.Character:FindFirstChild('Hammer').HammerEvent:FireServer('HammerTieUp', target.Character['Right Leg'], lplr.Character.HumanoidRootPart.Position)
+                    end
+                    task.wait(1)
+                until (not autorope.Enable)
+            end
+        end
+    })
+end)
+
+run(function()
+    local autorejoin = {};
+    local teleported = false;
+    autorejoin = utility.Api.CreateOptionsButton({
+        Name = 'AutoRejoin',
+        Function = function(call)
+            if call then
+                table.insert(autorejoin.Connections, runservice.Stepped:Connect(function()
+                    if store.players.beast == lplr and not teleported then
+                        teleported = true;
+                        print(teleported)
+                        getservice("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, lplr)
+                    end;
+                end))
+            end
         end
     })
 end)

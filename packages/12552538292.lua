@@ -123,6 +123,13 @@ run(function()
 end);
 run(function()
 	local entitiesNotifier = {};
+	local addCharm = function(parent)
+		local highlight = Instance.new("Highlight", parent);
+        highlight.FillColor = Color3.new(1, 0, 0);
+		highlight.Name = 'render'
+        highlight.FillTransparency = 0.6;
+        highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop;
+	end;
 	entitiesNotifier = utility.Api.CreateOptionsButton({
 		Name = 'EntityNotifier',
 		Function = function(call)
@@ -146,6 +153,7 @@ run(function()
 					end
 					if table.find(entity, ent.Name) then
 						warningNotification(`EntityNotifier`, `{ent.Name} spawned!`, 5)
+						task.spawn(addCharm, ent)
 					end
 				end))
 			end;
@@ -153,6 +161,7 @@ run(function()
 		HoverText = 'Make a notification when an entity arrive.'
 	})
 end)
+
 run(function()
     local AutoCollect = {};
     AutoCollect = utility.Api.CreateOptionsButton({
@@ -194,6 +203,7 @@ run(function()
 				for i,v in workspace:GetDescendants() do
 					if v.Name == 'Folder' and v.Parent.Name == 'Locker' then
 						v:WaitForChild('Enter'):InvokeServer();
+                        warningNotification('Render', 'GodMode Used', 6);
 						lplr.Character.Humanoid.WalkSpeed = old;
 						break
 					end;
@@ -230,7 +240,7 @@ run(function()
 					if v.ClassName == 'Model' and v.Name == 'NormalKeyCard' and ChamsKey.Enabled then
 						task.spawn(addCharm, v)
 					end
-					if v.ClassName == 'Model' and v.Name == 'Door' and ChamsDoor.Enabled then
+					if v.ClassName == 'Model' and v.Name == 'TricksterDoor' and ChamsDoor.Enabled then
 						task.spawn(addCharm, v)
 					end
 				end
@@ -238,7 +248,7 @@ run(function()
 					if v.ClassName == 'Model' and v.Name == 'NormalKeyCard' and ChamsKey.Enabled then
 						task.spawn(addCharm, v)
 					end
-					if v.ClassName == 'Model' and v.Name == 'Door' and ChamsDoor.Enabled then
+					if v.ClassName == 'Model' and v.Name == 'TricksterDoor' and ChamsDoor.Enabled then
 						task.spawn(addCharm, v)
 					end
 				end))
@@ -252,7 +262,7 @@ run(function()
 	})
 	
 	ChamsDoor = Chams.CreateToggle({
-		Name = 'Doors',
+		Name = 'FakeDoors',
 		Function = void
 	})
 	ChamsKey = Chams.CreateToggle({
