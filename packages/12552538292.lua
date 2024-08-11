@@ -61,6 +61,7 @@ local world = vape.ObjectsThatCanBeSaved.WorldWindow;
 
 run(function()
 	local Dupe = {};
+	local DupeAmount = {Value = 1}
 	local DupeItem = {};
 	Dupe = exploit.Api.CreateOptionsButton({
 		Name = 'Dupe',
@@ -70,13 +71,22 @@ run(function()
 				Dupe.ToggleButton();	
 				for i,v in inventories do
 					if v.Name ~= 'Duped' then
-						local item = v:Clone()
-						item.Parent = lplr.PlayerFolder.Inventory
-						item.Name = 'Duped'
+						for x = 1, DupeAmount.Value do
+							local item = v:Clone()
+							item.Parent = lplr.PlayerFolder.Inventory
+							item.Name = 'Duped'
+						end
 					end
 				end
 			end
 		end
+	})
+	DupeAmount = Dupe.CreateSlider({
+		Name = 'Amount',
+		Function = void,
+		Min = 1,
+		Max = 500,
+		Default = 1
 	})
 end);
 run(function()

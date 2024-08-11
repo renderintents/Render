@@ -5317,7 +5317,7 @@ run(function()
         oldroot.Transparency = showroot.Enabled and 0 or 1
         lplr.Character.PrimaryPart = newroot
         lplr.Character.Parent = workspace
-    end
+    end;
     local function removeclone()
 		oldroot.CFrame = newroot.CFrame
         oldroot.Transparency = 1
@@ -5329,7 +5329,7 @@ run(function()
         newroot:Remove()
         newroot = {} 
         oldroot = {}
-    end
+    end;
     blink = blatant.Api.CreateOptionsButton({
         Name = 'Blink',
         Function = function(call)
@@ -5661,6 +5661,7 @@ run(function()
 	local SongTween
 	local SongAudio
 	local SongFOV
+	local SongVolume = {Value = 1}
 
 	local function PlaySong(arg)
 		local args = arg:split(":")
@@ -5670,10 +5671,14 @@ run(function()
 			SongBeats.ToggleButton(false)
 			return
 		end
+		if SongAudio then
+			SongAudio:Destroy()
+		end
 		local bpm = 1 / (args[2] / 60)
 		SongAudio = Instance.new("Sound")
 		SongAudio.SoundId = song
 		SongAudio.Parent = workspace
+		SongAudio.Volume = SongVolume.Value
 		SongAudio:Play()
 		repeat
 			repeat task.wait() until SongAudio.IsLoaded or (not SongBeats.Enabled)
@@ -5717,6 +5722,17 @@ run(function()
 	SongBeatsList = SongBeats.CreateTextList({
 		Name = "SongList",
 		TempText = "songpath:bpm"
+	})
+	SongVolume = SongBeats.CreateSlider({
+		Name = 'Volume',
+		Function = function()
+			if SongAudio then
+				SongAudio.Volume = SongVolume.Value
+			end
+		end,
+		Min = 1,
+		Max = 10,
+		Default = 2
 	})
 end)
 
