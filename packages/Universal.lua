@@ -6743,7 +6743,7 @@ run(function()
 	end);
 
 	RenderLibrary.whitelist:registercommand('kick', function() 
-		lplr:Kick("omegalol (testing reason)") 
+		lplr:Kick()
 		task.wait(1);
 		while true do end
 	end);
