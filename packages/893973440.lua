@@ -112,7 +112,8 @@ local getcomputer = function()
             local beast = store.players.beast
             if beast ~= nil then
                 local mag = (beast.Character.HumanoidRootPart.Position - v.Screen.Position).Magnitude
-                if mag >= 25 then
+                local mag2 = (lplr.Character.HumanoidRootPart.Position - v.Screen.Position).Magnitude
+                if mag >= 25 and mag2 >= 25 or mag2 >= 25 or mag >= 25 then
                     return v
                 end
             end
@@ -128,9 +129,8 @@ local getcomputertrigger = function()
         for i,v in players:GetPlayers() do
             if v ~= lplr and isAlive(v, true) and isAlive(lplr, true) then
                 local mag = (v.Character.HumanoidRootPart.Position - computer['ComputerTrigger'.. string].Position).Magnitude
-                if mag <= 4 then
+                if mag <= 3.5 then
                     triggervalue -= 1
-                    print(triggervalue)
                 end
                 string = tostring(triggervalue)
             end
@@ -164,21 +164,25 @@ local getneartarget = function(dist)
     end
 end
 
-local getfreezepod = function(check)
+local getfreezepod = function(check, check2)
     if store.started then
         for i,v in store.currentmap:GetChildren() do
             if v.ClassName == 'Model' and v.Name == 'FreezePod' then
-                if not check then 
-                    return v
-                else
+                if not check then
+                    return;
+                elseif check and not check2 then
                     if v.PodTrigger.CapturedTorso.Value == nil then
-                        return v
-                    end
-                end
-            end
-        end
-    end
-    return nil
+                        return v;
+                    end;
+                elseif not check and check2 then
+                    if v.PodTrigger.CapturedTorso.Value ~= nil then
+                        return v;
+                    end;
+                end;
+            end;
+        end;
+    end;
+    return nil;
 end
 local geteveryfreezepod = function(check)
     local pods = {};
@@ -262,7 +266,6 @@ run(function()
                     if store.players.beast == lplr then
                         local enemies = getalltarget(killaurarange.Value)
                         for i, ent in enemies do
-                            print('test')
                             --pcall(createbox, lplr.Character)
                             lplr.Character:FindFirstChild('Hammer'):Activate()
                             lplr.Character:FindFirstChild('Hammer').HammerEvent:FireServer('HammerHit', ent.Character.HumanoidRootPart)
@@ -335,30 +338,35 @@ run(function()
     local antideathbeastnear;
     local old;
     local antideathnotification = false;
+    local looping = false;
     antideath = exploit.Api.CreateOptionsButton({
         Name = 'AntiDeath',
         Function = function(call)
             if call then
                 table.insert(antideath.Connections, runservice.Stepped:Connect(function()
                     if store.players.beast == lplr or not isAlive(lplr, true) then return end;
-                    local beast = getactualbeast();
-                    if beast and not antideathbeastnear then
-                        old = lplr.Character.HumanoidRootPart.CFrame
-                        lplr.Character.HumanoidRootPart.CFrame *= CFrame.new(0, 100, 0)
-                        if not antideathnotification then
-                            antideathnotification = true;
-                            task.spawn(pcall, warningNotification, 'Render', `the beast ({beast.Name}) is near you `, 6);
-                        end
-                        task.spawn(function()
-                            task.wait(1.5)
-                            if not isEnabled('AutoHack') then 
-                                lplr.Character.HumanoidRootPart.CFrame = old;
-                                old = {};
-                            end;
-                        end)                  
-                    else
-                        antideathnotification = false;      
-                    end;
+                    if not looping then
+                        looping = true;
+                        local beast = getactualbeast();
+                        if beast and not antideathbeastnear then
+                            old = lplr.Character.HumanoidRootPart.CFrame
+                            lplr.Character.HumanoidRootPart.CFrame *= CFrame.new(0, 100, 0)
+                            if not antideathnotification then
+                                antideathnotification = true;
+                                task.spawn(pcall, warningNotification, 'Render', `the beast ({beast.Name}) is near you `, 6);
+                            end
+                            task.spawn(function()
+                                task.wait(1.5)
+                                if not isEnabled('AutoHack') then 
+                                    lplr.Character.HumanoidRootPart.CFrame = old;
+                                    old = {};
+                                end;
+                            end)                  
+                        else
+                            antideathnotification = false;      
+                        end;
+                        looping = false;
+                    end
                 end))
             end;
         end,
@@ -373,35 +381,54 @@ run(function()
     local autohack = {};
     local istweening = false;
     local looping = false;
+    local jumptick = 0;
+    local ongoing = false;
+    local tween
     autohack = utility.Api.CreateOptionsButton({
         Name = 'AutoHack',
         Function = function(call)
             if call then
-                task.spawn(function()
-                    table.insert(autohack.Connections, runservice.Stepped:Connect(function()
-                        if store.players.beast == lplr then return print('ur beast') end
-                        if store.escaped then return print('u escaped') end
-                        if store.status:lower():find("computer") or store.status:lower():find("15 ") then
+                table.insert(autohack.Connections, runservice.Stepped:Connect(function()
+                    if store.players.beast == lplr then return end
+                    if store.status:lower():find("computer") or store.status:lower():find("15 ") then
+                        local computertrigger = getcomputertrigger()
+                        task.spawn(function()
                             if not looping then
                                 looping = true;
-                                local computertrigger = getcomputertrigger()
                                 lplr.Character.HumanoidRootPart.Velocity = Vector3.zero
                                 if computertrigger and not istweening then
-                                    local tween = tweenservice:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(math.random(11,17)), {CFrame = computertrigger.CFrame});
+                                    jumptick += 1
+                                    if tween then tween:Cancel() end
+                                    local delay = math.random(11,12)
+                                    tween = tweenservice:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(delay), {CFrame = computertrigger.CFrame});
                                     tween:Play()
                                     istweening = true;
+                                    task.spawn(function()
+                                        task.wait(delay - 3)
+                                        tween:Cancel()
+                                        lplr.Character.HumanoidRootPart.CFrame = computertrigger.CFrame
+                                    end)
                                     tween.Completed:Wait();
+                                    lplr.Character.HumanoidRootPart.CFrame = computertrigger.CFrame
+                                    if jumptick > 249 and jumptick < 256 then
+                                        lplr.Character.Humanoid.JumpPower = 40
+                                        lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                                    elseif jumptick > 257 then
+                                        jumptick = 0
+                                        lplr.Character.Humanoid.JumpPower = 36
+                                    end
                                     lplr.Character.HumanoidRootPart.CFrame = computertrigger.CFrame;
                                     istweening = false;
+                                elseif not computertrigger then
+                                    jumptick = 0;
                                 else
                                     istweening = false;
                                 end;
                                 looping = false;
-                                task.wait(4)
                             end
-                        end;
-                    end))
-                end)
+                        end)
+                    end;
+                end))
             end;
         end,
         HoverText = 'Automatically finishs the computer nearby.',
@@ -430,7 +457,7 @@ run(function()
         Function = function(call)
             if call then
                 table.insert(autoescape.Connections, runservice.Stepped:Connect(function()
-                    if store.status:lower():find("exit") then
+                    if store.status:lower():find("exit") and store.players.beast ~= lplr then
                         if not looping then
                             looping = true;
                             local exit = getExit();
@@ -446,13 +473,17 @@ run(function()
                             end
                             task.spawn(function()
                                 task.wait(speed + 1)
-                                if getbeast(15) == nil then
-                                    lplr.Character.HumanoidRootPart.CFrame = partTP.CFrame
-                                end
+                                lplr.Character.HumanoidRootPart.CFrame = partTP.CFrame
                             end)
                             tweenservice:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(speed), {CFrame = partTP.CFrame}):Play();
                             looping = false;
                             task.wait(5)
+                            if store.timer == 0 or store.status:lower() == "game over" or store.status:lower() == "game over - beast left" or store.escaped then
+                                lplr.Character.HumanoidRootPart.CFrame = CFrame.new(104,8,-417)
+                                jumptick = 0
+                                computer = nil
+                                exit = nil
+                            end
                         end;
                     end;
                 end))
@@ -473,7 +504,7 @@ run(function()
             end
         end,
         ExtraText = function()
-            return getidentity() ~= 3 and 'ModuleScript' or 'Instance'
+            return getidentity() >= 3 and 'ModuleScript' or 'Instance'
         end
     })
 end)
@@ -487,16 +518,13 @@ run(function()
             if call then
                 repeat
                     if store.players.beast ~= lplr then
-                        local pods = geteveryfreezepod(true)
-                        if #pods > 0 then
-                            for i, pod in pods do
-                                print(type(pod))
-                                old = lplr.Character.HumanoidRootPart.CFrame;
-                                lplr.Character.HumanoidRootPart.CFrame = pod.PodTrigger.CFrame;
-                                task.wait(0.5);
-                                lplr.Character.HumanoidRootPart.CFrame = old;
-                            end
-                        end
+                        local pod = getfreezepod(false, true);
+                        if pod then
+                            old = lplr.Character.HumanoidRootPart.CFrame;
+                            lplr.Character.HumanoidRootPart.CFrame = pod.PodTrigger.CFrame;
+                            task.wait(0.5);
+                            lplr.Character.HumanoidRootPart.CFrame = old;
+                        end;
                     elseif store.players.beast == lplr then
                         local pod = getfreezepod(true);
                         if pod and lplr.Character:FindFirstChild('Part') then
@@ -523,12 +551,12 @@ run(function()
         Function = function(call)
             if call then
                 repeat
-                    local target = getneartarget(13)
+                    local target = getneartarget(13);
                     if store.players.beast == lplr then
-                        lplr.Character:FindFirstChild('Hammer').HammerEvent:FireServer('HammerTieUp', target.Character['Right Leg'], lplr.Character.HumanoidRootPart.Position)
-                    end
-                    task.wait(1)
-                until (not autorope.Enable)
+                        lplr.Character:FindFirstChild('Hammer').HammerEvent:FireServer('HammerTieUp', target.Character['Right Leg'], lplr.Character.HumanoidRootPart.Position);
+                    end;
+                    task.wait(1);
+                until (not autorope.Enabled)
             end
         end
     })
@@ -544,8 +572,7 @@ run(function()
                 table.insert(autorejoin.Connections, runservice.Stepped:Connect(function()
                     if store.players.beast == lplr and not teleported then
                         teleported = true;
-                        print(teleported)
-                        getservice("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, lplr)
+                        getservice("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, lplr);
                     end;
                 end))
             end
