@@ -424,30 +424,36 @@ run(function()
         end;
         return nil;
     end;
+    local looping = false;
     autoescape = blatant.Api.CreateOptionsButton({
         Name = 'AutoEscape',
         Function = function(call)
             if call then
                 table.insert(autoescape.Connections, runservice.Stepped:Connect(function()
                     if store.status:lower():find("exit") then
-                        local exit = getExit();
-                        local partTP = exit.ExitArea
-                        speed = 3
-                        if exit.Door.Hinge.Rotation.Y == 0 or exit.Door.Hinge.Rotation.Y == 90 or exit.Door.Hinge.Rotation.Y == 180 or exit.Door.Hinge.Rotation.Y == 270 then
-                            partTP = exit.ExitDoorTrigger
-                            speed = 0.65
-                        end
-                        if exit.Door.Hinge.Rotation.Y == -90 or exit.Door.Hinge.Rotation.Y == -180 or exit.Door.Hinge.Rotation.Y == -270 then
-                            partTP = exit.ExitDoorTrigger
-                            speed = 0.65
-                        end
-                        task.spawn(function()
-                            task.wait(speed + 1)
-                            if getbeast(15) == nil then
-                                lplr.Character.HumanoidRootPart.CFrame = partTP.CFrame
+                        if not looping then
+                            looping = true;
+                            local exit = getExit();
+                            local partTP = exit.ExitArea
+                            speed = 3
+                            if exit.Door.Hinge.Rotation.Y == 0 or exit.Door.Hinge.Rotation.Y == 90 or exit.Door.Hinge.Rotation.Y == 180 or exit.Door.Hinge.Rotation.Y == 270 then
+                                partTP = exit.ExitDoorTrigger
+                                speed = 0.65
                             end
-                        end)
-                        tweenservice:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(speed), {CFrame = partTP.CFrame}):Play();
+                            if exit.Door.Hinge.Rotation.Y == -90 or exit.Door.Hinge.Rotation.Y == -180 or exit.Door.Hinge.Rotation.Y == -270 then
+                                partTP = exit.ExitDoorTrigger
+                                speed = 0.65
+                            end
+                            task.spawn(function()
+                                task.wait(speed + 1)
+                                if getbeast(15) == nil then
+                                    lplr.Character.HumanoidRootPart.CFrame = partTP.CFrame
+                                end
+                            end)
+                            tweenservice:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(speed), {CFrame = partTP.CFrame}):Play();
+                            looping = false;
+                            task.wait(5)
+                        end;
                     end;
                 end))
             end;
