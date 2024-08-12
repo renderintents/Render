@@ -444,7 +444,7 @@ run(function()
         for i,v in store.currentmap:GetChildren() do
             if v.Name == "ExitDoor" then
                 local mag = (store.players.beast.Character.HumanoidRootPart.Position - v.ExitDoorTrigger.Position).Magnitude;
-                if mag >= 15 then
+                if mag >= 20 then
                     return v;
                 end;
             end;
@@ -462,7 +462,7 @@ run(function()
                             looping = true;
                             local exit = getExit();
                             local partTP = exit.ExitArea
-                            speed = 3
+                            speed = 5
                             if exit.Door.Hinge.Rotation.Y == 0 or exit.Door.Hinge.Rotation.Y == 90 or exit.Door.Hinge.Rotation.Y == 180 or exit.Door.Hinge.Rotation.Y == 270 then
                                 partTP = exit.ExitDoorTrigger
                                 speed = 0.65
