@@ -1,0 +1,1 @@
+render.utils.errorNotification('Render', `All bedwarz modules are currently patched, please wait for an update.`, 120)
