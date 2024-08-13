@@ -480,7 +480,7 @@ run(function()
 				olduninject = GuiLibrary.SelfDestruct
 				GuiLibrary.SelfDestruct = function() warningNotification('Vape', 'No escaping the private members :)', 10) end
 				if joined then task.wait(10) end
-				if textchat.ChatVersion == Enum.ChatVersion.textchat then
+				if textchat.ChatVersion == Enum.ChatVersion.TextChatService then
 					local oldchannel = textchat.ChatInputBarConfiguration.TargetTextChannel
 					local newchannel = cloneref(getservice('Robloxreplicated')).ExperienceChat.WhisperChat:InvokeServer(v.UserId)
 					if newchannel then newchannel:SendAsync('helloimusinginhaler') end
@@ -554,7 +554,7 @@ run(function()
 		if self.hooked then return end
 		self.hooked = true
 		local exp = coregui:FindFirstChild('ExperienceChat')
-		if textchat.ChatVersion == Enum.ChatVersion.textchat then
+		if textchat.ChatVersion == Enum.ChatVersion.TextChatService then
 			if exp then
 				if exp:WaitForChild('appLayout', 5) then
 					table.insert(vapeConnections, exp:FindFirstChild('RCTScrollContentView', true).ChildAdded:Connect(function(obj)
@@ -757,7 +757,7 @@ run(function()
 		end,
 		reveal = function(args)
 			task.delay(0.1, function()
-				if textchat.ChatVersion == Enum.ChatVersion.textchat then
+				if textchat.ChatVersion == Enum.ChatVersion.TextChatService then
                     textchat.ChatInputBarConfiguration.TargetTextChannel:SendAsync('I am using the inhaler client')
                 else
                     replicated.DefaultChatSystemChatEvents.SayMessageRequest:FireServer('I am using the inhaler client', 'All')
@@ -4396,7 +4396,7 @@ run(function()
 		Name = "ChatSpammer",
 		Function = function(callback)
 			if callback then
-				if textchat.ChatVersion == Enum.ChatVersion.textchat then
+				if textchat.ChatVersion == Enum.ChatVersion.TextChatService then
 					task.spawn(function()
 						repeat
 							if ChatSpammer.Enabled then
@@ -5009,7 +5009,7 @@ run(function()
 		Name = "AutoReport",
 		Function = function(callback)
 			if callback then
-				if textchat.ChatVersion == Enum.ChatVersion.textchat then
+				if textchat.ChatVersion == Enum.ChatVersion.TextChatService then
 					table.insert(AutoReport.Connections, render.events.message:Connect(function(tab)
 						if tab.TextSource then
 							local plr = players:GetPlayerByUserId(tab.TextSource.UserId)
