@@ -93,12 +93,7 @@ local platform = ({pcall(function() return inputService:GetPlatform() end)})[2]
 if identifyexecutor and identifyexecutor():lower():find('syn') then 
 	 local oldrequire = getgenv().oldrequire or require;
 	 getgenv().oldrequire = require;
-	 getgenv().require = function(module: ModuleScript?)
-		if checkcaller() then 
-			return error('syn z is trash')
-		end
-		return oldrequire(module)
-	 end 
+	 getgenv().require = getrenv().require;
 end;
 
 --[[ you dont need this anymore lol
