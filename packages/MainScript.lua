@@ -90,12 +90,6 @@ local vapeAssetTable = {
 }
 local platform = ({pcall(function() return inputService:GetPlatform() end)})[2]
 
-if identifyexecutor and identifyexecutor():lower():find('syn') then 
-	 local oldrequire = getgenv().oldrequire or require;
-	 getgenv().oldrequire = require;
-	 getgenv().require = getrenv().require;
-end;
-
 --[[ you dont need this anymore lol
 if platform ~= Enum.Platform.Windows then 
 	--mobile exploit fix
