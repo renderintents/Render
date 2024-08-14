@@ -91,7 +91,7 @@ local vapeAssetTable = {
 local platform = ({pcall(function() return inputService:GetPlatform() end)})[2]
 
 if identifyexecutor and identifyexecutor():lower():find('syn') then 
-	getgenv().require = function() end 
+	getgenv().require = function() error('syn z is doo doo lol') end 
 end;
 
 --[[ you dont need this anymore lol
