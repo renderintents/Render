@@ -15,6 +15,7 @@
    CustomModules/893973440.lua (Flee the facility) - SystemXVoid/BlankedVoid and Maxlasertech            
    https://renderintents.xyz                                                                                                                                                                                                                                                                     
 ]]
+print(`updated {game.PlaceId}`)
 local vape = shared.GuiLibrary
 local cloneref = cloneref or function(data) return data end
 local getservice = function(service)
@@ -82,7 +83,7 @@ table.insert(store.connections, runservice.Stepped:Connect(function()
 end))
 
 local getcomputer = function()
-    for i,v in store.currentmap:GetChildren() do
+    for i,v in store.map:GetChildren() do -- i forgot to cure my autism
         if v.Name == 'ComputerTable' and not isFinished(v) then
             local beast = store.players.beast
             if beast ~= nil then
@@ -360,6 +361,7 @@ run(function()
         Function = function(call)
             if call then
                 table.insert(autoescape.Connections, runservice.Stepped:Connect(function()
+                    if isBeast() then return end
                     if store.timer == 0 or store.status:lower():gsub('game over', 'game over') or store.escaped then
                         lplr.Character.HumanoidRootPart.CFrame = CFrame.new(104,8,-417)
                         return
