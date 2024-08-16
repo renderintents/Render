@@ -83,7 +83,8 @@ table.insert(store.connections, runservice.Stepped:Connect(function()
 end))
 
 local getcomputer = function()
-    for i,v in store.map:GetChildren() do -- i forgot to cure my autism
+    if currentmap == nil then return end
+    for i,v in store.currentmap:GetChildren() do -- i forgot to cure my autism
         if v.Name == 'ComputerTable' and not isFinished(v) then
             local beast = store.players.beast
             if beast ~= nil then
