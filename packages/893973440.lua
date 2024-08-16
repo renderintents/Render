@@ -15,7 +15,6 @@
    CustomModules/893973440.lua (Flee the facility) - SystemXVoid/BlankedVoid and Maxlasertech            
    https://renderintents.xyz                                                                                                                                                                                                                                                                     
 ]]
-print(`updated agai {game.PlaceId}`)
 local vape = shared.GuiLibrary
 local cloneref = cloneref or function(data) return data end
 local getservice = function(service)
@@ -274,7 +273,7 @@ run(function()
                     if not looping then
                         looping = true
                         local beast = getbeast(true)
-                        if beast and not antideathbeastnear then
+                        if beast then
                             old = lplr.Character.HumanoidRootPart.CFrame
                             lplr.Character.HumanoidRootPart.CFrame *= CFrame.new(0, 100, 0)
                             if not antideathnotification then
