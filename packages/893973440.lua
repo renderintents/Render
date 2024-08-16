@@ -321,10 +321,10 @@ run(function()
                             tween = tweenservice:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(math.random(7, autohackspeed.Value)), {CFrame = trigger.CFrame})
                             tween:Play()
                             tween.Completed:Wait()
+                            if lplr.Character.HumanoidRootPart.CFrame ~= trigger.CFrame then
+                                lplr.Character.HumanoidRootPart.CFrame = trigger.CFrame
+                            end
                             tween = nil
-                        end
-                        if lplr.Character.HumanoidRootPart.CFrame ~= trigger.CFrame then
-                            lplr.Character.HumanoidRootPart.CFrame = trigger.CFrame
                         end
                         if jumptick >= 257 and usejump.Enabled then
                             lplr.Character.Humanoid.JumpPower = 40
@@ -360,7 +360,7 @@ run(function()
         Function = function(call)
             if call then
                 table.insert(autoescape.Connections, runservice.Stepped:Connect(function()
-                    if store.timer == 0 or store.status:lower():gsub('game over', nil) or store.escaped then
+                    if store.timer == 0 or store.status:lower():gsub('game over', 'game over') or store.escaped then
                         lplr.Character.HumanoidRootPart.CFrame = CFrame.new(104,8,-417)
                         return
                     end
