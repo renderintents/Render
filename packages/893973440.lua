@@ -168,7 +168,7 @@ local getfreezepod = function(check, check2)
 end
 
 run(function()
-    local antierror = {}: table;
+    local antierror = {};
     antierror = exploit.Api.CreateOptionsButton({
         Name = 'AntiError',
         Function = function(call)
@@ -182,8 +182,8 @@ run(function()
 end)
 
 run(function()
-    local killaura = {}: table;
-    local killaurarange = {}: table;
+    local killaura = {};
+    local killaurarange = {};
     killaura = blatant.Api.CreateOptionsButton({
         Name = 'Killaura',
         Function = function(call)
@@ -356,8 +356,8 @@ end)
     end)
 ]]
 run(function()
-    local autohack = {}: table;
-    local autohackspeed = {}: table;
+    local autohack = {};
+    local autohackspeed = {};
     local tween;
     local oldtrigger = nil;
     local jumptick = 0;
