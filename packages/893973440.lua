@@ -104,7 +104,7 @@ local getcomputertrigger = function()
         for i,v in players:GetPlayers() do
             if v ~= lplr and isAlive(v, true) and isAlive(lplr, true) then
                 local mag = (v.Character.HumanoidRootPart.Position - computer:FindFirstChild(`ComputerTrigger{string}`).Position).Magnitude
-                if mag <= 3.5 then
+                if mag <= 4 then
                     triggervalue -= 1
                 end
                 string = tostring(triggervalue)
