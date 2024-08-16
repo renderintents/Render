@@ -128,6 +128,18 @@ local getcomputertrigger = function()
     end
 end
 
+local getExit = function()
+    for i,v in store.currentmap:GetChildren() do
+        if v.Name == "ExitDoor" then
+            local mag = (store.players.beast.Character.HumanoidRootPart.Position - v.ExitDoorTrigger.Position).Magnitude;
+            if mag >= 20 then
+                return v;
+            end;
+        end;
+    end;
+    return nil;
+end;
+
 local gettarget = function(dist)
     local target = nil;
     for i,v in players:GetPlayers() do
@@ -167,6 +179,26 @@ local getfreezepod = function(check, check2)
     return nil
 end
 
+local getbeast = function(check)
+    for i,v in players:GetPlayers() do
+        if isAlive(v, true) and store.players.beast == v then
+            if check then
+                local mag = (v.Character.HumanoidRootPart.Position - lplr.Character.HumanoidRootPart.Position).Magnitude;
+                if mag <= 35 then
+                    return v;
+                end;
+            else
+                return v
+            end
+        end;
+    end;
+end;
+
+local isBeast = function(plr)
+    plr = plr or lplr
+    return store.players.beast ~= plr and false or true
+end
+
 run(function()
     local antierror = {};
     antierror = exploit.Api.CreateOptionsButton({
@@ -189,7 +221,7 @@ run(function()
         Function = function(call)
             if call then
                 repeat
-                    if store.players.beast == lplr then
+                    if isBeast() then
                         local target = gettarget(killaurarange.Value)
                         if target then
                             lplr.Character:FindFirstChild('Hammer'):Activate()
@@ -242,16 +274,6 @@ end)
 
 run(function()
     local antideath = {};
-    getbeast = function()
-        for i,v in players:GetPlayers() do
-            if isAlive(v, true) and v == store.players.beast then
-                local mag = (v.Character.HumanoidRootPart.Position - lplr.Character.HumanoidRootPart.Position).Magnitude;
-                if mag <= 35 then
-                    return v;
-                end;
-            end;
-        end;
-    end;
     local antideathbeastnear;
     local old;
     local antideathnotification = false;
@@ -261,10 +283,10 @@ run(function()
         Function = function(call)
             if call then
                 table.insert(antideath.Connections, runservice.Stepped:Connect(function()
-                    if store.players.beast == lplr or not isAlive(lplr, true) then return end;
+                    if isBeast() or not isAlive(lplr, true) then return end;
                     if not looping then
                         looping = true;
-                        local beast = getbeast();
+                        local beast = getbeast(true);
                         if beast and not antideathbeastnear then
                             old = lplr.Character.HumanoidRootPart.CFrame
                             lplr.Character.HumanoidRootPart.CFrame *= CFrame.new(0, 100, 0)
@@ -358,6 +380,7 @@ end)
 run(function()
     local autohack = {};
     local autohackspeed = {};
+    local usejump = {};
     local tween;
     local oldtrigger = nil;
     local jumptick = 0;
@@ -374,16 +397,23 @@ run(function()
                         if oldtrigger ~= trigger and tween then
                             tween:Cancel();
                         end;
-                        tween = tweenservice:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(math.random(7, autohackspeed.Value)), {CFrame = trigger.CFrame});
                         jumptick += 1;
-                        tween:Play();
-                        tween.Completed:Wait()
+                        if not tween then
+                            tween = tweenservice:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(math.random(7, autohackspeed.Value)), {CFrame = trigger.CFrame});
+                            tween:Play();
+                            tween.Completed:Wait()
+                            tween = nil
+                        end
                         if lplr.Character.HumanoidRootPart.CFrame ~= trigger.CFrame then
                             lplr.Character.HumanoidRootPart.CFrame = trigger.CFrame;
                         end;
-                        if jumptick >= 257 then
+                        if jumptick >= 257 and usejump.Enabled then
+                            lplr.Character.Humanoid.JumpPower = 40
                             lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping);
-                            jumptick = 0
+                            lplr.Character.Humanoid.JumpPower = 36
+                            jumptick = 0;
+                        elseif not usejump.Enabled then
+                            jumptick = 0;
                         end;
                     end
                 end))
@@ -397,62 +427,40 @@ run(function()
         Max = 20,
         Default = 19
     })
+    usejump = autohack.CreateToggle({
+        Name = 'Use JumpTick',
+        Function = void,
+        Default = true
+    })
 end)
---[[
 run(function()
     local autoescape = {};
-    getExit = function()
-        for i,v in store.currentmap:GetChildren() do
-            if v.Name == "ExitDoor" then
-                local mag = (store.players.beast.Character.HumanoidRootPart.Position - v.ExitDoorTrigger.Position).Magnitude;
-                if mag >= 20 then
-                    return v;
-                end;
-            end;
-        end;
-        return nil;
-    end;
-    local looping = false;
     autoescape = blatant.Api.CreateOptionsButton({
         Name = 'AutoEscape',
         Function = function(call)
             if call then
                 table.insert(autoescape.Connections, runservice.Stepped:Connect(function()
-                    if store.status:lower():find("exit") and store.players.beast ~= lplr then
-                        if not looping then
-                            looping = true;
-                            local exit = getExit();
-                            local partTP = exit.ExitArea
-                            speed = 5
-                            if exit.Door.Hinge.Rotation.Y == 0 or exit.Door.Hinge.Rotation.Y == 90 or exit.Door.Hinge.Rotation.Y == 180 or exit.Door.Hinge.Rotation.Y == 270 then
-                                partTP = exit.ExitDoorTrigger
-                                speed = 0.65
-                            end
-                            if exit.Door.Hinge.Rotation.Y == -90 or exit.Door.Hinge.Rotation.Y == -180 or exit.Door.Hinge.Rotation.Y == -270 then
-                                partTP = exit.ExitDoorTrigger
-                                speed = 0.65
-                            end
-                            task.spawn(function()
-                                task.wait(speed + 1)
-                                lplr.Character.HumanoidRootPart.CFrame = partTP.CFrame
-                            end)
-                            tweenservice:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(speed), {CFrame = partTP.CFrame}):Play();
-                            looping = false;
-                            task.wait(5)
-                            if store.timer == 0 or store.status:lower() == "game over" or store.status:lower() == "game over - beast left" or store.escaped then
-                                lplr.Character.HumanoidRootPart.CFrame = CFrame.new(104,8,-417)
-                                jumptick = 0
-                                computer = nil
-                                exit = nil
-                            end
-                        end;
-                    end;
+                    if store.timer == 0 or store.status:lower():gsub('game over', nil) or store.escaped then
+                        lplr.Character.HumanoidRootPart.CFrame = CFrame.new(104,8,-417);
+                        return;
+                    end
+                    local exit = getExit();
+                    local part = nil;
+                    if exit.Door.Hinge.Rotation.Y == 0 or exit.Door.Hinge.Rotation.Y == 90 or exit.Door.Hinge.Rotation.Y == 180 or exit.Door.Hinge.Rotation.Y == 270 then
+                        part = exit.ExitDoorTrigger;
+                    end
+                    if exit.Door.Hinge.Rotation.Y == -90 or exit.Door.Hinge.Rotation.Y == -180 or exit.Door.Hinge.Rotation.Y == -270 then
+                        part = exit.ExitDoorTrigger;
+                    end
+                    if part ~= nil then
+                        tweenservice:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(10), {CFrame = part.CFrame}):Play()
+                    end
                 end))
             end;
-        end;
+        end,
+        HoverText = 'Automatically escape for you after all\n the computer is finished.'
     })
 end)
-]]
 run(function()
     local antiragdoll = {};
     antiragdoll = exploit.Api.CreateOptionsButton({
@@ -479,7 +487,7 @@ run(function()
             if call then
                 repeat
                     local pod = getfreezepod(false, true);
-                    if pod and store.players.beast ~= lplr or pod and lplr.Character:FindFirstChild('Part') then
+                    if pod and not isBeast() or pod and lplr.Character:FindFirstChild('Part') then
                         old = lplr.Character.HumanoidRootPart.CFrame;
                         lplr.Character.HumanoidRootPart.CFrame = pod.PodTrigger.CFrame;
                         task.wait(0.5);
@@ -500,7 +508,7 @@ run(function()
             if call then
                 repeat
                     local target = gettarget(13);
-                    if store.players.beast == lplr and target then
+                    if isBeast() and target then
                         lplr.Character:FindFirstChild('Hammer').HammerEvent:FireServer('HammerTieUp', target.Character['Right Leg'], lplr.Character.HumanoidRootPart.Position);
                     end;
                     task.wait(1);

@@ -7840,7 +7840,7 @@ run(function()
 
 		local weld = Instance.new("Weld", part)
 		weld.Part0 = part
-		weld.Part1 = part.Parent.UpperTorso or part.Parent.Torso
+		weld.Part1 = part.Parent:FindFirstChild('UpperTorso') or part.Parent:FindFirstChild('Torso')
 		
 		table.insert(viewmodel, task.spawn(function()
 			viewmodel[entity.Name] = part
@@ -7858,7 +7858,6 @@ run(function()
             end
         end
         viewmodel[ent.Name] = nil
-		task.wait(1)
 	end
 	PlayerViewModel = GuiLibrary.ObjectsThatCanBeSaved.RenderWindow.Api.CreateOptionsButton({
 		Name = 'PlayerViewModel',
@@ -7866,7 +7865,7 @@ run(function()
 			if call then
 				for i,v in players:GetPlayers() do
 					table.insert(PlayerViewModel.Connections, v.CharacterAdded:Connect(function()
-						pcall(function() removeModel(v) end)
+						task.spawn(pcall, removeModel, v)
 						task.spawn(pcall, reModel, v)
 					end))
 				end
