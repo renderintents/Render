@@ -3146,7 +3146,7 @@ run(function()
 			if bedwars.AppController:isLayerOpen(bedwars.UILayers.MAIN) then return false end
 		end
 		local sword = killaurahandcheck.Enabled and store.localHand or getSword()
-		if not sword or not sword.tool or not swordmeta or (cheatenginetrash and not swordmeta.sword) then return false end
+		if not sword or not sword.tool then return false end
 		local swordmeta = bedwars.ItemTable[sword.tool.Name]
 		if killaurahandcheck.Enabled then
 			if store.localHand.Type ~= 'sword' or bedwars.DaoController.chargingMaid then return false end
@@ -11504,4 +11504,3 @@ run(function()
 		end
 	})
 end);
-
