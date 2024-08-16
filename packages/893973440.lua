@@ -263,6 +263,7 @@ end)
 
 run(function()
     local antideath = {}
+    local old
     local antideathnotification = false
     antideath = exploit.Api.CreateOptionsButton({
         Name = 'AntiDeath',
@@ -274,6 +275,7 @@ run(function()
                         looping = true
                         local beast = getbeast(true)
                         if beast then
+                            print('923uhtqfekk')
                             old = lplr.Character.HumanoidRootPart.CFrame
                             lplr.Character.HumanoidRootPart.CFrame *= CFrame.new(0, 100, 0)
                             if not antideathnotification then
@@ -322,9 +324,6 @@ run(function()
                             tween = tweenservice:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(math.random(7, autohackspeed.Value)), {CFrame = trigger.CFrame})
                             tween:Play()
                             tween.Completed:Wait()
-                            if lplr.Character.HumanoidRootPart.CFrame ~= trigger.CFrame then
-                                lplr.Character.HumanoidRootPart.CFrame = trigger.CFrame
-                            end
                             tween = nil
                         end
                         if jumptick >= 257 and usejump.Enabled then
