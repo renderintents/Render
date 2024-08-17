@@ -89,7 +89,7 @@ local getcomputer = function()
             if beast ~= nil then
                 local mag = (beast.Character.HumanoidRootPart.Position - v.Screen.Position).Magnitude
                 local mag2 = (lplr.Character.HumanoidRootPart.Position - v.Screen.Position).Magnitude
-                if mag <= 25 and mag2 >= 25 or mag2 >= 25 or mag <= 25 then
+                if mag >= 35 and mag2 <= 35 or mag2 >= 35 or mag >= 35 then
                     return v
                 end
             end
@@ -186,6 +186,7 @@ local getbeast = function(check)
             end
         end
     end
+    return nil
 end
 
 run(function()
@@ -275,7 +276,7 @@ run(function()
                         looping = true
                         local beast = getbeast(true)
                         if beast then
-                            print('923uhtqfekk')
+                            print('923uhtqfekkf')
                             old = lplr.Character.HumanoidRootPart.CFrame
                             lplr.Character.HumanoidRootPart.CFrame *= CFrame.new(0, 100, 0)
                             if not antideathnotification then

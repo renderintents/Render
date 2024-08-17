@@ -741,6 +741,17 @@ local function AllNearPosition(distance, amount, sortfunction, prediction)
 				end
 			end
 		end
+		for i, v in (collection:GetTagged('trainingRoomDummy')) do
+			if v.PrimaryPart then
+				local mag = (entityLibrary.character.HumanoidRootPart.Position - v.PrimaryPart.Position).magnitude
+				if prediction and mag > distance then
+					mag = (entityLibrary.LocalPosition - v.PrimaryPart.Position).magnitude
+				end
+				if mag <= distance then
+					table.insert(sortedentities, {Player = {Name = 'TrainingDummy', UserId = 1443379645, GetAttribute = function() return 'none' end}, Character = v, RootPart = v.PrimaryPart, Humanoid = v.Humanoid})
+				end
+			end
+		end
 		for i, v in (collection:GetTagged('GolemBoss')) do
 			if v.PrimaryPart then
 				local mag = (entityLibrary.character.HumanoidRootPart.Position - v.PrimaryPart.Position).magnitude
@@ -3350,6 +3361,29 @@ run(function()
 										}
 									})
 									break
+								end
+							elseif not sword and store.equippedKit == 'summoner' then
+								for i,plr in plrs do
+									local root = plr.RootPart
+									if not root then
+										continue
+									end
+									switchItem(getItemNear('summoner_claw').tool)
+									local localfacing = entityLibrary.character.HumanoidRootPart.CFrame.lookVector
+									local vec = (plr.RootPart.Position - entityLibrary.character.HumanoidRootPart.Position).unit
+									local angle = math.acos(localfacing:Dot(vec))
+									if angle >= (math.rad(killauraangle.Value) / 2) then
+										continue
+									end
+									if killauratargetframe.Walls.Enabled then
+										if not bedwars.SwordController:canSee({player = plr.Player, getInstance = function() return plr.Character end}) then continue end
+									end
+									if killauranovape.Enabled and store.whitelist.clientUsers[plr.Player.Name] then
+										continue
+									end
+									bedwars.Client:Get('SummonerClawAttackRequest'):SendToServer({
+										direction = plr.RootPart.Position
+									})
 								end
 							end
 						end
@@ -7200,7 +7234,8 @@ run(function()
 		warlock = 'Eldric',
 		necromancer = 'Crypt',
 		pinata = 'Lucia',
-		spirit_assassin = 'Evelynn'
+		spirit_assassin = 'Evelynn',
+		sorcerer = 'Death Adder'
 	}
 	local autokitstuff = {
 		melody = function()
@@ -7438,6 +7473,19 @@ run(function()
 				end
 				task.wait(0.1)
 			until not AutoKit.Enabled
+		end,
+		sorcerer = function()
+			repeat
+				for i, crystal in collection:GetTagged('alchemy_crystal') do
+					local prompt = crystal:FindFirstChildWhichIsA('ProximityPrompt')
+					if prompt then
+						fireproximityprompt(prompt)
+						collection:RemoveTag(crystal, 'alchemy_crystal')
+						crystal:Remove()
+					end
+				end
+				task.wait(0.1)
+			until (not AutoKit.Enabled)
 		end
 	}
 	local function autoKitCreateObject(args)
@@ -10717,6 +10765,20 @@ run(function()
 				until (not bdautowin.Enabled)
 			end
 		end
+	})
+end)
+
+run(function()
+	local instawin = {};
+	instawin = exploit.Api.CreateOptionsButton({
+		Name = 'InstantWin',
+		Function = function(call)
+			if call then
+				instawin.ToggleButton();
+				getservice('TeleportService'):Teleport(game.PlaceId, lplr, getservice('TeleportService'):GetLocalPlayerTeleportData())
+			end;
+		end,
+		HoverText = 'InstaWin made by\n godclutcher.'
 	})
 end)
 
