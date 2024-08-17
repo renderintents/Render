@@ -69,7 +69,9 @@ end
 pcall(storeupdate)
 
 local isFinished = function(computer)
-    return computer.Screen.BrickColor == BrickColor.new("Dark green") and true or false
+    local screen = computer:FindFirstChild('Screen')
+    if not screen then return true end
+    return screen.BrickColor == BrickColor.new("Dark green") and true or false
 end
 
 local isCaptured = function(plr)
@@ -83,7 +85,7 @@ end))
 
 local getcomputer = function()
     if store.currentmap == nil then return end
-    for i,v in store.currentmap:GetChildren() do -- i forgot to cure my autism
+    for i,v in store.currentmap:GetChildren() do
         if v.Name == 'ComputerTable' and not isFinished(v) then
             local beast = store.players.beast
             if beast ~= nil then
@@ -174,16 +176,16 @@ local isBeast = function(plr)
 end
 
 local getbeast = function(check)
-    for i,v in players:GetPlayers() do
-        if isAlive(v, true) and isBeast(v) then
-            if check then
-                local mag = (v.Character.HumanoidRootPart.Position - lplr.Character.HumanoidRootPart.Position).Magnitude
-                if mag <= 35 then
-                    return v
-                end
-            else
-                return v
+    local beast = store.players.beast
+    if beast == nil then return end
+    if isAlive(beast, true) and isAlive(lplr, true) then
+        if check then
+            local mag = (beast.Character.HumanoidRootPart.Position - lplr.Character.HumanoidRootPart.Position).Magnitude
+            if mag <= 35 then
+                return beast
             end
+        else
+            return beast
         end
     end
     return nil
@@ -272,26 +274,21 @@ run(function()
             if call then
                 table.insert(antideath.Connections, runservice.Stepped:Connect(function()
                     if isBeast() or not isAlive(lplr, true) then return end
-                    if not looping then
-                        looping = true
-                        local beast = getbeast(true)
-                        if beast then
-                            print('923uhtqfekkf')
-                            old = lplr.Character.HumanoidRootPart.CFrame
-                            lplr.Character.HumanoidRootPart.CFrame *= CFrame.new(0, 100, 0)
-                            if not antideathnotification then
-                                antideathnotification = true
-                                task.spawn(pcall, warningNotification, 'Render', 'the beast is near you ', 6)
-                            end
-                            if not isEnabled('AutoHack') then
-                                task.delay(1.5, function()
-                                    lplr.Character.HumanoidRootPart.CFrame = old
-                                end)
-                            end
-                        else
-                            antideathnotification = false
+                    local beast = getbeast(true)
+                    if beast then
+                        old = lplr.Character.HumanoidRootPart.CFrame
+                        lplr.Character.HumanoidRootPart.CFrame *= CFrame.new(0, 100, 0)
+                        if not antideathnotification then
+                            antideathnotification = true
+                            task.spawn(pcall, warningNotification, 'Render', 'the beast is near you ', 6)
                         end
-                        looping = false
+                        if not isEnabled('AutoHack') then
+                            task.delay(1.5, function()
+                                lplr.Character.HumanoidRootPart.CFrame = old
+                            end)
+                        end
+                    else
+                        antideathnotification = false
                     end
                 end))
             end
@@ -317,17 +314,14 @@ run(function()
                         if not oldtrigger then
                             oldtrigger = trigger
                         end
-                        if oldtrigger ~= trigger and tween then
+                        if oldtrigger ~= trigger then
+                            oldtrigger = trigger
                             tween:Cancel()
                         end
-                        jumptick += 1
-                        if not tween then
-                            tween = tweenservice:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(math.random(7, autohackspeed.Value)), {CFrame = trigger.CFrame})
-                            tween:Play()
-                            tween.Completed:Wait()
-                            tween = nil
-                        end
-                        if jumptick >= 257 and usejump.Enabled then
+                        if jumptick >= 223 and usejump.Enabled then
+                            if tween then 
+                                tween:Cancel() 
+                            end
                             lplr.Character.Humanoid.JumpPower = 40
                             lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
                             lplr.Character.Humanoid.JumpPower = 36
@@ -335,8 +329,22 @@ run(function()
                         elseif not usejump.Enabled then
                             jumptick = 0
                         end
+                        if not tween then
+                            tween = tweenservice:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(math.random(7, autohackspeed.Value)), {CFrame = trigger.CFrame})
+                            if (trigger.Position - lplr.Character.PrimaryPart.Position).Magnitude >= 2.5 then
+                                tween:Play()
+                                tween.Completed:Wait()
+                            end
+                            jumptick += 1
+                            tween = nil
+                        end
                     end
                 end))
+            else
+                if tween then
+                    tween:Cancel()
+                    tween = nil
+                end
             end
         end,
         HoverText = 'JumpTick method by\n qwertytui'
@@ -362,7 +370,7 @@ run(function()
             if call then
                 table.insert(autoescape.Connections, runservice.Stepped:Connect(function()
                     if isBeast() then return end
-                    if store.timer == 0 or store.status:lower():gsub('game over', 'game over') or store.escaped then
+                    if store.timer == 0 or store.status:lower():find('game over') or store.escaped then
                         lplr.Character.HumanoidRootPart.CFrame = CFrame.new(104,8,-417)
                         return
                     end
@@ -374,7 +382,7 @@ run(function()
                     if exit.Door.Hinge.Rotation.Y == -90 or exit.Door.Hinge.Rotation.Y == -180 or exit.Door.Hinge.Rotation.Y == -270 then
                         part = exit.ExitDoorTrigger
                     end
-                    if part ~= nil then
+                    if part then
                         tweenservice:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(10), {CFrame = part.CFrame}):Play()
                     end
                 end))
