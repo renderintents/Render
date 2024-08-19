@@ -2127,6 +2127,107 @@ run(function()
 end)
 
 run(function()
+    local silentaura = {}
+    local silentaurarange = {}
+    local silentauraangle = {}
+    local silentauramouse = {}
+    local silentaurahitchance = {}
+    local function getdata()
+		if bedwars.AppController:isLayerOpen(bedwars.UILayers.MAIN) then 
+            return false
+        end
+        if silentauramouse.Enabled then
+			if not inputservice:IsMouseButtonPressed(0) then return false end
+		end
+		local sword = store.localHand
+		if not sword or not sword.tool then return false end
+		local swordmeta = bedwars.ItemTable[sword.tool.Name]
+		if sword.Type ~= 'sword' or bedwars.DaoController.chargingMaid then return false end
+		return sword, swordmeta
+	end
+    local silentauraremote = bedwars.Client:Get(bedwars.AttackRemote)
+    silentaura = combat.Api.CreateOptionsButton({
+        Name = 'SilentAura',
+        Function = function(call)
+            if call then
+                repeat
+                    local plrs = GetAllTargets(silentaurarange.Value)
+                    for i, enemy in plrs do
+                        local sword, swordmeta = getdata()
+                        if sword then
+                            local root = enemy.RootPart
+                            if not root then
+                                continue
+                            end
+                            if not silentauramouse.Enabled then bedwars.SwordController:playSwordEffect(swordmeta, false) end
+                            if math.random(silentaurahitchance.Value, 100) ~= 100 then 
+                                continue
+                            end
+                            local localfacing = lplr.Character.HumanoidRootPart.CFrame.lookVector
+                            local vec = (enemy.RootPart.Position - lplr.Character.HumanoidRootPart.Position).unit
+                            local angle = math.acos(localfacing:Dot(vec))
+                            if angle >= (math.rad(silentauraangle.Value) / 2) then
+                                continue
+                            end
+                            if not bedwars.SwordController:canSee({player = enemy.Player, getInstance = function() return enemy.Player.Character end}) then continue end
+                            local selfrootpos = lplr.Character.HumanoidRootPart.Position
+                            local selfpos = selfrootpos + (silentaurarange.Value > 14 and (selfrootpos - root.Position).magnitude > 14.4 and (CFrame.lookAt(selfrootpos, root.Position).lookVector * ((selfrootpos - root.Position).magnitude - 14)) or Vector3.zero)
+                            silentauraremote.instance:FireServer({
+                                weapon = sword.tool,
+                                chargedAttack = {
+                                    chargeRatio = swordmeta.sword.chargedAttack or 0
+                                },
+                                entityInstance = enemy.Player.Character,
+                                validate = {
+                                    raycast = {
+                                        cameraPosition = attackValue(root.Position),
+                                        cursorDirection = attackValue(CFrame.new(selfpos, root.Position).lookVector)
+                                    },
+                                    targetPosition = attackValue(root.Position),
+                                    selfPosition = attackValue(selfpos)
+                                }
+                            })
+                        end
+                    end
+                    task.wait(0.15)
+                until (not silentaura.Enabled)
+            end
+        end,
+        ExtraText = function()
+            return 'Distance'
+        end
+    })
+    silentaurarange = silentaura.CreateSlider({
+        Name = 'Atttack Range',
+        Min = 1,
+        Max = 14,
+        Function = void,
+        Default = 12.5
+    })
+    silentauraangle = silentaura.CreateSlider({
+        Name = 'Max Angle',
+        Min = 1,
+        Max = 360,
+        Function = void,
+        Default = 120
+    })
+    silentaurahitchance = silentaura.CreateSlider({
+        Name = 'Hit Chance',
+        Min = 1,
+        Max = 100,
+        Percent = true,
+        Function = void,
+        Default = 97
+    })
+    silentauramouse = silentaura.CreateToggle({
+        Name = 'Require mouse down',
+        Function = void,
+        HoverText = 'Check if you are holding your left click before attacking.'
+    })
+end)
+
+
+run(function()
 	local oldclickhold
 	local oldclickhold2
 	local roact
