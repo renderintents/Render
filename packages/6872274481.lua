@@ -2150,7 +2150,6 @@ run(function()
         Function = function(call)
             if call then
                 repeat
-					print('test1')
                     local plrs = GetAllTargets(silentaurarange.Value, true)
                     if #plrs > 0 then
                         local sword, swordmeta = getdata()
@@ -2163,7 +2162,7 @@ run(function()
 								if not silentauramouse.Enabled or silentauramouse.Enabled and not isEnabled('AutoClicker') then 
 									bedwars.SwordController:playSwordEffect(swordmeta, false) 
 								end
-								if render.ping >= 170 then
+								if render.ping >= 210 then
 									if math.random(silentaurahitchance.Value, 100) ~= 100 then 
 										continue
 									end
@@ -2200,7 +2199,7 @@ run(function()
             end
         end,
         ExtraText = function()
-            return render.ping >= 170 and 'FullCombo' or 'HitChance'
+            return render.ping >= 210 and 'FullCombo' or 'HitChance'
         end
     })
     silentaurarange = silentaura.CreateSlider({
