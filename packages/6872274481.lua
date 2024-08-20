@@ -2025,7 +2025,6 @@ run(function()
 		HoverText = 'Remove the CPS cap'
 	})
 end)
-
 run(function()
 	local ReachValue = {Value = 14}
 
@@ -2132,7 +2131,7 @@ run(function()
     local silentauraangle = {}
     local silentauramouse = {}
     local silentaurahitchance = {}
-    local function getdata()
+    local function getdata() 
 		if bedwars.AppController:isLayerOpen(bedwars.UILayers.MAIN) then 
             return false
         end
@@ -2145,56 +2144,63 @@ run(function()
 		if sword.Type ~= 'sword' or bedwars.DaoController.chargingMaid then return false end
 		return sword, swordmeta
 	end
-    local silentauraremote = bedwars.Client:Get(bedwars.AttackRemote)
+    local silentauraremote = bedwars.Client:Get(bedwars.AttackRemote).instance
     silentaura = combat.Api.CreateOptionsButton({
         Name = 'SilentAura',
         Function = function(call)
             if call then
                 repeat
-                    local plrs = GetAllTargets(silentaurarange.Value)
-                    for i, enemy in plrs do
+					print('test1')
+                    local plrs = GetAllTargets(silentaurarange.Value, true)
+                    if #plrs > 0 then
                         local sword, swordmeta = getdata()
-                        if sword then
-                            local root = enemy.RootPart
-                            if not root then
-                                continue
-                            end
-                            if not silentauramouse.Enabled then bedwars.SwordController:playSwordEffect(swordmeta, false) end
-                            if math.random(silentaurahitchance.Value, 100) ~= 100 then 
-                                continue
-                            end
-                            local localfacing = lplr.Character.HumanoidRootPart.CFrame.lookVector
-                            local vec = (enemy.RootPart.Position - lplr.Character.HumanoidRootPart.Position).unit
-                            local angle = math.acos(localfacing:Dot(vec))
-                            if angle >= (math.rad(silentauraangle.Value) / 2) then
-                                continue
-                            end
-                            if not bedwars.SwordController:canSee({player = enemy.Player, getInstance = function() return enemy.Player.Character end}) then continue end
-                            local selfrootpos = lplr.Character.HumanoidRootPart.Position
-                            local selfpos = selfrootpos + (silentaurarange.Value > 14 and (selfrootpos - root.Position).magnitude > 14.4 and (CFrame.lookAt(selfrootpos, root.Position).lookVector * ((selfrootpos - root.Position).magnitude - 14)) or Vector3.zero)
-                            silentauraremote.instance:FireServer({
-                                weapon = sword.tool,
-                                chargedAttack = {
-                                    chargeRatio = swordmeta.sword.chargedAttack or 0
-                                },
-                                entityInstance = enemy.Player.Character,
-                                validate = {
-                                    raycast = {
-                                        cameraPosition = attackValue(root.Position),
-                                        cursorDirection = attackValue(CFrame.new(selfpos, root.Position).lookVector)
-                                    },
-                                    targetPosition = attackValue(root.Position),
-                                    selfPosition = attackValue(selfpos)
-                                }
-                            })
+                        for i, enemy in plrs do
+							if sword then
+								local root = enemy.RootPart
+								if not root then
+									continue
+								end
+								if not silentauramouse.Enabled or silentauramouse.Enabled and not isEnabled('AutoClicker') then 
+									bedwars.SwordController:playSwordEffect(swordmeta, false) 
+								end
+								if render.ping >= 170 then
+									if math.random(silentaurahitchance.Value, 100) ~= 100 then 
+										continue
+									end
+								end
+								local localfacing = lplr.Character.HumanoidRootPart.CFrame.lookVector
+								local vec = (enemy.RootPart.Position - lplr.Character.HumanoidRootPart.Position).unit
+								local angle = math.acos(localfacing:Dot(vec))
+								if angle >= (math.rad(silentauraangle.Value) / 2) then
+									continue
+								end
+								if not bedwars.SwordController:canSee({player = enemy.Player, getInstance = function() return enemy.Player.Character end}) then continue end
+								local selfrootpos = lplr.Character.HumanoidRootPart.Position
+								local selfpos = selfrootpos + (silentaurarange.Value > 12.45 and (CFrame.lookAt(selfrootpos, root.Position).lookVector * 2) or Vector3.zero)
+								silentauraremote:FireServer({
+									weapon = sword.tool,
+									chargedAttack = {
+										chargeRatio = swordmeta.sword.chargedAttack or 0
+									},
+									entityInstance = enemy.Player.Character,
+									validate = {
+										raycast = {
+											cameraPosition = attackValue(camera.CFrame.Position),
+											cursorDirection = attackValue(Ray.new(camera.CFrame.Position, root.CFrame.Position).Unit.Direction)
+										},
+										targetPosition = attackValue(root.Position),
+										selfPosition = attackValue(selfpos)
+									}
+								})
+							end
                         end
                     end
-                    task.wait(0.15)
+                    task.wait(silentauramouse.Enabled and isEnabled('AutoClicker') and 0 or 0.15)
                 until (not silentaura.Enabled)
             end
         end,
         ExtraText = function()
-            return 'Distance'
+            return render.ping >= 170 and 'FullCombo' or 'HitChance'
         end
     })
     silentaurarange = silentaura.CreateSlider({
