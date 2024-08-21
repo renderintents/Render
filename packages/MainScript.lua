@@ -780,7 +780,7 @@ local function TextGUIUpdate()
 		end
 
 		TextGUIFormatted = moduleList
-		VapeTextExtra.Text = formattedText
+        VapeTextExtra.Text = formattedText
         VapeText.Size = UDim2.fromOffset(154, (formattedText ~= "" and textService:GetTextSize(formattedText, VapeText.TextSize, VapeText.Font, Vector2.new(1000000, 1000000)) or Vector2.zero).Y)
 
 		local offsets = TextGUIOffsets[platform] or {
@@ -812,7 +812,7 @@ local function TextGUIUpdate()
                 VapeBackground.Position = VapeText.Position + UDim2.fromOffset(-4, -2 + offsets[4])
             end
         end
-        
+
 		if TextGUIMode.Value == "Drawing" then 
 			for i,v in pairs(TextGUIObjects.Labels) do 
 				v.Visible = false
@@ -851,12 +851,12 @@ local function TextGUIUpdate()
             local textsize = textService:GetTextSize(v, VapeText.TextSize, VapeText.Font, Vector2.new(1000000, 1000000))
             local backgroundFrame = Instance.new("Frame")
             backgroundFrame.BorderSizePixel = 0
-            backgroundFrame.BackgroundTransparency = 0.62
+            backgroundFrame.BackgroundTransparency = 0.35
             backgroundFrame.BackgroundColor3 = Color3.new()
             backgroundFrame.Visible = true
             backgroundFrame.ZIndex = 0
             backgroundFrame.LayoutOrder = i
-            backgroundFrame.Size = UDim2.fromOffset(textsize.X + 8, textsize.Y + 3)
+            backgroundFrame.Size = UDim2.fromOffset(textsize.X + 12, textsize.Y + 4)
             backgroundFrame.Parent = VapeBackground
             local backgroundLineFrame = Instance.new("Frame")
             backgroundLineFrame.Size = UDim2.new(0, 2, 1, 0)
@@ -1706,7 +1706,7 @@ GeneralSettings.CreateButton2({
 		shared.VapeSwitchServers = true
 		shared.VapeOpenGui = true
 		shared.VapePrivate = vapePrivateCheck
-		loadstring(vapeGithubRequest("NewMainScript.lua"))()
+		loadfile('vape/loader.lua')()
 	end
 })
 GUISettings.CreateButton2({
@@ -1764,6 +1764,14 @@ GUISettings.CreateButton2({
 			num = num + 223
 		end
 	end
+})
+GeneralSettings.CreateButton2({
+    Name = 'REINJECT',
+    Function = function()
+        pcall(GuiLibrary.SelfDestruct)
+        repeat task.wait(1) until not shared.VapeFullyLoaded
+        loadfile('vape/loader.lua')()
+    end
 })
 GeneralSettings.CreateButton2({
 	Name = "UNINJECT",
