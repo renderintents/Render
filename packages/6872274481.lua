@@ -15,6 +15,26 @@
    CustomModules/6872274481.lua (bedwars) - SystemXVoid/BlankedVoid and Maxlasertech            
    https://renderintents.xyz                                                                                                                                                                                                                                                                     
 ]]
+
+type vapemodule = {
+    Connections: table,
+    Enabled: boolean,
+    Object: Instance,
+    ToggleButton: () -> (),
+	CreateSlider: () -> table
+};
+
+type vapeminimodule = {
+	Enabled: boolean,
+	Object: Instance,
+	ToggleButton: () -> ()
+};
+
+type vapeslider = {
+	Value: number,
+	Object: Instance,
+	SetValue: () -> ()
+};
    
 
 local vape = shared.GuiLibrary;
@@ -9085,30 +9105,6 @@ run(function()
 				end
 			end
 		end
-	})
-end)
-
-run(function()
-	local Disabler = {Enabled = false}
-	Disabler = vape.ObjectsThatCanBeSaved.UtilityWindow.Api.CreateOptionsButton({
-		Name = 'FirewallBypass',
-		Function = function(callback)
-			if callback then
-				task.spawn(function()
-					repeat
-						task.wait()
-						local item = getItemNear('scythe')
-						if item and lplr.Character.HandInvItem.Value == item.tool and bedwars.CombatController then
-							bedwars.Client:Get('ScytheDash'):SendToServer({direction = Vector3.new(9e18, 9e18, 9e18) * 40})
-							if entityLibrary.isAlive and entityLibrary.character.Head.Transparency ~= 0 then
-								store.scythe = tick() + 1
-							end
-						end
-					until (not Disabler.Enabled)
-				end)
-			end
-		end,
-		HoverText = 'Float disabler with scythe'
 	})
 end)
 
