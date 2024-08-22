@@ -1,6 +1,6 @@
 repeat task.wait() until game:IsLoaded()
 local GuiLibrary
-local baseDirectory = (shared.VapePrivate and "vapeprivate/" or "vape/")
+local baseDirectory = (shared.VapePrivate and "vapeprivate/" or render and isfolder('rendervape') and 'rendervape' or 'vape')
 local vapeInjected = true
 local oldRainbow = false
 local errorPopupShown = false
@@ -849,6 +849,8 @@ local function TextGUIUpdate()
         end
         for i,v in pairs(backgroundList) do
             local textsize = textService:GetTextSize(v, VapeText.TextSize, VapeText.Font, Vector2.new(1000000, 1000000))
+			local backgroundoffest = VapeScale.Scale >= 8 and UDim2.fromOffset(textSize.X + 4, textSize.Y + -2) or VapeScale.Scale >= 6 and UDim2.fromOffset(textsize.X + 12, textsize.Y + 4) or UDim2.fromOffset(textsize.X + 8, textsize.Y + 3)
+			-- dont ask why i use this :money:
             local backgroundFrame = Instance.new("Frame")
             backgroundFrame.BorderSizePixel = 0
             backgroundFrame.BackgroundTransparency = 0.35
@@ -856,7 +858,7 @@ local function TextGUIUpdate()
             backgroundFrame.Visible = true
             backgroundFrame.ZIndex = 0
             backgroundFrame.LayoutOrder = i
-            backgroundFrame.Size = UDim2.fromOffset(textsize.X + 12, textsize.Y + 4)
+            backgroundFrame.Size = backgroundoffest
             backgroundFrame.Parent = VapeBackground
             local backgroundLineFrame = Instance.new("Frame")
             backgroundLineFrame.Size = UDim2.new(0, 2, 1, 0)

@@ -90,13 +90,6 @@ getgenv().render = render;
 render.guardian = cheatenginetrash and bedwars ~= nil and ({pcall(function() return loadfile('vape/Render/lib/solarapoop.lua')() end)})[2];
 render.utils:init();
 
-getgenv().isEnabled = function(button, category)
-	local success, enabled = pcall(function()
-		return GuiLibrary.ObjectsThatCanBeSaved[button..(category or 'OptionsButton')].Api.Enabled 
-	end)
-	return success and enabled
-end
-
 for i,v in render.utils do
 	getfenv()[i] = v;
 end;
