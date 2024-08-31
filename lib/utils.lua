@@ -235,7 +235,8 @@ functions.GetAllTargets = function(distance: number?, mobs: boolean?, raycast: b
 		Titan = collection:GetTagged('GolemBoss'),
 		Drone = collection:GetTagged('Drone'),
 		Monarch = collection:GetTagged('GooseBoss'),
-		Dummy = collection:GetTagged('trainingRoomDummy')
+		Dummy = collection:GetTagged('trainingRoomDummy'),
+        Crate = collection:GetTagged('infected-crate')
 	}
 	for i,v in players:GetPlayers() do 
 		if v ~= lplr and isAlive(v, game.PlaceId == 11630038968) and isAlive(lplr, true) then 
@@ -258,7 +259,7 @@ functions.GetAllTargets = function(distance: number?, mobs: boolean?, raycast: b
 					if typeof(v) == 'Instance' and v.PrimaryPart then 
 						local entdistance = (lplr.Character.PrimaryPart.Position - v.PrimaryPart.Position).Magnitude
 						if entdistance <= (distance or math.huge) then 
-							table.insert(targets, {Human = false, RootPart = v.PrimaryPart, Humanoid = v:FindFirstChildWhichIsA('Humanoid'), Player = {Character = v, Name = i, DisplayName = i, UserId = 1, JumpTick = tick()}})
+							table.insert(targets, {Human = false, RootPart = v.PrimaryPart, Humanoid = v:FindFirstChildWhichIsA('Humanoid') or {Health = 100, MaxHealth = 100}, Player = {Character = v, Name = i, DisplayName = i, UserId = 1, JumpTick = tick()}})
 						end
 					end
 				end

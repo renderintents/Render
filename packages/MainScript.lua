@@ -849,7 +849,7 @@ local function TextGUIUpdate()
         end
         for i,v in pairs(backgroundList) do
             local textsize = textService:GetTextSize(v, VapeText.TextSize, VapeText.Font, Vector2.new(1000000, 1000000))
-			local backgroundoffest = VapeScale.Scale >= 8 and UDim2.fromOffset(textSize.X + 4, textSize.Y + -2) or VapeScale.Scale >= 6 and UDim2.fromOffset(textsize.X + 12, textsize.Y + 4) or UDim2.fromOffset(textsize.X + 8, textsize.Y + 3)
+			local backgroundoffest = VapeScale.Scale >= 8 and UDim2.fromOffset(textSize.X + 4, textSize.Y + -2) or VapeScale.Scale >= 7 and UDim2.fromOffset(textsize.X + 12, textsize.Y + 4) or UDim2.fromOffset(textsize.X + 8, textsize.Y + 3)
 			-- dont ask why i use this :money:
             local backgroundFrame = Instance.new("Frame")
             backgroundFrame.BorderSizePixel = 0
