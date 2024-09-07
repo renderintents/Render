@@ -90,8 +90,6 @@ getgenv().render = render;
 render.guardian = cheatenginetrash and bedwars ~= nil and ({pcall(function() return loadfile('vape/Render/lib/solarapoop.lua')() end)})[2];
 render.utils:init();
 
-getgenv().isEnabled = render.utils.isEnabled
-
 for i,v in render.utils do
 	getfenv()[i] = v;
 end;
