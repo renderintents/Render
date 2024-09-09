@@ -11802,7 +11802,7 @@ run(function()
 		lplr.Character.PrimaryPart = clone
 		entityLibrary.character.HumanoidRootPart = clone
 		lplr.Character.Parent = workspace
-		old.Transparency = 0
+		old.Transparency = 1
 	end
 	local destroyclone = function()
 		old.CFrame = clone.CFrame
