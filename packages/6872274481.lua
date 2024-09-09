@@ -11671,3 +11671,185 @@ run(function()
 		end
 	})
 end);
+
+run(function()
+    local godmode = {}
+    local Remotes = require(game:GetService("ReplicatedStorage").TS.remotes).default
+    godmode = GuiLibrary.ObjectsThatCanBeSaved.ExploitWindow.Api.CreateOptionsButton({
+        Name = "Godmode",
+        Function = function(callback)
+            if callback then    
+                task.spawn(function()
+                    local oldNamecall
+                    local remfunc = game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("node_modules"):WaitForChild("@rbxts"):WaitForChild("net"):WaitForChild("out"):WaitForChild("_NetManaged"):WaitForChild("RequestSquadLaunch")
+                    oldNamecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
+                        if self == remfunc and getnamecallmethod() == "InvokeServer" and not checkcaller() then
+                            return nil
+                        end
+                        return oldNamecall(self, ...)
+                    end))
+                    repeat
+                        Remotes.Client:Get("RequestEnterSquadLauncher"):CallServer({
+                            squadLauncher = game.Players.LocalPlayer.Character
+                        })
+                        game.Players.LocalPlayer.Character:SetAttribute("Transparency", 0)
+                        game.Players.LocalPlayer.Character:SetAttribute("Locked", false)
+                        lplr.CameraMinZoomDistance = 0.1
+                        task.wait(1)
+                    until (not godmode.Enabled)
+                end)
+			else
+				task.spawn(function()
+					for i = 1, 12 do
+						Remotes.Client:Get("RequestExitSquadLauncher"):CallServer({
+							squadLauncher = game.Players.LocalPlayer.Character
+						})
+					end
+				end)
+            end
+        end
+    })
+end)
+
+run(function()
+    local anticrash = {}
+    local knit = debug.getupvalue(require(game.Players.LocalPlayer.PlayerScripts.TS.knit).setup, 6)
+    local oldcontroller = knit.Controllers.SquadLauncherController.enterLauncherEffect
+    anticrash = GuiLibrary.ObjectsThatCanBeSaved.UtilityWindow.Api.CreateOptionsButton({
+        Name = "AntiCrash",
+        Function = function(callback)
+            if callback then
+                knit.Controllers.SquadLauncherController.setupAimCamera = function() end
+                knit.Controllers.SquadLauncherController.activateIndicator = function() end
+                knit.Controllers.SquadLauncherController.mountLauncherUI = function() end
+                knit.Controllers.SquadLauncherController.constructor = function() end
+                knit.Controllers.SquadLauncherController.exitLauncherEffect = function() end
+                knit.Controllers.SquadLauncherController.exitLauncher = function() end
+                knit.Controllers.SquadLauncherController.enterLauncherEffect = function() end
+                lplr:GetPropertyChangedSignal("CameraMinZoomDistance"):Connect(function()
+                    lplr.CameraMinZoomDistance = 0
+                    lplr.CameraMaxZoomDistance = 128
+                end)
+            else
+                knit.Controllers.SquadLauncherController.enterLauncherEffect = oldcontroller
+            end
+        end
+    })
+    local Remotes = require(game:GetService("ReplicatedStorage").TS.remotes).default
+    local thingystop = false
+    ClientCrasher = GuiLibrary.ObjectsThatCanBeSaved.ExploitWindow.Api.CreateOptionsButton({
+        Name = "ClientCrasher",
+        Function = function(callback)
+            if callback then
+                if not anticrash.Enabled then
+                    anticrash.ToggleButton(false)
+                end
+                task.spawn(function()
+                    local rf = game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("node_modules"):WaitForChild("@rbxts"):WaitForChild("net"):WaitForChild("out"):WaitForChild("_NetManaged"):WaitForChild("RequestSquadLaunch")
+                    local oldNamecall
+                    oldNamecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
+                        if self == rf and getnamecallmethod() == "InvokeServer" and not checkcaller() then
+                            return nil
+                        end
+                        return oldNamecall(self, ...)
+                    end))
+                    repeat 
+                        thingystop = false
+                        task.spawn(function()
+                            for i = 1,30 do
+                                if thingystop then break end
+                                Remotes.Client:Get("RequestEnterSquadLauncher"):CallServer({
+                                    squadLauncher = game.Players.LocalPlayer.Character
+                                })
+
+                            end
+                        end)
+                        task.spawn(function()
+                            for i = 1,30 do
+                                if thingystop then break end
+                                Remotes.Client:Get("RequestExitSquadLauncher"):CallServer({
+                                    squadLauncher = game.Players.LocalPlayer.Character
+                                })
+                            end
+                        end)
+                        task.wait(0.25)
+                        game.Players.LocalPlayer.Character:SetAttribute("Transparency", 0)
+                        game.Players.LocalPlayer.Character:SetAttribute("Locked", false)
+                    until (not ClientCrasher.Enabled)
+                end)
+            else
+                thingystop = true
+            end
+        end
+    })
+end)
+
+run(function()
+	local disabler = {}
+	local old
+	local clone
+	local createclone = function()
+		if not isAlive() then
+			repeat task.wait() until isAlive()
+		end
+		lplr.Character.Parent = game
+		lplr.Character.HumanoidRootPart.Archivable = true
+		old = lplr.Character.HumanoidRootPart 
+		old.Anchored = false
+		clone = old:Clone()
+		clone.Parent = lplr.Character
+		old.Parent = workspace
+		lplr.Character.PrimaryPart = clone
+		entityLibrary.character.HumanoidRootPart = clone
+		lplr.Character.Parent = workspace
+		old.Transparency = 0
+	end
+	local destroyclone = function()
+		old.CFrame = clone.CFrame
+		old.Transparency = 1
+		lplr.Character.Parent = game
+		old.Parent = lplr.Character
+		clone.Parent = workspace
+		lplr.Character.PrimaryPart = old
+		lplr.Character.Parent = workspace
+		entityLibrary.character.HumanoidRootPart = old
+		clone:Remove()
+		clone = {} 
+		old = {} 
+	end
+	disabler = vape.windows.exploit.CreateOptionsButton({
+		Name = 'Disabler',
+		Function = function(call)
+			if call then
+				if store.matchState == 0 then
+					repeat task.wait(1) until store.matchState ~= 0
+				end
+				lplr.Character:SetAttribute("Transparency", 1)
+				createclone()
+				table.insert(disabler.Connections, runservice.Stepped:Connect(function()
+					if old then	
+						old.Velocity = Vector3.zero
+						bedwars.Client:Get('RequestSquadLaunch'):SendToServer({
+							target = clone.Position,
+							player = lplr
+						})
+						old.CFrame = clone.CFrame
+					end
+				end))
+				repeat	
+					lplr.Character:SetAttribute("Transparency", 1)
+					lplr.Character:SetAttribute("Locked", false)
+					bedwars.Client:Get("RequestEnterSquadLauncher"):SendToServer({
+						squadLauncher = game.Players.LocalPlayer.Character
+					})
+					bedwars.Client:Get("RequestExitSquadLauncher"):SendToServer({
+						squadLauncher = game.Players.LocalPlayer.Character
+					})
+					task.wait(0)
+				until (not disabler.Enabled)
+			else
+				destroyclone()
+			end
+		end
+	})
+end)
