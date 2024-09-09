@@ -11817,7 +11817,7 @@ run(function()
 		clone = {} 
 		old = {} 
 	end
-	disabler = exploit.CreateOptionsButton({
+	disabler = exploit.Api.CreateOptionsButton({
 		Name = 'Disabler',
 		Function = function(call)
 			if call then
