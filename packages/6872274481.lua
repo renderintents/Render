@@ -11817,7 +11817,7 @@ run(function()
 		clone = {} 
 		old = {} 
 	end
-	disabler = vape.windows.exploit.CreateOptionsButton({
+	disabler = exploit.CreateOptionsButton({
 		Name = 'Disabler',
 		Function = function(call)
 			if call then
