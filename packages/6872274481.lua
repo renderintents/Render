@@ -997,7 +997,7 @@ local function CreateAutoHotbarGUI(children2, argstable)
 	ItemListFramePickerGrid.CellSize = UDim2.new(0, 51, 0, 52)
 	ItemListFramePickerGrid.Parent = ItemListFramePicker
 	ItemListFramePickerGrid:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
-		ItemListFramePicker.CanvasSize = UDim2.new(0, 0, 0, ItemListFramePickerGrid.AbsoluteContentSize.Y * (1 / GuiLibrary['MainRescale'].Scale))
+		ItemListFramePicker.CanvasSize = UDim2.new(0, 0, 0, ItemListFramePickerGrid.AbsoluteContentSize.Y * (1 / vape['MainRescale'].Scale))
 	end)
 	local ItemListcorner = Instance.new('UICorner')
 	ItemListcorner.CornerRadius = UDim.new(0, 5)
@@ -1169,7 +1169,7 @@ local function CreateAutoHotbarGUI(children2, argstable)
 		for i2,v2 in (buttonapi['Hotbars']) do
 			createHotbarButton(i2, v2['Items'])
 		end
-		GuiLibrary['Settings'][children2.Name..argstable['Name']..'ItemList'] = {['Type'] = 'ItemList', ['Items'] = buttonapi['Hotbars'], ['CurrentlySelected'] = buttonapi['CurrentlySelected']}
+		vape['Settings'][children2.Name..argstable['Name']..'ItemList'] = {['Type'] = 'ItemList', ['Items'] = buttonapi['Hotbars'], ['CurrentlySelected'] = buttonapi['CurrentlySelected']}
 	end
 	buttonapi['RefreshList'] = refreshList
 
@@ -1177,7 +1177,7 @@ local function CreateAutoHotbarGUI(children2, argstable)
 		createHotbarButton()
 	end)
 
-	GuiLibrary['Settings'][children2.Name..argstable['Name']..'ItemList'] = {['Type'] = 'ItemList', ['Items'] = buttonapi['Hotbars'], ['CurrentlySelected'] = buttonapi['CurrentlySelected']}
+	vape['Settings'][children2.Name..argstable['Name']..'ItemList'] = {['Type'] = 'ItemList', ['Items'] = buttonapi['Hotbars'], ['CurrentlySelected'] = buttonapi['CurrentlySelected']}
 	vape.ObjectsThatCanBeSaved[children2.Name..argstable['Name']..'ItemList'] = {['Type'] = 'ItemList', ['Items'] = buttonapi['Hotbars'], ['Api'] = buttonapi, Object = buttontext}
 
 	return buttonapi
@@ -11675,7 +11675,7 @@ end);
 run(function()
     local godmode = {}
     local Remotes = require(game:GetService("ReplicatedStorage").TS.remotes).default
-    godmode = GuiLibrary.ObjectsThatCanBeSaved.ExploitWindow.Api.CreateOptionsButton({
+    godmode = vape.ObjectsThatCanBeSaved.ExploitWindow.Api.CreateOptionsButton({
         Name = "Godmode",
         Function = function(callback)
             if callback then    
@@ -11715,7 +11715,7 @@ run(function()
     local anticrash = {}
     local knit = debug.getupvalue(require(game.Players.LocalPlayer.PlayerScripts.TS.knit).setup, 6)
     local oldcontroller = knit.Controllers.SquadLauncherController.enterLauncherEffect
-    anticrash = GuiLibrary.ObjectsThatCanBeSaved.UtilityWindow.Api.CreateOptionsButton({
+    anticrash = vape.ObjectsThatCanBeSaved.UtilityWindow.Api.CreateOptionsButton({
         Name = "AntiCrash",
         Function = function(callback)
             if callback then
@@ -11737,7 +11737,7 @@ run(function()
     })
     local Remotes = require(game:GetService("ReplicatedStorage").TS.remotes).default
     local thingystop = false
-    ClientCrasher = GuiLibrary.ObjectsThatCanBeSaved.ExploitWindow.Api.CreateOptionsButton({
+    ClientCrasher = vape.ObjectsThatCanBeSaved.ExploitWindow.Api.CreateOptionsButton({
         Name = "ClientCrasher",
         Function = function(callback)
             if callback then
