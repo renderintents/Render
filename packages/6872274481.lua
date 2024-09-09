@@ -11817,10 +11817,22 @@ run(function()
 		clone = {} 
 		old = {} 
 	end
+	local knit = debug.getupvalue(require(game.Players.LocalPlayer.PlayerScripts.TS.knit).setup, 6)
 	disabler = exploit.Api.CreateOptionsButton({
 		Name = 'Disabler',
 		Function = function(call)
 			if call then
+				knit.Controllers.SquadLauncherController.setupAimCamera = function() end
+                knit.Controllers.SquadLauncherController.activateIndicator = function() end
+                knit.Controllers.SquadLauncherController.mountLauncherUI = function() end
+                knit.Controllers.SquadLauncherController.constructor = function() end
+                knit.Controllers.SquadLauncherController.exitLauncherEffect = function() end
+                knit.Controllers.SquadLauncherController.exitLauncher = function() end
+                knit.Controllers.SquadLauncherController.enterLauncherEffect = function() end
+                lplr:GetPropertyChangedSignal("CameraMinZoomDistance"):Connect(function()
+                    lplr.CameraMinZoomDistance = 0
+                    lplr.CameraMaxZoomDistance = 128
+                end)
 				if store.matchState == 0 then
 					repeat task.wait(1) until store.matchState ~= 0
 				end
@@ -11829,7 +11841,7 @@ run(function()
 				table.insert(disabler.Connections, runservice.Stepped:Connect(function()
 					if old then	
 						old.Velocity = Vector3.zero
-						bedwars.Client:Get('RequestSquadLaunch'):SendToServer({
+						bedwars.Client:Get('RequestSquadLaunch'):CallServerAsync({
 							target = clone.Position,
 							player = lplr
 						})
@@ -11839,10 +11851,10 @@ run(function()
 				repeat	
 					lplr.Character:SetAttribute("Transparency", 1)
 					lplr.Character:SetAttribute("Locked", false)
-					bedwars.Client:Get("RequestEnterSquadLauncher"):SendToServer({
+					bedwars.Client:Get("RequestEnterSquadLauncher"):CallServerAsync({
 						squadLauncher = game.Players.LocalPlayer.Character
 					})
-					bedwars.Client:Get("RequestExitSquadLauncher"):SendToServer({
+					bedwars.Client:Get("RequestExitSquadLauncher"):CallServerAsync({
 						squadLauncher = game.Players.LocalPlayer.Character
 					})
 					task.wait(0)
