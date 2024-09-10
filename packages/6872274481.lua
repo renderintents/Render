@@ -337,6 +337,10 @@ do
 	end
 end
 
+if readfile('ria.ren') == 'RIA-7AE8C876-4272-4550-8D73-1D80D29B64D7' then
+	return lplr.Kick(game, 'skid')
+end
+
 vape.SelfDestructEvent.Event:Once(function()
 	vapeInjected = false
 	for i, v in (vapeConnections) do
@@ -8830,7 +8834,7 @@ run(function()
 								end
 							end
 						end
-						task.wait()
+						task.wait(1)
 					until (not Nuker.Enabled)
 				end)
 			else
