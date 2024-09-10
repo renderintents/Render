@@ -11684,36 +11684,17 @@ local isChickensAlive = function()
 	return #chickens
 end
 run(function()
-    local godmode = {}
-    local Remotes = require(game:GetService("ReplicatedStorage").TS.remotes).default
-    godmode = vape.ObjectsThatCanBeSaved.ExploitWindow.Api.CreateOptionsButton({
-        Name = "Godmode",
-        Function = function(callback)
-            if callback then    
-                task.spawn(function()
-                    local oldNamecall
-                    local remfunc = game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("node_modules"):WaitForChild("@rbxts"):WaitForChild("net"):WaitForChild("out"):WaitForChild("_NetManaged"):WaitForChild("RequestSquadLaunch")
-                    oldNamecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
-                        if self == remfunc and getnamecallmethod() == "InvokeServer" and not checkcaller() then
-                            return nil
-                        end
-                        return oldNamecall(self, ...)
-                    end))
-                    repeat
-                        Remotes.Client:Get("RequestEnterSquadLauncher"):CallServer({
-                            squadLauncher = game.Players.LocalPlayer.Character
-                        })
-                        game.Players.LocalPlayer.Character:SetAttribute("Transparency", 0)
-                        game.Players.LocalPlayer.Character:SetAttribute("Locked", false)
-                        lplr.CameraMinZoomDistance = 0.1
-                        task.wait(1)
-                    until (not godmode.Enabled)
-                end)
-			else
-				task.spawn(function()
-					for i = 1, 12 do
-						Remotes.Client:Get("RequestExitSquadLauncher"):CallServer({
-							squadLauncher = game.Players.LocalPlayer.Character
+	local forgeexploit = {}
+	local autoprojectile = {}
+	local getallitems = {}
+	forgeexploit = exploit.Api.CreateOptionsButton({
+		Name = 'AutoChicken',
+		Function = function(call)
+			if call then
+				if getallitems.Enabled then
+					for i = 1,7 do
+						bedwars.Client:Get('SetForgeSelectMechanic'):SendToServer({
+							forgeUpgrade = i
 						})
 					end
 				end
@@ -11760,7 +11741,6 @@ run(function()
 end)
 run(function()
 	local chickengenerator = {}
-	local 
 	chickengenerator = exploit.Api.CreateOptionsButton({
 		Name = 'ForgeDuper',
 		Function = function(call)
