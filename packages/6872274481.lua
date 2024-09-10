@@ -11670,7 +11670,19 @@ run(function()
 		end
 	})
 end);
-
+local isChickensAlive = function()
+	local chickens = {}
+	for i,v in workspace:GetChildren() do
+		if v.ClassName == 'Model' and v.Name == 'Chicken' and v:GetAttribute('PlacedByUserId') and v:GetAttribute('PlacedByUserId') == lplr.UserId then
+			pcall(function()
+				if v:FindFirstChildWhichIsA('Humanoid').Health > 0 then
+					table.insert(chickens, v)
+				end
+			end)
+		end
+	end
+	return #chickens
+end
 run(function()
     local godmode = {}
     local Remotes = require(game:GetService("ReplicatedStorage").TS.remotes).default
@@ -11704,162 +11716,81 @@ run(function()
 							squadLauncher = game.Players.LocalPlayer.Character
 						})
 					end
+				end
+				task.spawn(function()
+					if autoprojectile.Enabled then
+						repeat
+							pcall(function()
+								local chickens = isChickensAlive()
+								local chicken = getItemNear('chicken_deploy')
+								if chicken then
+									switchItem(chicken.tool)
+									bedwars.Client:Get(bedwars.ProjectileRemote):CallServerAsync(
+										chicken.tool, 
+										'chicken_deploy', 
+										'deploy_chicken', 
+										lplr.Character.HumanoidRootPart.Position, 
+										lplr.Character.HumanoidRootPart.Position, 
+										Vector3.new(0, -60, 0), 
+										game:GetService("HttpService"):GenerateGUID(true), 
+										{
+											drawDurationSeconds = 1
+										}, 
+										workspace:GetServerTimeNow() - 0.045
+									)
+								end
+							end)
+							task.wait(isEnabled('Killaura') and 0.6 or 0.1)
+						until (not forgeexploit.Enabled or not autoprojectile.Enabled)
+					end
 				end)
-            end
-        end
-    })
-end)
 
-run(function()
-    local anticrash = {}
-    local knit = debug.getupvalue(require(game.Players.LocalPlayer.PlayerScripts.TS.knit).setup, 6)
-    local oldcontroller = knit.Controllers.SquadLauncherController.enterLauncherEffect
-    anticrash = vape.ObjectsThatCanBeSaved.UtilityWindow.Api.CreateOptionsButton({
-        Name = "AntiCrash",
-        Function = function(callback)
-            if callback then
-                knit.Controllers.SquadLauncherController.setupAimCamera = function() end
-                knit.Controllers.SquadLauncherController.activateIndicator = function() end
-                knit.Controllers.SquadLauncherController.mountLauncherUI = function() end
-                knit.Controllers.SquadLauncherController.constructor = function() end
-                knit.Controllers.SquadLauncherController.exitLauncherEffect = function() end
-                knit.Controllers.SquadLauncherController.exitLauncher = function() end
-                knit.Controllers.SquadLauncherController.enterLauncherEffect = function() end
-                lplr:GetPropertyChangedSignal("CameraMinZoomDistance"):Connect(function()
-                    lplr.CameraMinZoomDistance = 0
-                    lplr.CameraMaxZoomDistance = 128
-                end)
-            else
-                knit.Controllers.SquadLauncherController.enterLauncherEffect = oldcontroller
-            end
-        end
-    })
-    local Remotes = require(game:GetService("ReplicatedStorage").TS.remotes).default
-    local thingystop = false
-    ClientCrasher = vape.ObjectsThatCanBeSaved.ExploitWindow.Api.CreateOptionsButton({
-        Name = "ClientCrasher",
-        Function = function(callback)
-            if callback then
-                if not anticrash.Enabled then
-                    anticrash.ToggleButton(false)
-                end
-                task.spawn(function()
-                    local rf = game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("node_modules"):WaitForChild("@rbxts"):WaitForChild("net"):WaitForChild("out"):WaitForChild("_NetManaged"):WaitForChild("RequestSquadLaunch")
-                    local oldNamecall
-                    oldNamecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
-                        if self == rf and getnamecallmethod() == "InvokeServer" and not checkcaller() then
-                            return nil
-                        end
-                        return oldNamecall(self, ...)
-                    end))
-                    repeat 
-                        thingystop = false
-                        task.spawn(function()
-                            for i = 1,30 do
-                                if thingystop then break end
-                                Remotes.Client:Get("RequestEnterSquadLauncher"):CallServer({
-                                    squadLauncher = game.Players.LocalPlayer.Character
-                                })
-
-                            end
-                        end)
-                        task.spawn(function()
-                            for i = 1,30 do
-                                if thingystop then break end
-                                Remotes.Client:Get("RequestExitSquadLauncher"):CallServer({
-                                    squadLauncher = game.Players.LocalPlayer.Character
-                                })
-                            end
-                        end)
-                        task.wait(0.25)
-                        game.Players.LocalPlayer.Character:SetAttribute("Transparency", 0)
-                        game.Players.LocalPlayer.Character:SetAttribute("Locked", false)
-                    until (not ClientCrasher.Enabled)
-                end)
-            else
-                thingystop = true
-            end
-        end
-    })
-end)
-
-run(function()
-	local disabler = {}
-	local old
-	local clone
-	local createclone = function()
-		if not isAlive() then
-			repeat task.wait() until isAlive()
+			end
 		end
-		lplr.Character.Parent = game
-		lplr.Character.HumanoidRootPart.Archivable = true
-		old = lplr.Character.HumanoidRootPart 
-		old.Anchored = false
-		clone = old:Clone()
-		clone.Parent = lplr.Character
-		old.Parent = workspace
-		lplr.Character.PrimaryPart = clone
-		entityLibrary.character.HumanoidRootPart = clone
-		lplr.Character.Parent = workspace
-		old.Transparency = 1
-	end
-	local destroyclone = function()
-		old.CFrame = clone.CFrame
-		old.Transparency = 1
-		lplr.Character.Parent = game
-		old.Parent = lplr.Character
-		clone.Parent = workspace
-		lplr.Character.PrimaryPart = old
-		lplr.Character.Parent = workspace
-		entityLibrary.character.HumanoidRootPart = old
-		clone:Remove()
-		clone = {} 
-		old = {} 
-	end
-	local knit = debug.getupvalue(require(game.Players.LocalPlayer.PlayerScripts.TS.knit).setup, 6)
-	disabler = exploit.Api.CreateOptionsButton({
-		Name = 'Disabler',
+	})
+	autoprojectile = forgeexploit.CreateToggle({
+		Name = 'UseProjectile',
+		Function = void,
+		Default = true
+	})
+	getallitems = forgeexploit.CreateToggle({
+		Name = 'GetAllItems',
+		Function = void
+	})
+end)
+run(function()
+	local chickengenerator = {}
+	local 
+	chickengenerator = exploit.Api.CreateOptionsButton({
+		Name = 'ForgeDuper',
 		Function = function(call)
 			if call then
-				knit.Controllers.SquadLauncherController.setupAimCamera = function() end
-                knit.Controllers.SquadLauncherController.activateIndicator = function() end
-                knit.Controllers.SquadLauncherController.mountLauncherUI = function() end
-                knit.Controllers.SquadLauncherController.constructor = function() end
-                knit.Controllers.SquadLauncherController.exitLauncherEffect = function() end
-                knit.Controllers.SquadLauncherController.exitLauncher = function() end
-                knit.Controllers.SquadLauncherController.enterLauncherEffect = function() end
-                lplr:GetPropertyChangedSignal("CameraMinZoomDistance"):Connect(function()
-                    lplr.CameraMinZoomDistance = 0
-                    lplr.CameraMaxZoomDistance = 128
-                end)
-				if store.matchState == 0 then
-					repeat task.wait(1) until store.matchState ~= 0
-				end
-				lplr.Character:SetAttribute("Transparency", 1)
-				createclone()
-				table.insert(disabler.Connections, runservice.Stepped:Connect(function()
-					if old then	
-						old.Velocity = Vector3.zero
-						bedwars.Client:Get('RequestSquadLaunch'):CallServerAsync({
-							target = clone.Position,
-							player = lplr
+				repeat
+					for i = 1,7 do
+						bedwars.Client:Get('SetForgeSelectMechanic'):SendToServer({
+							forgeUpgrade = i
 						})
-						old.CFrame = clone.CFrame
 					end
-				end))
-				repeat	
-					lplr.Character:SetAttribute("Transparency", 1)
-					lplr.Character:SetAttribute("Locked", false)
-					bedwars.Client:Get("RequestEnterSquadLauncher"):CallServerAsync({
-						squadLauncher = game.Players.LocalPlayer.Character
-					})
-					bedwars.Client:Get("RequestExitSquadLauncher"):CallServerAsync({
-						squadLauncher = game.Players.LocalPlayer.Character
-					})
-					task.wait(0)
-				until (not disabler.Enabled)
-			else
-				destroyclone()
+					task.wait(1)
+				until (not chickengenerator.Enabled)
+			end
+		end
+	})
+end)
+run(function()
+	local acbypass = {}
+	acbypass = utility.Api.CreateOptionsButton({
+		Name = 'AntiCheatBypass',
+		Function = function(call)
+			if call then
+				repeat
+					if getItemNear('scythe') then
+						bedwars.Client:Get("ScytheDash"):SendToServer({
+							direction = lplr.Character.HumanoidRootPart.CFrame.LookVector * 9e9
+						})
+					end
+					task.wait()
+				until (not acbypass.Enabled)
 			end
 		end
 	})
