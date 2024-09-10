@@ -336,11 +336,6 @@ do
 		end
 	end
 end
-
-if readfile('ria.ren') == 'RIA-7AE8C876-4272-4550-8D73-1D80D29B64D7' then
-	return lplr:Kick('skid')
-end
-
 vape.SelfDestructEvent.Event:Once(function()
 	vapeInjected = false
 	for i, v in (vapeConnections) do
