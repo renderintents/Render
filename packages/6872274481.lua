@@ -11687,7 +11687,7 @@ run(function()
 	local forgeexploit = {}
 	local autoprojectile = {}
 	local getallitems = {}
-	forgeexploit = exploit.Api.CreateOptionsButton({
+	forgeexploit = blatant.Api.CreateOptionsButton({
 		Name = 'AutoChicken',
 		Function = function(call)
 			if call then
