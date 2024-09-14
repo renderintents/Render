@@ -882,6 +882,11 @@ run(function()
 		Function = function(callback)
 			if callback then
 				oldfov = camera.FieldOfView
+                table.insert(FieldOfView.Connections, runservice.RenderStepped:Connect(function()
+                    if fieldofviewnoshake.Enabled then
+                        require(maingame).csgo = CFrame.new()
+                    end
+                end))
 				if FieldOfViewZoom.Enabled then
 					task.spawn(function()
 						repeat
@@ -899,21 +904,7 @@ run(function()
                     camera.FieldOfView = FieldOfViewValue.Value
 				end))
 			else
-                local tween = tween:Create(camera, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {FieldOfView = oldfov})
-                task.spawn(function()
-                    repeat
-                        if not tween then break end
-                        camera.FieldOfView = FieldOfViewValue.Value
-                        task.wait(0)
-                    until (not tween)
-                end)
-                task.spawn(function()
-                    repeat task.wait() until not #FieldOfView.Connections == 0
-                    tween:Play()
-                    tween.Completed:Wait()
-                    tween = nil
-                end)
-               
+                camera.FieldOfView = FieldOfViewValue.Value
 			end
 		end
 	})
@@ -921,8 +912,14 @@ run(function()
 		Name = "FOV",
 		Min = 30,
 		Max = 120,
-		Function = function(val) end
+		Function = function(val) end,
+        Default = 120
 	})
+    fieldofviewnoshake = FieldOfView.CreateToggle({
+        Name = 'NoShake',
+        Function = void,
+        Default = true
+    })
 	FieldOfViewZoom = FieldOfView.CreateToggle({
 		Name = "Zoom",
 		Function = void,
