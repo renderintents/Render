@@ -3507,7 +3507,9 @@ run(function()
 										continue
 									end
 									bedwars.Client:Get('SummonerClawAttackRequest'):SendToServer({
-										direction = plr.RootPart.Position
+								                clientTime = tick(),
+										direction = localfacing,
+									        position = root.Position
 									})
 								end
 							end
