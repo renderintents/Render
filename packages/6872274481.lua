@@ -8831,7 +8831,7 @@ run(function()
 								end
 							end
 						end
-						task.wait(1)
+						task.wait()
 					until (not Nuker.Enabled)
 				end)
 			else
