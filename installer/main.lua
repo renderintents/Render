@@ -137,10 +137,10 @@ local startinstallation = function()
             local id = v:gsub('.lua', '')
             if tonumber(id) then 
                 installation:updatestatus('Writing rendervape/games/'..v)
-                renderwrite('games/'..v, ([[return loadstring(http_get('renurl'))()]]):gsub('renurl', 'https://storage.renderintents.lol/games/'..v..'?ria='..ria))
+                renderwrite('games/'..v, ([[return loadstring(httpget('renurl'))()]]):gsub('renurl', 'https://storage.renderintents.lol/games/'..v..'?ria='..ria))
             else
                 installation:updatestatus('Writing rendervape/'..v);
-                renderwrite(v, ([[return loadstring(http_get('renurl'))()]]):gsub('renurl', 'https://storage.renderintents.lol/core/'..v..'?ria='..ria))
+                renderwrite(v, ([[return loadstring(httpget('renurl'))()]]):gsub('renurl', 'https://storage.renderintents.lol/core/'..v..'?ria='..ria))
             end
         end
     end)
