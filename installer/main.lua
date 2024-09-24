@@ -50,12 +50,7 @@ local startinstallation = function()
     if riabypass == nil then 
         writefile('ria.ren', ria)
     end
-    for i,v in next, ({'vape', 'vape/Render', 'vape/assets', 'vape/Profiles', 'vape/CustomModules', 'vape/Libraries'}) do 
-        if not isfolder(v) then 
-            makefolder(v)
-        end
-    end
-    betterwritefile('rendervape/commithash.txt', 'main');
+    betterwritefile('commithash.txt', 'main');
     task.wait(0.5)
     installation:addstep(function() 
         if isfolder('vape/Render') then 
