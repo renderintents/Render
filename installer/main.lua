@@ -20,21 +20,32 @@ end
 
 local httpservice = cloneref(game.GetService(game, 'HttpService'));
 local oldautoinstall = renderautoinstall;
-local api = loadstring(getasync('https://storage.renderintents.lol/Installer/installerui.lua?ria='..ria))()
+local api = loadstring(getasync('https://storage.renderintents.lol/installer/installerui.lua?ria='..ria))()
 
 local creategradient = function(pos, color, pos2, color2)
     return ColorSequence.new({ColorSequenceKeypoint.new(pos, color), ColorSequenceKeypoint.new(pos2, color2)})
 end;
 
+local betterwritefile: (string, string) -> () = function(file, contents)
+    local folderstring: string = '';
+    for i: number, v: string in file:split('/') do 
+        if i ~= #file:split('/') then 
+            folderstring = `{folderstring}{v}/`;
+            makefolder(folderstring)
+        else 
+            writefile(file, contents)
+        end
+    end
+  end;
+  
+
 local renderwrite = function(file, data)
-    local directories = file:split('/')
-    local last
-    return writefile('vape/'..file, data)
+    return betterwritefile('rendervape/'..file, data)
 end;
 
 local startinstallation = function()
     local installation = api:install()
-    local profiles, assets, libraries = {}, {}, {}
+    local profiles, assets, renderlibraries, libraries = {}, {}, {}, {};
     local modules = {};
     if riabypass == nil then 
         writefile('ria.ren', ria)
@@ -44,11 +55,11 @@ local startinstallation = function()
             makefolder(v)
         end
     end
-    writefile('vape/commithash.txt', 'main');
+    betterwritefile('rendervape/commithash.txt', 'main');
     task.wait(0.5)
     installation:addstep(function() 
         if isfolder('vape/Render') then 
-            delfolder('vape/Render')
+            delfolder('vape')
         end
         installation:updatedesc('Installation shouldn\'t take too long, hang tight!')
     end)
@@ -57,30 +68,54 @@ local startinstallation = function()
         installation:updatetitle('Fetching Profiles from Github')
         installation:updatestatus('These are for the settings.')
         local success, response = pcall(function()
-            return httpservice:JSONDecode(getasync('https://storage.renderintents.lol/lib/settings?iterate=true'))
+            return httpservice:JSONDecode(getasync('https://storage.renderintents.lol/configuration?iterate=true'))
         end)
         assert(typeof(response.result) == 'table' and response.success, 'Failed to fetch profile files')
         for i,v in next, response.result do
-            table.insert(profiles, v) 
+            if v:find('vapeprofiles') then 
+                table.insert(profiles, v) 
+            end
         end
-    end)
+    end);
+    installation:addstep(function()
+        installation:updatetitle('Fetching Core Files')
+        installation:updatestatus('These are for render to work properly.')
+        local success, response = pcall(function()
+            return httpservice:JSONDecode(getasync('https://storage.renderintents.lol/core?iterate=true'))
+        end)
+        assert(typeof(response.result) == 'table' and response.success, 'Failed to fetch core files')
+        for i,v in next, response.result do
+            table.insert(modules, v) 
+        end
+    end);
     installation:addstep(function()
         installation:updatetitle('Fetching Custom Modules')
         installation:updatestatus('These are for the features.')
         local success, response = pcall(function()
-            return httpservice:JSONDecode(getasync('https://storage.renderintents.lol/packages?iterate=true'))
+            return httpservice:JSONDecode(getasync('https://storage.renderintents.lol/games?iterate=true'))
         end)
         assert(typeof(response.result) == 'table' and response.success, 'Failed to fetch custom module files')
         for i,v in next, response.result do
             table.insert(modules, v) 
         end
-    end)
+    end);
     installation:addstep(function()
-        installation:updatetitle('Fetching assets from Github')
+        installation:updatetitle('Fetching Render Libraries')
+        installation:updatestatus('These are for render to work properly.')
+        local success, response = pcall(function()
+            return httpservice:JSONDecode(getasync('https://storage.renderintents.lol/libraries?iterate=true'))
+        end)
+        assert(typeof(response.result) == 'table' and response.success, 'Failed to fetch custom module files')
+        for i,v in next, response.result do
+            table.insert(renderlibraries, v) 
+        end
+    end);
+    installation:addstep(function()
+        installation:updatetitle('Fetching assets')
         installation:updatestatus('These are for the images.')
         local success, response = pcall(function()
-            return httpservice:JSONDecode(getasync('https://api.github.com/repos/7GrandDadPGN/VapeV4ForRoblox/contents/assets'))
-        end)
+            return httpservice:JSONDecode(getasync('https://storage.renderintents.lol/assets?iterate=true')).result;
+        end);
         assert(typeof(response) == 'table', 'Failed to fetch asset files')
         for i,v in next, response do
             if v.name then 
@@ -106,50 +141,44 @@ local startinstallation = function()
         for i,v in next, modules do 
             local id = v:gsub('.lua', '')
             if tonumber(id) then 
-                installation:updatestatus('Writing vape/CustomModules/'..v)
-                renderwrite('CustomModules/'..v, ([[return loadstring(http_get('renurl'))()]]):gsub('renurl', 'https://storage.renderintents.lol/packages/'..v..'?ria='..ria))
+                installation:updatestatus('Writing rendervape/games/'..v)
+                renderwrite('games/'..v, ([[return loadstring(http_get('renurl'))()]]):gsub('renurl', 'https://storage.renderintents.lol/games/'..v..'?ria='..ria))
             else
-                installation:updatestatus('Writing vape/CustomModules/'..v);
-                if v == 'loader.lua' then 
-                    renderwrite(v, ([[return loadstring(game:HttpGet('renurl'))()]]):gsub('renurl', 'https://storage.renderintents.lol/packages/'..v..'?ria='..ria));
-                    continue
-                end;
-                renderwrite(v, ([[return loadstring(http_get('renurl'))()]]):gsub('renurl', 'https://storage.renderintents.lol/packages/'..v..'?ria='..ria))
+                installation:updatestatus('Writing rendervape/'..v);
+                renderwrite(v, ([[return loadstring(http_get('renurl'))()]]):gsub('renurl', 'https://storage.renderintents.lol/core/'..v..'?ria='..ria))
             end
         end
     end)
     installation:addstep(function() 
         installation:updatetitle('Downloading Libraries')
         installation:updatedesc('These are required for render to work properly.')
-        makefolder('vape/Render');
-        makefolder('vape/Render/lib');
-        for i,v in ({'utils.lua', 'solarapoop.lua'}) do 
-            installation:updatestatus('Writing vape/Render/lib/'..v)
-            writefile('vape/Render/lib/'..v, getasync('https://storage.renderintents.lol/lib/'..v..'?ria='..ria))
+        for i,v in renderlibraries do 
+            installation:updatestatus('Writing rendervape/libraries/'..v)
+            renderwrite('libraries/'..v, getasync('https://storage.renderintents.lol/libraries/'..v..'?ria='..ria))
         end;
     end);
     installation:addstep(function()
         installation:updatetitle('Downloading default settings')
         for i,v in next, profiles do 
-            installation:updatestatus('Writing vape/Profiles/'..v)
-            renderwrite('Profiles/'..v, getasync('https://storage.renderintents.lol/lib/settings/'..v..'?ria='..ria))
+            installation:updatestatus('Writing rendervape/configuration/'..v)
+            renderwrite('configuration/'..v, getasync('https://storage.renderintents.lol/configuration/'..v..'?ria='..ria))
         end
     end)
-  --[[  installation:addstep(function()
+    installation:addstep(function()
         if cheatenginetrash then 
             return 
         end;
         installation:updatetitle('Downloading assets')
         for i,v in next, assets do 
             installation:updatestatus('Writing vape/assets/'..v)
-            renderwrite('assets/'..v, getasync('https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/assets/'..v))
+            renderwrite('assets/'..v, getasync('https://storage.renderintents.lol/assets/'..v..'?ria='..ria))
         end
-    end)]]
+    end)
     installation:addstep(function()
         installation:updatetitle('Downloading Libraries')
         for i,v in next, libraries do 
             installation:updatestatus('Writing vape/Libraries/'..v)
-            renderwrite('Libraries/'..v, getasync('https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/Libraries/'..v))
+            renderwrite('libraries/'..v, getasync('https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/Libraries/'..v))
         end
     end)
     installation:start()
