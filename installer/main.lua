@@ -134,13 +134,17 @@ local startinstallation = function()
     installation:addstep(function()
         installation:updatetitle('Downloading Custom Features')
         for i,v in next, modules do 
+            if v == 'boot.lua' then 
+                renderwrite('core/'..v, ([[return loadstring(game:HttpGet('renurl'))()]]):gsub('renurl', 'https://storage.renderintents.lol/core/'..v..'?ria='..ria));
+                continue;
+            end;
             local id = v:gsub('.lua', '')
             if tonumber(id) then 
                 installation:updatestatus('Writing rendervape/games/'..v)
-                renderwrite('games/'..v, ([[return loadstring(httpget('renurl'))()]]):gsub('renurl', 'https://storage.renderintents.lol/games/'..v..'?ria='..ria))
+                renderwrite('games/'..v, ([[return loadstring(httprequest('renurl'))()]]):gsub('renurl', 'https://storage.renderintents.lol/games/'..v..'?ria='..ria))
             else
-                installation:updatestatus('Writing rendervape/'..v);
-                renderwrite(v, ([[return loadstring(httpget('renurl'))()]]):gsub('renurl', 'https://storage.renderintents.lol/core/'..v..'?ria='..ria))
+                installation:updatestatus('Writing rendervape/core/'..v);
+                renderwrite(`core/{v}`, ([[return loadstring(httprequest('renurl'))()]]):gsub('renurl', 'https://storage.renderintents.lol/core/'..v..'?ria='..ria))
             end
         end
     end)

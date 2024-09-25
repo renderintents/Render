@@ -1909,7 +1909,7 @@ local function customload(data, file)
 		task.spawn(error, "Render - Failed to load "..file..".lua | "..err);
 		GuiLibrary:notify({
 			title = 'Initiation Failure',
-			text = `Intitiation Exception: {err}`,
+			text = `Intitiation Exception ({file}): {err}`,
 			duration = 20,
 			color = Color3.fromRGB(255, 0, 0)
 		})
@@ -1936,6 +1936,7 @@ local function initiaterender()
 				return isfile("rendervape/games/"..game.PlaceId..".lua") and readfile("rendervape/games/"..game.PlaceId..".lua") or game:HttpGet("https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/CustomModules/"..game.PlaceId..".lua") 
 			end)
 			if success and response ~= "404: Not Found" then 
+				warn(response)
 				customload(response, game.PlaceId)
 				if not isfile("rendervape/games/"..game.PlaceId..".lua") then 
 					pcall(writefile, "rendervape/games/"..game.PlaceId..".lua", response)
