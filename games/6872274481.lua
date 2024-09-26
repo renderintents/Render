@@ -11552,7 +11552,7 @@ run(function()
 	local damagehighlightvisuals = {};
 	local highlightcolor = newcolor();
 	local highlightinvis = {Value = 4};
-	local highlightanim = {};
+	local highlightanim = {Enabled = true};
 	damagehighlightvisuals = visual.Api.CreateOptionsButton({
 		Name = 'HighlightVisuals',
 		HoverText = 'Changes the color of the damage highlight.',
