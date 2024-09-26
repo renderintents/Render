@@ -10811,7 +10811,7 @@ run(function()
 		pcall(function() invisrenderstep:Disconnect() end);
 		for i,v in lplr.Character:GetDescendants() do 
 			pcall(function()
-				if v.CanCollide and v ~= lplr.Character.HumanoidRootPart then 
+				if v.CanCollide and v ~= lplr.Character.PrimaryPart then 
 					v.CanCollide = false;
 					table.insert(invisbaseparts, v);
 				end
@@ -10877,36 +10877,6 @@ run(function()
 	invisrootcolor = invis.CreateColorSlider({
 		Name = 'Root Color',
 		Function = void
-	})
-end)
-
-run(function()
-	local bdautowin = {};
-	bdautowin = exploit.Api.CreateOptionsButton({
-		Name = 'BridgeDuelsExploit',
-		HoverText = 'Automatically wins without you needing\nto do anything.', 
-		Function = function(calling)
-			if calling then 
-				repeat 
-					if isAlive(lplr, true) then 
-						for i = 1, 2 do 
-							for i2, v in collection:GetTagged(`touchdownZone:{i}`) do 
-								local touch = v:FindFirstChildOfClass('TouchTransmitter');
-								if touch then 
-									if firetouchinterest then 
-										firetouchinterest(lplr.Character.PrimaryPart, v, 1);
-									else 
-										lplr.Character.PrimaryPart.CFrame = v.CFrame;
-										task.wait(0.1);
-									end
-								end
-							end
-						end
-					end
-					task.wait()
-				until (not bdautowin.Enabled)
-			end
-		end
 	})
 end)
 
@@ -11552,19 +11522,16 @@ run(function()
 	local damagehighlightvisuals = {};
 	local highlightcolor = newcolor();
 	local highlightinvis = {Value = 4};
-	local highlightanim = {Enabled = true};
 	damagehighlightvisuals = visual.Api.CreateOptionsButton({
 		Name = 'HighlightVisuals',
 		HoverText = 'Changes the color of the damage highlight.',
 		Function = function(calling)
-			if calling then  
-				table.insert(damagehighlightvisuals.Connections, workspace.DescendantAdded:Connect(function(indicator: Highlight?)
+			if calling then 
+				table.insert(damagehighlightvisuals.Connections, workspace.DescendantAdded:Connect(function(indicator)
 					if indicator.Name == '_DamageHighlight_' and indicator.ClassName == 'Highlight' then 
-						if highlightanim.Enabled then 
-							tween:Create(indicator, TweenInfo.new(0.4), {FillTransparency = (0.1 * highlightinvis.Value)}):Play()
-						end;
 						repeat 
 							indicator.FillColor = Color3.fromHSV(highlightcolor.Hue, highlightcolor.Sat, highlightcolor.Value);
+							indicator.FillTransparency = (0.1 * highlightinvis.Value);
 							task.wait()
 						until (indicator.Parent == nil)
 					end;
