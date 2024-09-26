@@ -11548,20 +11548,23 @@ run(function()
 		DamageIndicatorStrokeColor.Object.Visible = false
 	end);
 
-	run(function()
-		local damagehighlightvisuals = {};
+run(function()
+	local damagehighlightvisuals = {};
 	local highlightcolor = newcolor();
-	local highlightinvis = {Value = 4}
+	local highlightinvis = {Value = 4};
+	local highlightanim = {};
 	damagehighlightvisuals = visual.Api.CreateOptionsButton({
 		Name = 'HighlightVisuals',
 		HoverText = 'Changes the color of the damage highlight.',
 		Function = function(calling)
-			if calling then 
-				table.insert(damagehighlightvisuals.Connections, workspace.DescendantAdded:Connect(function(indicator)
+			if calling then  
+				table.insert(damagehighlightvisuals.Connections, workspace.DescendantAdded:Connect(function(indicator: Highlight?)
 					if indicator.Name == '_DamageHighlight_' and indicator.ClassName == 'Highlight' then 
+						if highlightanim.Enabled then 
+							tween:Create(indicator, TweenInfo.new(0.4), {FillTransparency = (0.1 * highlightinvis.Value)}):Play()
+						end;
 						repeat 
 							indicator.FillColor = Color3.fromHSV(highlightcolor.Hue, highlightcolor.Sat, highlightcolor.Value);
-							indicator.FillTransparency = (0.1 * highlightinvis.Value);
 							task.wait()
 						until (indicator.Parent == nil)
 					end;
