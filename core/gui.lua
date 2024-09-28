@@ -85,7 +85,7 @@ type vapemodule = {
 
 
 if shared.VapeExecuted then
-	local VERSION = "4.10"..(shared.VapePrivate and " PRIVATE" or "").." "..readfile("rendervape/commithash.txt"):sub(1, 6)
+	local VERSION = "RENDER "..(getgenv().RenderIntents.Premium and " PREMIUM V3" or "V3")
 	local baseDirectory = (shared.VapePrivate and "vapeprivate/" or "rendervape/")
 	local vapeAssetTable = {
 		["rendervape/assets/AddItem.png"] = "rbxassetid://13350763121",
@@ -352,6 +352,12 @@ if shared.VapeExecuted then
 	legitgui.BackgroundTransparency = 1
 	legitgui.Visible = true
 	legitgui.Parent = scaledgui
+	local legitmodal = Instance.new("TextButton")
+	legitmodal.Size = UDim2.new(0, 0, 0, 0)
+	legitmodal.BorderSizePixel = 0
+	legitmodal.Text = ''
+	legitmodal.Modal = true
+	legitmodal.Parent = legitgui
 	local LegitModulesBigFrame = Instance.new("Frame")
 	LegitModulesBigFrame.Size = UDim2.new(1, 0, 1, 0)
 	LegitModulesBigFrame.Name = "LegitModules"
