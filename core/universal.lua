@@ -252,20 +252,11 @@ end
 local vapeAssetTable = {["rendervape/assets/VapeCape.png"] = "rbxassetid://13380453812", ["rendervape/assets/ArrowIndicator.png"] = "rbxassetid://13350766521"}
 local getcustomasset = getsynasset or getcustomasset or function(location) return vapeAssetTable[location] or "" end;
 local queueonteleport = syn and syn.queue_on_teleport or queue_on_teleport or function() end;
-local synapsev3 = syn and syn.toast_notification and "V3" or "";
 
 local worldtoscreenpoint = function(pos)
-	if synapsev3 == "V3" then
-		local scr = worldtoscreen({pos})
-		return scr[1] - Vector3.new(0, 36, 0), scr[1].Z > 0
-	end
 	return camera.WorldToScreenPoint(camera, pos)
 end
 local worldtoviewportpoint = function(pos)
-	if synapsev3 == "V3" then
-		local scr = worldtoscreen({pos})
-		return scr[1], scr[1].Z > 0
-	end
 	return camera.WorldToViewportPoint(camera, pos)
 end
 
@@ -967,6 +958,7 @@ do
 		end
 	end
 end
+getgenv().RunLoops = RunLoops
 
 rendervape.SelfDestructEvent.Event:Connect(function()
 	for i,v in renderconnections do 
@@ -1125,7 +1117,7 @@ run(function()
 	local SilentAimRaycastWhitelist = RaycastParams.new()
 	SilentAimRaycastWhitelist.FilterType = Enum.RaycastFilterType.Whitelist
 	local SlientAimShotTick = tick()
-	local SilentAimFilterObject = synapsev3 == "V3" and AllFilter.new({NamecallFilter.new(SilentAimMethod.Value), CallerFilter.new(true)})
+	local SilentAimFilterObject
 	local SilentAimMethodUsed
 	local SilentAimHooked
 	local SilentAimCircle
@@ -1379,7 +1371,7 @@ run(function()
 		Name = "SilentAim",
 		Function = function(callback)
 			if callback then
-				SilentAimMethodUsed = "Normal"..synapsev3
+				SilentAimMethodUsed = "Normal"
 				task.spawn(function()
 					repeat
 						vapeTargetInfo.Targets.SilentAim = SlientAimShotTick >= tick() and SilentAimShot or nil
@@ -3721,7 +3713,7 @@ run(function()
 		Name = "ESP",
 		Function = function(callback)
 			if callback then
-				methodused = "Drawing"..ESPMethod.Value..synapsev3
+				methodused = "Drawing"..ESPMethod.Value
 				if espfuncs2[methodused] then
 					table.insert(ESP.Connections, entityLibrary.entityRemovedEvent:Connect(espfuncs2[methodused]))
 				end
@@ -4153,7 +4145,7 @@ run(function()
 		Name = "Tracers",
 		Function = function(callback)
 			if callback then
-				methodused = "Drawing"..synapsev3
+				methodused = "Drawing"
 				if tracersfuncs2[methodused] then
 					table.insert(Tracers.Connections, entityLibrary.entityRemovedEvent:Connect(tracersfuncs2[methodused]))
 				end
@@ -5189,7 +5181,8 @@ end)
 
 run(function()
 	local targetstrafe = {Enabled = false}
-	local targetstraferange = {Value = 0}
+	local targetstraferange1 = {Value = 14}
+	local targetstraferange2 = {Value = 5}
 	local oldmove
 	local controlmodule
 	targetstrafe = rendervape.ObjectsThatCanBeSaved.BlatantWindow.Api.CreateOptionsButton({
@@ -5203,7 +5196,7 @@ run(function()
 				oldmove = controlmodule.moveFunction
 				controlmodule.moveFunction = function(Self, vec, facecam, ...)
 					if entityLibrary.isAlive then
-						local plr = EntityNearPosition(targetstraferange.Value, {
+						local plr = EntityNearPosition(targetstraferange1.Value, {
 							WallCheck = false,
 							AimPart = "RootPart"
 						})
@@ -5211,7 +5204,8 @@ run(function()
 							facecam = false
 							--code stolen from roblox since the way I tried to make it apparently sucks
 							local c, s
-							local plrCFrame = CFrame.lookAt(entityLibrary.character.HumanoidRootPart.Position, Vector3.new(plr.RootPart.Position.X, 0, plr.RootPart.Position.Z))
+							--print(typeof(plr.RootPart.Position.X))
+							local plrCFrame = CFrame.lookAt(entityLibrary.character.HumanoidRootPart.Position, Vector3.new(plr.RootPart.Position.X + (targetstraferange2.Value + 3), 0, plr.RootPart.Position.Z))
 							local _, _, _, R00, R01, R02, _, _, R12, _, _, R22 = plrCFrame:GetComponents()
 							if R12 < 1 and R12 > -1 then
 								c = R22
@@ -5236,12 +5230,19 @@ run(function()
 			end
 		end
 	})
-	targetstraferange = targetstrafe.CreateSlider({
+	targetstraferange1 = targetstrafe.CreateSlider({
 		Name = "Range",
 		Function = void,
-		Min = 0,
+		Min = 1,
 		Max = 100,
 		Default = 14
+	})
+	targetstraferange2 = targetstrafe.CreateSlider({
+		Name = 'Range2',
+		Function = void,
+		Min = 0,
+		Max = 20,
+		Default = 5
 	})
 end)
 
@@ -6421,424 +6422,424 @@ run(function()
 			skyobj.SunAngularSize = 0
 			skyobj.MoonAngularSize = 0
 		end,
-	Pink = function()
-		skyobj.SkyboxBk = 'rbxassetid://271042516'
-		skyobj.SkyboxDn = 'rbxassetid://271077243'
-		skyobj.SkyboxFt = 'rbxassetid://271042556'
-		skyobj.SkyboxLf = 'rbxassetid://271042310'
-		skyobj.SkyboxRt = 'rbxassetid://271042467'
-		skyobj.SkyboxUp = 'rbxassetid://271077958'
-	end,
-	PurpleMountains = function() --
-		skyobj.SkyboxBk = 'rbxassetid://17901353811';
-		skyobj.SkyboxDn = 'rbxassetid://17901366771';
-		skyobj.SkyboxFt = 'rbxassetid://17901356262';
-		skyobj.SkyboxLf = 'rbxassetid://17901359687';
-		skyobj.SkyboxRt = 'rbxassetid://17901362326';
-		skyobj.SkyboxUp = 'rbxassetid://17901365106';
-		skyobj.SunAngularSize = 0;
-	end,
-	AestheticMountains = function()
-		skyobj.SkyboxBk = 'rbxassetid://15470198023';
-		skyobj.SkyboxDn = 'rbxassetid://15470151245';
-		skyobj.SkyboxFt = 'rbxassetid://15470200128';
-		skyobj.SkyboxLf = 'rbxassetid://15470202648';
-		skyobj.SkyboxRt = 'rbxassetid://15470204862';
-		skyobj.SkyboxUp = 'rbxassetid://15470207755';
-		skyobj.MoonAngularSize = 11;
-		skyobj.SunAngularSize = 21;
-	end,
-	OverPlanet = function()
-		skyobj.SkyboxBk = 'rbxassetid://165052268';
-		skyobj.SkyboxDn = 'rbxassetid://165052286';
-		skyobj.SkyboxFt = 'rbxassetid://165052328';
-		skyobj.SkyboxLf = 'rbxassetid://165052365';
-		skyobj.SkyboxRt = 'rbxassetid://165052306';
-		skyobj.SkyboxUp = 'rbxassetid://165052345';
-		skyobj.MoonAngularSize = 11;
-		skyobj.SunAngularSize = 21;
-		skyobj.StarCount = 3000;
-	end,
-	Beach = function()
-		skyobj.SkyboxBk = 'rbxassetid://173380597';
-		skyobj.SkyboxDn = 'rbxassetid://173380627';
-		skyobj.SkyboxFt = 'rbxassetid://173380642';
-		skyobj.SkyboxLf = 'rbxassetid://173380671';
-		skyobj.SkyboxRt = 'rbxassetid://173380774';
-		skyobj.SkyboxUp = 'rbxassetid://173380790';
-		skyobj.MoonAngularSize = 11;
-		skyobj.SunAngularSize = 21;
-	end,
-	RedNight = function()
-		skyobj.SkyboxBk = 'rbxassetid://401664839';
-		skyobj.SkyboxDn = 'rbxassetid://401664862';
-		skyobj.SkyboxFt = 'rbxassetid://401664960';
-		skyobj.SkyboxLf = 'rbxassetid://401664881';
-		skyobj.SkyboxRt = 'rbxassetid://401664901';
-		skyobj.SkyboxUp = 'rbxassetid://401664936';
-		skyobj.SunAngularSize = 0;
-	end,
-	GreenHaze = function()
-		skyobj.SkyboxBk = 'rbxassetid://160193404';
-		skyobj.SkyboxDn = 'rbxassetid://160193466';
-		skyobj.SkyboxFt = 'rbxassetid://160193461';
-		skyobj.SkyboxLf = 'rbxassetid://160193469';
-		skyobj.SkyboxRt = 'rbxassetid://160193463';
-		skyobj.SkyboxUp = 'rbxassetid://160193458';
-		skyobj.SunAngularSize = 0;
-	end,
-	Purple3 = function()
-		skyobj.SkyboxBk = 'rbxassetid://433274085'
-		skyobj.SkyboxDn = 'rbxassetid://433274194'
-		skyobj.SkyboxFt = 'rbxassetid://433274131'
-		skyobj.SkyboxLf = 'rbxassetid://433274370'
-		skyobj.SkyboxRt = 'rbxassetid://433274429'
-		skyobj.SkyboxUp = 'rbxassetid://433274285'
-	end,
-	DarkishPink = function()
-		skyobj.SkyboxBk = 'rbxassetid://570555736'
-		skyobj.SkyboxDn = 'rbxassetid://570555964'
-		skyobj.SkyboxFt = 'rbxassetid://570555800'
-		skyobj.SkyboxLf = 'rbxassetid://570555840'
-		skyobj.SkyboxRt = 'rbxassetid://570555882'
-		skyobj.SkyboxUp = 'rbxassetid://570555929'
-	end,
-	Space = function()
-		skyobj.MoonAngularSize = 0
-		skyobj.SunAngularSize = 0
-		skyobj.SkyboxBk = 'rbxassetid://166509999'
-		skyobj.SkyboxDn = 'rbxassetid://166510057'
-		skyobj.SkyboxFt = 'rbxassetid://166510116'
-		skyobj.SkyboxLf = 'rbxassetid://166510092'
-		skyobj.SkyboxRt = 'rbxassetid://166510131'
-		skyobj.SkyboxUp = 'rbxassetid://166510114'
-	end,
-	Space2 = function()
-		skyobj.SkyboxBk = 'rbxassetid://11844076072';
-		skyobj.SkyboxDn = 'rbxassetid://11844069700';
-		skyobj.SkyboxFt = 'rbxassetid://11844067209';
-		skyobj.SkyboxLf = 'rbxassetid://11844063543';
-		skyobj.SkyboxRt = 'rbxassetid://11844058446';
-		skyobj.SkyboxUp = 'rbxassetid://11844053742';
-		skyobj.MoonTextureId = 'rbxassetid://11844121592';
-		skyobj.SunAngularSize = 11;
-		skyobj.StarCount = 3e3;
-		skyobj.MoonAngularSize = 20;
-	end,
-	Galaxy3 = function()
-		skyobj.MoonAngularSize = 0
-		skyobj.SunAngularSize = 0
-		skyobj.SkyboxBk = 'rbxassetid://14543264135'
-		skyobj.SkyboxDn = 'rbxassetid://14543358958'
-		skyobj.SkyboxFt = 'rbxassetid://14543257810'
-		skyobj.SkyboxLf = 'rbxassetid://14543275895'
-		skyobj.SkyboxRt = 'rbxassetid://14543280890'
-		skyobj.SkyboxUp = 'rbxassetid://14543371676'
-	end,
-	NetherWorld = function()
-		skyobj.MoonAngularSize = 0
-		skyobj.SunAngularSize = 0
-		skyobj.SkyboxBk = 'rbxassetid://14365019002'
-		skyobj.SkyboxDn = 'rbxassetid://14365023350'
-		skyobj.SkyboxFt = 'rbxassetid://14365018399'
-		skyobj.SkyboxLf = 'rbxassetid://14365018705'
-		skyobj.SkyboxRt = 'rbxassetid://14365018143'
-		skyobj.SkyboxUp = 'rbxassetid://14365019327'
-	end,
-	Nebula = function()
-		skyobj.MoonAngularSize = 0
-		skyobj.SunAngularSize = 0
-		skyobj.SkyboxBk = 'rbxassetid://5260808177'
-		skyobj.SkyboxDn = 'rbxassetid://5260653793'
-		skyobj.SkyboxFt = 'rbxassetid://5260817288'
-		skyobj.SkyboxLf = 'rbxassetid://5260800833'
-		skyobj.SkyboxRt = 'rbxassetid://5260811073'
-		skyobj.SkyboxUp = 'rbxassetid://5260824661'
-	end,
-	PurpleSpace = function()
-		skyobj.MoonAngularSize = 0
-		skyobj.SunAngularSize = 0
-		skyobj.SkyboxBk = 'rbxassetid://15983968922'
-		skyobj.SkyboxDn = 'rbxassetid://15983966825'
-		skyobj.SkyboxFt = 'rbxassetid://15983965025'
-		skyobj.SkyboxLf = 'rbxassetid://15983967420'
-		skyobj.SkyboxRt = 'rbxassetid://15983966246'
-		skyobj.SkyboxUp = 'rbxassetid://15983964246'
-		skyobj.SkyboxFt = 'rbxassetid://5260817288'
-		skyobj.StarCount = 3000
-	end,
-	PurpleNight = function()
-		skyobj.MoonAngularSize = 0
-		skyobj.SunAngularSize = 0
-		skyobj.SkyboxBk = 'rbxassetid://5260808177'
-		skyobj.SkyboxDn = 'rbxassetid://5260653793'
-		skyobj.SkyboxFt = 'rbxassetid://5260817288'
-		skyobj.SkyboxLf = 'rbxassetid://5260800833'
-		skyobj.SkyboxRt = 'rbxassetid://5260800833'
-		skyobj.SkyboxUp = 'rbxassetid://5084576400'
-	end,
-	Aesthetic = function()
-		skyobj.MoonAngularSize = 0
-		skyobj.SunAngularSize = 0
-		skyobj.SkyboxBk = 'rbxassetid://1417494030'
-		skyobj.SkyboxDn = 'rbxassetid://1417494146'
-		skyobj.SkyboxFt = 'rbxassetid://1417494253'
-		skyobj.SkyboxLf = 'rbxassetid://1417494402'
-		skyobj.SkyboxRt = 'rbxassetid://1417494499'
-		skyobj.SkyboxUp = 'rbxassetid://1417494643'
-	end,
-	Aesthetic2 = function()
-		skyobj.MoonAngularSize = 0
-		skyobj.SunAngularSize = 0
-		skyobj.SkyboxBk = 'rbxassetid://600830446'
-		skyobj.SkyboxDn = 'rbxassetid://600831635'
-		skyobj.SkyboxFt = 'rbxassetid://600832720'
-		skyobj.SkyboxLf = 'rbxassetid://600886090'
-		skyobj.SkyboxRt = 'rbxassetid://600833862'
-		skyobj.SkyboxUp = 'rbxassetid://600835177'
-	end,
-	Pastel = function()
-		skyobj.SunAngularSize = 0
-		skyobj.MoonAngularSize = 0
-		skyobj.SkyboxBk = 'rbxassetid://2128458653'
-		skyobj.SkyboxDn = 'rbxassetid://2128462480'
-		skyobj.SkyboxFt = 'rbxassetid://2128458653'
-		skyobj.SkyboxLf = 'rbxassetid://2128462027'
-		skyobj.SkyboxRt = 'rbxassetid://2128462027'
-		skyobj.SkyboxUp = 'rbxassetid://2128462236'
-	end,
-	PurpleClouds = function()
-		skyobj.SkyboxBk = 'rbxassetid://570557514'
-		skyobj.SkyboxDn = 'rbxassetid://570557775'
-		skyobj.SkyboxFt = 'rbxassetid://570557559'
-		skyobj.SkyboxLf = 'rbxassetid://570557620'
-		skyobj.SkyboxRt = 'rbxassetid://570557672'
-		skyobj.SkyboxUp = 'rbxassetid://570557727'
-	end,
-	BetterSky = function()
-		if skyobj then
-		skyobj.SkyboxBk = 'rbxassetid://591058823'
-		skyobj.SkyboxDn = 'rbxassetid://591059876'
-		skyobj.SkyboxFt = 'rbxassetid://591058104'
-		skyobj.SkyboxLf = 'rbxassetid://591057861'
-		skyobj.SkyboxRt = 'rbxassetid://591057625'
-		skyobj.SkyboxUp = 'rbxassetid://591059642'
+		Pink = function()
+			skyobj.SkyboxBk = 'rbxassetid://271042516'
+			skyobj.SkyboxDn = 'rbxassetid://271077243'
+			skyobj.SkyboxFt = 'rbxassetid://271042556'
+			skyobj.SkyboxLf = 'rbxassetid://271042310'
+			skyobj.SkyboxRt = 'rbxassetid://271042467'
+			skyobj.SkyboxUp = 'rbxassetid://271077958'
+		end,
+		PurpleMountains = function() --
+			skyobj.SkyboxBk = 'rbxassetid://17901353811';
+			skyobj.SkyboxDn = 'rbxassetid://17901366771';
+			skyobj.SkyboxFt = 'rbxassetid://17901356262';
+			skyobj.SkyboxLf = 'rbxassetid://17901359687';
+			skyobj.SkyboxRt = 'rbxassetid://17901362326';
+			skyobj.SkyboxUp = 'rbxassetid://17901365106';
+			skyobj.SunAngularSize = 0;
+		end,
+		AestheticMountains = function()
+			skyobj.SkyboxBk = 'rbxassetid://15470198023';
+			skyobj.SkyboxDn = 'rbxassetid://15470151245';
+			skyobj.SkyboxFt = 'rbxassetid://15470200128';
+			skyobj.SkyboxLf = 'rbxassetid://15470202648';
+			skyobj.SkyboxRt = 'rbxassetid://15470204862';
+			skyobj.SkyboxUp = 'rbxassetid://15470207755';
+			skyobj.MoonAngularSize = 11;
+			skyobj.SunAngularSize = 21;
+		end,
+		OverPlanet = function()
+			skyobj.SkyboxBk = 'rbxassetid://165052268';
+			skyobj.SkyboxDn = 'rbxassetid://165052286';
+			skyobj.SkyboxFt = 'rbxassetid://165052328';
+			skyobj.SkyboxLf = 'rbxassetid://165052365';
+			skyobj.SkyboxRt = 'rbxassetid://165052306';
+			skyobj.SkyboxUp = 'rbxassetid://165052345';
+			skyobj.MoonAngularSize = 11;
+			skyobj.SunAngularSize = 21;
+			skyobj.StarCount = 3000;
+		end,
+		Beach = function()
+			skyobj.SkyboxBk = 'rbxassetid://173380597';
+			skyobj.SkyboxDn = 'rbxassetid://173380627';
+			skyobj.SkyboxFt = 'rbxassetid://173380642';
+			skyobj.SkyboxLf = 'rbxassetid://173380671';
+			skyobj.SkyboxRt = 'rbxassetid://173380774';
+			skyobj.SkyboxUp = 'rbxassetid://173380790';
+			skyobj.MoonAngularSize = 11;
+			skyobj.SunAngularSize = 21;
+		end,
+		RedNight = function()
+			skyobj.SkyboxBk = 'rbxassetid://401664839';
+			skyobj.SkyboxDn = 'rbxassetid://401664862';
+			skyobj.SkyboxFt = 'rbxassetid://401664960';
+			skyobj.SkyboxLf = 'rbxassetid://401664881';
+			skyobj.SkyboxRt = 'rbxassetid://401664901';
+			skyobj.SkyboxUp = 'rbxassetid://401664936';
+			skyobj.SunAngularSize = 0;
+		end,
+		GreenHaze = function()
+			skyobj.SkyboxBk = 'rbxassetid://160193404';
+			skyobj.SkyboxDn = 'rbxassetid://160193466';
+			skyobj.SkyboxFt = 'rbxassetid://160193461';
+			skyobj.SkyboxLf = 'rbxassetid://160193469';
+			skyobj.SkyboxRt = 'rbxassetid://160193463';
+			skyobj.SkyboxUp = 'rbxassetid://160193458';
+			skyobj.SunAngularSize = 0;
+		end,
+		Purple3 = function()
+			skyobj.SkyboxBk = 'rbxassetid://433274085'
+			skyobj.SkyboxDn = 'rbxassetid://433274194'
+			skyobj.SkyboxFt = 'rbxassetid://433274131'
+			skyobj.SkyboxLf = 'rbxassetid://433274370'
+			skyobj.SkyboxRt = 'rbxassetid://433274429'
+			skyobj.SkyboxUp = 'rbxassetid://433274285'
+		end,
+		DarkishPink = function()
+			skyobj.SkyboxBk = 'rbxassetid://570555736'
+			skyobj.SkyboxDn = 'rbxassetid://570555964'
+			skyobj.SkyboxFt = 'rbxassetid://570555800'
+			skyobj.SkyboxLf = 'rbxassetid://570555840'
+			skyobj.SkyboxRt = 'rbxassetid://570555882'
+			skyobj.SkyboxUp = 'rbxassetid://570555929'
+		end,
+		Space = function()
+			skyobj.MoonAngularSize = 0
+			skyobj.SunAngularSize = 0
+			skyobj.SkyboxBk = 'rbxassetid://166509999'
+			skyobj.SkyboxDn = 'rbxassetid://166510057'
+			skyobj.SkyboxFt = 'rbxassetid://166510116'
+			skyobj.SkyboxLf = 'rbxassetid://166510092'
+			skyobj.SkyboxRt = 'rbxassetid://166510131'
+			skyobj.SkyboxUp = 'rbxassetid://166510114'
+		end,
+		Space2 = function()
+			skyobj.SkyboxBk = 'rbxassetid://11844076072';
+			skyobj.SkyboxDn = 'rbxassetid://11844069700';
+			skyobj.SkyboxFt = 'rbxassetid://11844067209';
+			skyobj.SkyboxLf = 'rbxassetid://11844063543';
+			skyobj.SkyboxRt = 'rbxassetid://11844058446';
+			skyobj.SkyboxUp = 'rbxassetid://11844053742';
+			skyobj.MoonTextureId = 'rbxassetid://11844121592';
+			skyobj.SunAngularSize = 11;
+			skyobj.StarCount = 3e3;
+			skyobj.MoonAngularSize = 20;
+		end,
+		Galaxy3 = function()
+			skyobj.MoonAngularSize = 0
+			skyobj.SunAngularSize = 0
+			skyobj.SkyboxBk = 'rbxassetid://14543264135'
+			skyobj.SkyboxDn = 'rbxassetid://14543358958'
+			skyobj.SkyboxFt = 'rbxassetid://14543257810'
+			skyobj.SkyboxLf = 'rbxassetid://14543275895'
+			skyobj.SkyboxRt = 'rbxassetid://14543280890'
+			skyobj.SkyboxUp = 'rbxassetid://14543371676'
+		end,
+		NetherWorld = function()
+			skyobj.MoonAngularSize = 0
+			skyobj.SunAngularSize = 0
+			skyobj.SkyboxBk = 'rbxassetid://14365019002'
+			skyobj.SkyboxDn = 'rbxassetid://14365023350'
+			skyobj.SkyboxFt = 'rbxassetid://14365018399'
+			skyobj.SkyboxLf = 'rbxassetid://14365018705'
+			skyobj.SkyboxRt = 'rbxassetid://14365018143'
+			skyobj.SkyboxUp = 'rbxassetid://14365019327'
+		end,
+		Nebula = function()
+			skyobj.MoonAngularSize = 0
+			skyobj.SunAngularSize = 0
+			skyobj.SkyboxBk = 'rbxassetid://5260808177'
+			skyobj.SkyboxDn = 'rbxassetid://5260653793'
+			skyobj.SkyboxFt = 'rbxassetid://5260817288'
+			skyobj.SkyboxLf = 'rbxassetid://5260800833'
+			skyobj.SkyboxRt = 'rbxassetid://5260811073'
+			skyobj.SkyboxUp = 'rbxassetid://5260824661'
+		end,
+		PurpleSpace = function()
+			skyobj.MoonAngularSize = 0
+			skyobj.SunAngularSize = 0
+			skyobj.SkyboxBk = 'rbxassetid://15983968922'
+			skyobj.SkyboxDn = 'rbxassetid://15983966825'
+			skyobj.SkyboxFt = 'rbxassetid://15983965025'
+			skyobj.SkyboxLf = 'rbxassetid://15983967420'
+			skyobj.SkyboxRt = 'rbxassetid://15983966246'
+			skyobj.SkyboxUp = 'rbxassetid://15983964246'
+			skyobj.SkyboxFt = 'rbxassetid://5260817288'
+			skyobj.StarCount = 3000
+		end,
+		PurpleNight = function()
+			skyobj.MoonAngularSize = 0
+			skyobj.SunAngularSize = 0
+			skyobj.SkyboxBk = 'rbxassetid://5260808177'
+			skyobj.SkyboxDn = 'rbxassetid://5260653793'
+			skyobj.SkyboxFt = 'rbxassetid://5260817288'
+			skyobj.SkyboxLf = 'rbxassetid://5260800833'
+			skyobj.SkyboxRt = 'rbxassetid://5260800833'
+			skyobj.SkyboxUp = 'rbxassetid://5084576400'
+		end,
+		Aesthetic = function()
+			skyobj.MoonAngularSize = 0
+			skyobj.SunAngularSize = 0
+			skyobj.SkyboxBk = 'rbxassetid://1417494030'
+			skyobj.SkyboxDn = 'rbxassetid://1417494146'
+			skyobj.SkyboxFt = 'rbxassetid://1417494253'
+			skyobj.SkyboxLf = 'rbxassetid://1417494402'
+			skyobj.SkyboxRt = 'rbxassetid://1417494499'
+			skyobj.SkyboxUp = 'rbxassetid://1417494643'
+		end,
+		Aesthetic2 = function()
+			skyobj.MoonAngularSize = 0
+			skyobj.SunAngularSize = 0
+			skyobj.SkyboxBk = 'rbxassetid://600830446'
+			skyobj.SkyboxDn = 'rbxassetid://600831635'
+			skyobj.SkyboxFt = 'rbxassetid://600832720'
+			skyobj.SkyboxLf = 'rbxassetid://600886090'
+			skyobj.SkyboxRt = 'rbxassetid://600833862'
+			skyobj.SkyboxUp = 'rbxassetid://600835177'
+		end,
+		Pastel = function()
+			skyobj.SunAngularSize = 0
+			skyobj.MoonAngularSize = 0
+			skyobj.SkyboxBk = 'rbxassetid://2128458653'
+			skyobj.SkyboxDn = 'rbxassetid://2128462480'
+			skyobj.SkyboxFt = 'rbxassetid://2128458653'
+			skyobj.SkyboxLf = 'rbxassetid://2128462027'
+			skyobj.SkyboxRt = 'rbxassetid://2128462027'
+			skyobj.SkyboxUp = 'rbxassetid://2128462236'
+		end,
+		PurpleClouds = function()
+			skyobj.SkyboxBk = 'rbxassetid://570557514'
+			skyobj.SkyboxDn = 'rbxassetid://570557775'
+			skyobj.SkyboxFt = 'rbxassetid://570557559'
+			skyobj.SkyboxLf = 'rbxassetid://570557620'
+			skyobj.SkyboxRt = 'rbxassetid://570557672'
+			skyobj.SkyboxUp = 'rbxassetid://570557727'
+		end,
+		BetterSky = function()
+			if skyobj then
+			skyobj.SkyboxBk = 'rbxassetid://591058823'
+			skyobj.SkyboxDn = 'rbxassetid://591059876'
+			skyobj.SkyboxFt = 'rbxassetid://591058104'
+			skyobj.SkyboxLf = 'rbxassetid://591057861'
+			skyobj.SkyboxRt = 'rbxassetid://591057625'
+			skyobj.SkyboxUp = 'rbxassetid://591059642'
+			end
+		end,
+		DarkClouds = function()
+			skyobj.SkyboxBk = 'rbxassetid://190477248';
+			skyobj.SkyboxDn = 'rbxassetid://190477222';
+			skyobj.SkyboxFt = 'rbxassetid://190477200';
+			skyobj.SkyboxLf = 'rbxassetid://190477185';
+			skyobj.SkyboxRt = 'rbxassetid://190477166';
+			skyobj.SkyboxUp = 'rbxassetid://190477146';
+			skyobj.MoonAngularSize = 1.5;
+			skyobj.StarCount = 0;
+		end,
+		Pinkie = function()
+			skyobj.SkyboxBk = 'rbxassetid://11555017034';
+			skyobj.SkyboxDn = 'rbxassetid://11555013415';
+			skyobj.SkyboxFt = 'rbxassetid://11555010145';
+			skyobj.SkyboxLf = 'rbxassetid://11555006545';
+			skyobj.SkyboxRt = 'rbxassetid://11555000712';
+			skyobj.SkyboxUp = 'rbxassetid://11554996247';
+			skyobj.MoonAngularSize = 1.5;
+			skyobj.StarCount = 0;
+		end,
+		Hell = function()
+			skyobj.SkyboxBk = 'rbxassetid://11730840088';
+			skyobj.SkyboxDn = 'rbxassetid://11730842997';
+			skyobj.SkyboxFt = 'rbxassetid://11730849615';
+			skyobj.SkyboxLf = 'rbxassetid://11730852920';
+			skyobj.SkyboxRt = 'rbxassetid://11730855491';
+			skyobj.SkyboxUp = 'rbxassetid://11730857150';
+			skyobj.MoonAngularSize = 11;
+			skyobj.StarCount = 3000;
+		end,
+		BetterNight3 = function()
+			skyobj.MoonTextureId = 'rbxassetid://1075087760'
+			skyobj.SkyboxBk = 'rbxassetid://2670643994'
+			skyobj.SkyboxDn = 'rbxassetid://2670643365'
+			skyobj.SkyboxFt = 'rbxassetid://2670643214'
+			skyobj.SkyboxLf = 'rbxassetid://2670643070'
+			skyobj.SkyboxRt = 'rbxassetid://2670644173'
+			skyobj.SkyboxUp = 'rbxassetid://2670644331'
+			skyobj.MoonAngularSize = 1.5
+			skyobj.StarCount = 500
+		end,
+		Orange = function()
+			skyobj.SkyboxBk = 'rbxassetid://150939022'
+			skyobj.SkyboxDn = 'rbxassetid://150939038'
+			skyobj.SkyboxFt = 'rbxassetid://150939047'
+			skyobj.SkyboxLf = 'rbxassetid://150939056'
+			skyobj.SkyboxRt = 'rbxassetid://150939063'
+			skyobj.SkyboxUp = 'rbxassetid://150939082'
+		end,
+		DarkMountains = function()
+			skyobj.SkyboxBk = 'rbxassetid://5098814730'
+			skyobj.SkyboxDn = 'rbxassetid://5098815227'
+			skyobj.SkyboxFt = 'rbxassetid://5098815653'
+			skyobj.SkyboxLf = 'rbxassetid://5098816155'
+			skyobj.SkyboxRt = 'rbxassetid://5098820352'
+			skyobj.SkyboxUp = 'rbxassetid://5098819127'
+		end,
+		FlamingSunset = function()
+			skyobj.SkyboxBk = 'rbxassetid://415688378'
+			skyobj.SkyboxDn = 'rbxassetid://415688193'
+			skyobj.SkyboxFt = 'rbxassetid://415688242'
+			skyobj.SkyboxLf = 'rbxassetid://415688310'
+			skyobj.SkyboxRt = 'rbxassetid://415688274'
+			skyobj.SkyboxUp = 'rbxassetid://415688354'
+		end,
+		Nebula2 = function()
+			skyobj.MoonAngularSize = 0
+			skyobj.SunAngularSize = 0
+			skyobj.SkyboxBk = 'rbxassetid://16932794531'
+			skyobj.SkyboxDn = 'rbxassetid://16932797813'
+			skyobj.SkyboxFt = 'rbxassetid://16932800523'
+			skyobj.SkyboxLf = 'rbxassetid://16932803722'
+			skyobj.SkyboxRt = 'rbxassetid://16932806825'
+			skyobj.SkyboxUp = 'rbxassetid://16932810138'
+		end,
+		Nebula3 = function()
+			skyobj.MoonAngularSize = 0
+			skyobj.SunAngularSize = 0
+			skyobj.SkyboxBk = 'rbxassetid://17839210699'
+			skyobj.SkyboxDn = 'rbxassetid://17839215896'
+			skyobj.SkyboxFt = 'rbxassetid://17839218166'
+			skyobj.SkyboxLf = 'rbxassetid://17839220800'
+			skyobj.SkyboxRt = 'rbxassetid://17839223605'
+			skyobj.SkyboxUp = 'rbxassetid://17839226876'
+		end,
+		Nebula4 = function()
+			skyobj.MoonAngularSize = 0
+			skyobj.SunAngularSize = 0
+			skyobj.SkyboxBk = 'rbxassetid://17103618635'
+			skyobj.SkyboxDn = 'rbxassetid://17103622190'
+			skyobj.SkyboxFt = 'rbxassetid://17103624898'
+			skyobj.SkyboxLf = 'rbxassetid://17103628153'
+			skyobj.SkyboxRt = 'rbxassetid://17103636666'
+			skyobj.SkyboxUp = 'rbxassetid://17103639457'
+		end,
+		NewYork = function()
+			skyobj.SkyboxBk = 'rbxassetid://11333973069'
+			skyobj.SkyboxDn = 'rbxassetid://11333969768'
+			skyobj.SkyboxFt = 'rbxassetid://11333964303'
+			skyobj.SkyboxLf = 'rbxassetid://11333971332'
+			skyobj.SkyboxRt = 'rbxassetid://11333982864'
+			skyobj.SkyboxUp = 'rbxassetid://11333967970'
+			skyobj.SunAngularSize = 0
+		end,
+		Aesthetic3 = function()
+			skyobj.SkyboxBk = 'rbxassetid://151165214'
+			skyobj.SkyboxDn = 'rbxassetid://151165197'
+			skyobj.SkyboxFt = 'rbxassetid://151165224'
+			skyobj.SkyboxLf = 'rbxassetid://151165191'
+			skyobj.SkyboxRt = 'rbxassetid://151165206'
+			skyobj.SkyboxUp = 'rbxassetid://151165227'
+		end,
+		FakeClouds = function()
+			skyobj.SkyboxBk = 'rbxassetid://8496892810'
+			skyobj.SkyboxDn = 'rbxassetid://8496896250'
+			skyobj.SkyboxFt = 'rbxassetid://8496892810'
+			skyobj.SkyboxLf = 'rbxassetid://8496892810'
+			skyobj.SkyboxRt = 'rbxassetid://8496892810'
+			skyobj.SkyboxUp = 'rbxassetid://8496897504'
+			skyobj.SunAngularSize = 0
+		end,
+		LunarNight = function()
+			skyobj.SkyboxBk = 'rbxassetid://187713366'
+			skyobj.SkyboxDn = 'rbxassetid://187712428'
+			skyobj.SkyboxFt = 'rbxassetid://187712836'
+			skyobj.SkyboxLf = 'rbxassetid://187713755'
+			skyobj.SkyboxRt = 'rbxassetid://187714525'
+			skyobj.SkyboxUp = 'rbxassetid://187712111'
+			skyobj.SunAngularSize = 0
+			skyobj.StarCount = 0
+		end,
+		FPSBoost = function()
+			skyobj.SkyboxBk = 'rbxassetid://11457548274'
+			skyobj.SkyboxDn = 'rbxassetid://11457548274'
+			skyobj.SkyboxFt = 'rbxassetid://11457548274'
+			skyobj.SkyboxLf = 'rbxassetid://11457548274'
+			skyobj.SkyboxRt = 'rbxassetid://11457548274'
+			skyobj.SkyboxUp = 'rbxassetid://11457548274'
+			skyobj.SunAngularSize = 0
+			skyobj.StarCount = 3000
+		end,
+		PurplePlanet = function()
+			skyobj.SkyboxBk = 'rbxassetid://16262356578'
+			skyobj.SkyboxDn = 'rbxassetid://16262358026'
+			skyobj.SkyboxFt = 'rbxassetid://16262360469'
+			skyobj.SkyboxLf = 'rbxassetid://16262362003'
+			skyobj.SkyboxRt = 'rbxassetid://16262363873'
+			skyobj.SkyboxUp = 'rbxassetid://16262366016'
+			skyobj.SunAngularSize = 21
+			skyobj.StarCount = 3000
+		end,
+		BluePlanet = function()
+			skyobj.SkyboxBk = 'rbxassetid://16888989874';
+			skyobj.SkyboxDn = 'rbxassetid://16888991855';
+			skyobj.SkyboxFt = 'rbxassetid://16888995219';
+			skyobj.SkyboxLf = 'rbxassetid://16888998994';
+			skyobj.SkyboxRt = 'rbxassetid://16889000916';
+			skyobj.SkyboxUp = 'rbxassetid://16889004122';
+			skyobj.SunAngularSize = 21;
+			skyobj.StarCount = 3000;
+		end,
+		Mountains = function()
+			skyobj.SkyboxBk = 'rbxassetid://15359410490';
+			skyobj.SkyboxDn = 'rbxassetid://15359411132';
+			skyobj.SkyboxFt = 'rbxassetid://15359412131';
+			skyobj.SkyboxLf = 'rbxassetid://15359411633';
+			skyobj.SkyboxRt = 'rbxassetid://15359417656';
+			skyobj.SkyboxUp = 'rbxassetid://15359412677';
+			skyobj.SunAngularSize = 21;
+			skyobj.StarCount = 3000;
+		end,
+		LunarNight2 = function()
+			skyobj.SkyboxBk = 'rbxassetid://14365026085';
+			skyobj.SkyboxDn = 'rbxassetid://14365026242';
+			skyobj.SkyboxFt = 'rbxassetid://14365025735';
+			skyobj.SkyboxLf = 'rbxassetid://14365025904';
+			skyobj.SkyboxRt = 'rbxassetid://14365025444';
+			skyobj.SkyboxUp = 'rbxassetid://14365026442';
+			skyobj.SunAngularSize = 21;
+			skyobj.StarCount = 3000;
+		end,
+		FunnyStorm = function()
+			skyobj.SkyboxBk = 'rbxassetid://6280934001';
+			skyobj.SkyboxDn = 'rbxassetid://6280935347';
+			skyobj.SkyboxFt = 'rbxassetid://6280936575';
+			skyobj.SkyboxLf = 'rbxassetid://6280938749';
+			skyobj.SkyboxRt = 'rbxassetid://6280940989';
+			skyobj.SkyboxUp = 'rbxassetid://6280942402';
+			skyobj.SunAngularSize = 21;
+			skyobj.StarCount = 3000;
+		end,
+		Flame = function()
+			skyobj.SkyboxBk = 'rbxassetid://6286780109';
+			skyobj.SkyboxDn = 'rbxassetid://6286782353';
+			skyobj.SkyboxFt = 'rbxassetid://6286784186';
+			skyobj.SkyboxLf = 'rbxassetid://6286785801';
+			skyobj.SkyboxRt = 'rbxassetid://6286788245';
+			skyobj.SkyboxUp = 'rbxassetid://6286790025';
+			skyobj.SunAngularSize = 21;
+			skyobj.StarCount = 3000;
+		end,
+		BlueSpace = function()
+			skyobj.SkyboxBk = 'rbxassetid://16876541778';
+			skyobj.SkyboxDn = 'rbxassetid://16876543880';
+			skyobj.SkyboxFt = 'rbxassetid://16876546384';
+			skyobj.SkyboxLf = 'rbxassetid://16876548320';
+			skyobj.SkyboxRt = 'rbxassetid://16876550345';
+			skyobj.SkyboxUp = 'rbxassetid://16876552681';
+			skyobj.SunAngularSize = 21;
+			skyobj.StarCount = 3000;
 		end
-	end,
-	DarkClouds = function()
-		skyobj.SkyboxBk = 'rbxassetid://190477248';
-		skyobj.SkyboxDn = 'rbxassetid://190477222';
-		skyobj.SkyboxFt = 'rbxassetid://190477200';
-		skyobj.SkyboxLf = 'rbxassetid://190477185';
-		skyobj.SkyboxRt = 'rbxassetid://190477166';
-		skyobj.SkyboxUp = 'rbxassetid://190477146';
-		skyobj.MoonAngularSize = 1.5;
-		skyobj.StarCount = 0;
-	end,
-	Pinkie = function()
-		skyobj.SkyboxBk = 'rbxassetid://11555017034';
-		skyobj.SkyboxDn = 'rbxassetid://11555013415';
-		skyobj.SkyboxFt = 'rbxassetid://11555010145';
-		skyobj.SkyboxLf = 'rbxassetid://11555006545';
-		skyobj.SkyboxRt = 'rbxassetid://11555000712';
-		skyobj.SkyboxUp = 'rbxassetid://11554996247';
-		skyobj.MoonAngularSize = 1.5;
-		skyobj.StarCount = 0;
-	end,
-	Hell = function()
-		skyobj.SkyboxBk = 'rbxassetid://11730840088';
-		skyobj.SkyboxDn = 'rbxassetid://11730842997';
-		skyobj.SkyboxFt = 'rbxassetid://11730849615';
-		skyobj.SkyboxLf = 'rbxassetid://11730852920';
-		skyobj.SkyboxRt = 'rbxassetid://11730855491';
-		skyobj.SkyboxUp = 'rbxassetid://11730857150';
-		skyobj.MoonAngularSize = 11;
-		skyobj.StarCount = 3000;
-	end,
-	BetterNight3 = function()
-		skyobj.MoonTextureId = 'rbxassetid://1075087760'
-		skyobj.SkyboxBk = 'rbxassetid://2670643994'
-		skyobj.SkyboxDn = 'rbxassetid://2670643365'
-		skyobj.SkyboxFt = 'rbxassetid://2670643214'
-		skyobj.SkyboxLf = 'rbxassetid://2670643070'
-		skyobj.SkyboxRt = 'rbxassetid://2670644173'
-		skyobj.SkyboxUp = 'rbxassetid://2670644331'
-		skyobj.MoonAngularSize = 1.5
-		skyobj.StarCount = 500
-	end,
-	Orange = function()
-		skyobj.SkyboxBk = 'rbxassetid://150939022'
-		skyobj.SkyboxDn = 'rbxassetid://150939038'
-		skyobj.SkyboxFt = 'rbxassetid://150939047'
-		skyobj.SkyboxLf = 'rbxassetid://150939056'
-		skyobj.SkyboxRt = 'rbxassetid://150939063'
-		skyobj.SkyboxUp = 'rbxassetid://150939082'
-	end,
-	DarkMountains = function()
-		skyobj.SkyboxBk = 'rbxassetid://5098814730'
-		skyobj.SkyboxDn = 'rbxassetid://5098815227'
-		skyobj.SkyboxFt = 'rbxassetid://5098815653'
-		skyobj.SkyboxLf = 'rbxassetid://5098816155'
-		skyobj.SkyboxRt = 'rbxassetid://5098820352'
-		skyobj.SkyboxUp = 'rbxassetid://5098819127'
-	end,
-	FlamingSunset = function()
-		skyobj.SkyboxBk = 'rbxassetid://415688378'
-		skyobj.SkyboxDn = 'rbxassetid://415688193'
-		skyobj.SkyboxFt = 'rbxassetid://415688242'
-		skyobj.SkyboxLf = 'rbxassetid://415688310'
-		skyobj.SkyboxRt = 'rbxassetid://415688274'
-		skyobj.SkyboxUp = 'rbxassetid://415688354'
-	end,
-	Nebula2 = function()
-		skyobj.MoonAngularSize = 0
-		skyobj.SunAngularSize = 0
-		skyobj.SkyboxBk = 'rbxassetid://16932794531'
-		skyobj.SkyboxDn = 'rbxassetid://16932797813'
-		skyobj.SkyboxFt = 'rbxassetid://16932800523'
-		skyobj.SkyboxLf = 'rbxassetid://16932803722'
-		skyobj.SkyboxRt = 'rbxassetid://16932806825'
-		skyobj.SkyboxUp = 'rbxassetid://16932810138'
-	end,
-	Nebula3 = function()
-		skyobj.MoonAngularSize = 0
-		skyobj.SunAngularSize = 0
-		skyobj.SkyboxBk = 'rbxassetid://17839210699'
-		skyobj.SkyboxDn = 'rbxassetid://17839215896'
-		skyobj.SkyboxFt = 'rbxassetid://17839218166'
-		skyobj.SkyboxLf = 'rbxassetid://17839220800'
-		skyobj.SkyboxRt = 'rbxassetid://17839223605'
-		skyobj.SkyboxUp = 'rbxassetid://17839226876'
-	end,
-	Nebula4 = function()
-		skyobj.MoonAngularSize = 0
-		skyobj.SunAngularSize = 0
-		skyobj.SkyboxBk = 'rbxassetid://17103618635'
-		skyobj.SkyboxDn = 'rbxassetid://17103622190'
-		skyobj.SkyboxFt = 'rbxassetid://17103624898'
-		skyobj.SkyboxLf = 'rbxassetid://17103628153'
-		skyobj.SkyboxRt = 'rbxassetid://17103636666'
-		skyobj.SkyboxUp = 'rbxassetid://17103639457'
-	end,
-	NewYork = function()
-		skyobj.SkyboxBk = 'rbxassetid://11333973069'
-		skyobj.SkyboxDn = 'rbxassetid://11333969768'
-		skyobj.SkyboxFt = 'rbxassetid://11333964303'
-		skyobj.SkyboxLf = 'rbxassetid://11333971332'
-		skyobj.SkyboxRt = 'rbxassetid://11333982864'
-		skyobj.SkyboxUp = 'rbxassetid://11333967970'
-		skyobj.SunAngularSize = 0
-	end,
-	Aesthetic3 = function()
-		skyobj.SkyboxBk = 'rbxassetid://151165214'
-		skyobj.SkyboxDn = 'rbxassetid://151165197'
-		skyobj.SkyboxFt = 'rbxassetid://151165224'
-		skyobj.SkyboxLf = 'rbxassetid://151165191'
-		skyobj.SkyboxRt = 'rbxassetid://151165206'
-		skyobj.SkyboxUp = 'rbxassetid://151165227'
-	end,
-	FakeClouds = function()
-		skyobj.SkyboxBk = 'rbxassetid://8496892810'
-		skyobj.SkyboxDn = 'rbxassetid://8496896250'
-		skyobj.SkyboxFt = 'rbxassetid://8496892810'
-		skyobj.SkyboxLf = 'rbxassetid://8496892810'
-		skyobj.SkyboxRt = 'rbxassetid://8496892810'
-		skyobj.SkyboxUp = 'rbxassetid://8496897504'
-		skyobj.SunAngularSize = 0
-	end,
-	LunarNight = function()
-		skyobj.SkyboxBk = 'rbxassetid://187713366'
-		skyobj.SkyboxDn = 'rbxassetid://187712428'
-		skyobj.SkyboxFt = 'rbxassetid://187712836'
-		skyobj.SkyboxLf = 'rbxassetid://187713755'
-		skyobj.SkyboxRt = 'rbxassetid://187714525'
-		skyobj.SkyboxUp = 'rbxassetid://187712111'
-		skyobj.SunAngularSize = 0
-		skyobj.StarCount = 0
-	end,
-	FPSBoost = function()
-		skyobj.SkyboxBk = 'rbxassetid://11457548274'
-		skyobj.SkyboxDn = 'rbxassetid://11457548274'
-		skyobj.SkyboxFt = 'rbxassetid://11457548274'
-		skyobj.SkyboxLf = 'rbxassetid://11457548274'
-		skyobj.SkyboxRt = 'rbxassetid://11457548274'
-		skyobj.SkyboxUp = 'rbxassetid://11457548274'
-		skyobj.SunAngularSize = 0
-		skyobj.StarCount = 3000
-	end,
-	PurplePlanet = function()
-		skyobj.SkyboxBk = 'rbxassetid://16262356578'
-		skyobj.SkyboxDn = 'rbxassetid://16262358026'
-		skyobj.SkyboxFt = 'rbxassetid://16262360469'
-		skyobj.SkyboxLf = 'rbxassetid://16262362003'
-		skyobj.SkyboxRt = 'rbxassetid://16262363873'
-		skyobj.SkyboxUp = 'rbxassetid://16262366016'
-		skyobj.SunAngularSize = 21
-		skyobj.StarCount = 3000
-	end,
-	BluePlanet = function()
-		skyobj.SkyboxBk = 'rbxassetid://16888989874';
-		skyobj.SkyboxDn = 'rbxassetid://16888991855';
-		skyobj.SkyboxFt = 'rbxassetid://16888995219';
-		skyobj.SkyboxLf = 'rbxassetid://16888998994';
-		skyobj.SkyboxRt = 'rbxassetid://16889000916';
-		skyobj.SkyboxUp = 'rbxassetid://16889004122';
-		skyobj.SunAngularSize = 21;
-		skyobj.StarCount = 3000;
-	end,
-	Mountains = function()
-		skyobj.SkyboxBk = 'rbxassetid://15359410490';
-		skyobj.SkyboxDn = 'rbxassetid://15359411132';
-		skyobj.SkyboxFt = 'rbxassetid://15359412131';
-		skyobj.SkyboxLf = 'rbxassetid://15359411633';
-		skyobj.SkyboxRt = 'rbxassetid://15359417656';
-		skyobj.SkyboxUp = 'rbxassetid://15359412677';
-		skyobj.SunAngularSize = 21;
-		skyobj.StarCount = 3000;
-	end,
-	LunarNight2 = function()
-		skyobj.SkyboxBk = 'rbxassetid://14365026085';
-		skyobj.SkyboxDn = 'rbxassetid://14365026242';
-		skyobj.SkyboxFt = 'rbxassetid://14365025735';
-		skyobj.SkyboxLf = 'rbxassetid://14365025904';
-		skyobj.SkyboxRt = 'rbxassetid://14365025444';
-		skyobj.SkyboxUp = 'rbxassetid://14365026442';
-		skyobj.SunAngularSize = 21;
-		skyobj.StarCount = 3000;
-	end,
-	FunnyStorm = function()
-		skyobj.SkyboxBk = 'rbxassetid://6280934001';
-		skyobj.SkyboxDn = 'rbxassetid://6280935347';
-		skyobj.SkyboxFt = 'rbxassetid://6280936575';
-		skyobj.SkyboxLf = 'rbxassetid://6280938749';
-		skyobj.SkyboxRt = 'rbxassetid://6280940989';
-		skyobj.SkyboxUp = 'rbxassetid://6280942402';
-		skyobj.SunAngularSize = 21;
-		skyobj.StarCount = 3000;
-	end,
-	Flame = function()
-		skyobj.SkyboxBk = 'rbxassetid://6286780109';
-		skyobj.SkyboxDn = 'rbxassetid://6286782353';
-		skyobj.SkyboxFt = 'rbxassetid://6286784186';
-		skyobj.SkyboxLf = 'rbxassetid://6286785801';
-		skyobj.SkyboxRt = 'rbxassetid://6286788245';
-		skyobj.SkyboxUp = 'rbxassetid://6286790025';
-		skyobj.SunAngularSize = 21;
-		skyobj.StarCount = 3000;
-	end,
-	BlueSpace = function()
-		skyobj.SkyboxBk = 'rbxassetid://16876541778';
-		skyobj.SkyboxDn = 'rbxassetid://16876543880';
-		skyobj.SkyboxFt = 'rbxassetid://16876546384';
-		skyobj.SkyboxLf = 'rbxassetid://16876548320';
-		skyobj.SkyboxRt = 'rbxassetid://16876550345';
-		skyobj.SkyboxUp = 'rbxassetid://16876552681';
-		skyobj.SunAngularSize = 21;
-		skyobj.StarCount = 3000;
-	end
-}
+	}
 
-Atmosphere = rendervape.ObjectsThatCanBeSaved.RenderWindow.Api.CreateOptionsButton({
+	Atmosphere = rendervape.ObjectsThatCanBeSaved.RenderWindow.Api.CreateOptionsButton({
 		Name = 'Atmosphere',
 		ExtraText = function()
 			return AtmosphereMethod.Value ~= 'Custom' and AtmosphereMethod.Value or ''
@@ -7284,6 +7285,8 @@ run(function()
 		Function = void
 	})
 end)
+
+loadfile('rendervape/libraries/rain.lua')()
 
 run(function()
 	local LightingMods = {};
@@ -8412,7 +8415,7 @@ run(function()
 	BubbleModsTextSize.Object.Visible = false
 end);
 
---[[run(function()
+run(function()
 	local discordselfbot: vapemodule = {}; --> project for later
 	local websocketfunc: (table) -> table = ( WebSocket and WebSocket.Connect or Ws and Ws.Connect or ws and ws.Connect or WebSocket_connect);
 	local gateway;
@@ -8479,5 +8482,5 @@ end);
 			end
 		end
 	})
-end)]]
+end)
 
