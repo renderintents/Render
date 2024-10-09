@@ -352,18 +352,18 @@ if shared.VapeExecuted then
 	legitgui.BackgroundTransparency = 1
 	legitgui.Visible = true
 	legitgui.Parent = scaledgui
-	local legitmodal = Instance.new("TextButton")
-	legitmodal.Size = UDim2.new(0, 0, 0, 0)
-	legitmodal.BorderSizePixel = 0
-	legitmodal.Text = ''
-	legitmodal.Modal = true
-	legitmodal.Parent = legitgui
 	local LegitModulesBigFrame = Instance.new("Frame")
 	LegitModulesBigFrame.Size = UDim2.new(1, 0, 1, 0)
 	LegitModulesBigFrame.Name = "LegitModules"
 	LegitModulesBigFrame.BackgroundTransparency = 1
 	LegitModulesBigFrame.Visible = false
 	LegitModulesBigFrame.Parent = scaledgui
+	local legitmodal = Instance.new("TextButton")
+	legitmodal.Size = UDim2.new(0, 0, 0, 0)
+	legitmodal.BorderSizePixel = 0
+	legitmodal.Text = ''
+	legitmodal.Modal = true
+	legitmodal.Parent = LegitModulesBigFrame
 	local LegitModulesFrame = Instance.new("Frame")
 	LegitModulesFrame.Size = UDim2.new(0, 700, 0, 389)
 	LegitModulesFrame.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -6895,89 +6895,98 @@ if shared.VapeExecuted then
     end
 
 	GuiLibrary["CreateNotification"] = function(top, bottom, duration, customicon)
-		local size = math.max( textService:GetTextSize(removeTags(bottom), 13, Enum.Font.Gotham, Vector2.new(99999, 99999)).X + 60, 266)
-		local offset = #notificationwindow:GetChildren()
-		local frame = Instance.new("Frame")
-		frame.Size = UDim2.new(0, size, 0, 75)
-		frame.Position = UDim2.new(1, 0, 1, -(150 + 80 * offset))
-		frame.BackgroundTransparency = 1
-		frame.BackgroundColor3 = Color3.new(0, 0,0)
-		frame.BorderSizePixel = 0
-		frame.Parent = notificationwindow
-		frame.Visible = GuiLibrary["Notifications"]
-		frame.ClipsDescendants = false
-		local image = Instance.new("ImageLabel")
-		image.SliceCenter = Rect.new(67, 59, 323, 120)
-		image.Position = UDim2.new(0, -61, 0, -50)
-		image.BackgroundTransparency = 1
-		image.Name = "Frame"
-		image.ScaleType = Enum.ScaleType.Slice
-		image.Image = downloadVapeAsset("rendervape/assets/NotificationBackground.png")
-		image.Size = UDim2.new(1, 61, 0, 159)
-		image.Parent = frame
-		local uicorner = Instance.new("UICorner")
-		uicorner.CornerRadius = UDim.new(0, 6)
-		uicorner.Parent = frame
-		local frame2 = Instance.new("ImageLabel")
-		frame2.BackgroundColor3 = Color3.new(1, 1, 1)
-		frame2.Name = "Frame"
-		frame2:GetPropertyChangedSignal("BackgroundColor3"):Connect(function()
-			frame2.ImageColor3 = frame2.BackgroundColor3
-		end)
-		frame2.BackgroundTransparency = 1
-		frame2.SliceCenter = Rect.new(2, 0, 224, 2)
-		frame2.Size = UDim2.new(1, -61, 0, 2)
-		frame2.ScaleType = Enum.ScaleType.Slice
-		frame2.Position = UDim2.new(0, 63, 1, -36)
-		frame2.ZIndex = 2
-		frame2.Image = downloadVapeAsset("rendervape/assets/NotificationBar.png")
-		frame2.BorderSizePixel = 0
-		frame2.Parent = image
-		local icon = Instance.new("ImageLabel")
-		icon.Name = "IconLabel"
-		icon.Image = downloadVapeAsset(customicon and "rendervape/"..customicon or "rendervape/assets/InfoNotification.png")
-		icon.BackgroundTransparency = 1
-		icon.Position = UDim2.new(0, -6, 0, -6)
-		icon.Size = UDim2.new(0, 60, 0, 60)
-		icon.Parent = frame
-		local icon2 = icon:Clone()
-		icon2.ImageColor3 = Color3.new(0, 0, 0)
-		icon2.ZIndex = -1
-		icon2.Position = UDim2.new(0, 1, 0, 1)
-		icon2.ImageTransparency = 0.5
-		icon2.Parent = icon
-		local textlabel1 = Instance.new("TextLabel")
-		textlabel1.Font = Enum.Font.Arial
-		textlabel1.TextSize = 14
-		textlabel1.RichText = true
-		textlabel1.TextTransparency = 0.1
-		textlabel1.TextColor3 = Color3.new(1, 1, 1)
-		textlabel1.BackgroundTransparency = 1
-		textlabel1.Position = UDim2.new(0, 46, 0, 17)
-		textlabel1.TextXAlignment = Enum.TextXAlignment.Left
-		textlabel1.TextYAlignment = Enum.TextYAlignment.Top
-		textlabel1.Text = (translations[top] ~= nil and translations[top] or top)
-		textlabel1.Parent = frame
-		local textlabel2 = textlabel1:Clone()
-		textlabel2.Position = UDim2.new(0, 46, 0, 44)
-		textlabel2.Font = Enum.Font.Arial
-		textlabel2.TextTransparency = 0
-		textlabel2.TextColor3 = Color3.fromRGB(170, 170, 170)
-		textlabel2.RichText = true
-		textlabel2.Text = bottom
-		textlabel2.Parent = frame
-		task.spawn(function()
-			pcall(function()
-				bettertween2(frame, UDim2.new(1, -(size - 4), 1, -(150 + 80 * offset)), Enum.EasingDirection.In, Enum.EasingStyle.Sine, 0.15, true)
-				task.wait(0.15)
-				frame2:TweenSize(UDim2.new(0, 0, 0, 2), Enum.EasingDirection.In, Enum.EasingStyle.Linear, duration, true)
-				task.wait(duration)
-				bettertween2(frame, UDim2.new(1, 0, 1, frame.Position.Y.Offset), Enum.EasingDirection.In, Enum.EasingStyle.Sine, 0.15, true)
-				task.wait(0.15)
-				frame:Remove()
+		if syn_toast_notification and getgenv().RenderIntents and getgenv().RenderIntents.Toast then
+			syn.toast_notification({
+				Title = top,
+				Content = bottom,
+				Duration = duration,
+				Type = 4
+			})
+		else
+			local size = math.max( textService:GetTextSize(removeTags(bottom), 13, Enum.Font.Gotham, Vector2.new(99999, 99999)).X + 60, 266)
+			local offset = #notificationwindow:GetChildren()
+			local frame = Instance.new("Frame")
+			frame.Size = UDim2.new(0, size, 0, 75)
+			frame.Position = UDim2.new(1, 0, 1, -(150 + 80 * offset))
+			frame.BackgroundTransparency = 1
+			frame.BackgroundColor3 = Color3.new(0, 0,0)
+			frame.BorderSizePixel = 0
+			frame.Parent = notificationwindow
+			frame.Visible = GuiLibrary["Notifications"]
+			frame.ClipsDescendants = false
+			local image = Instance.new("ImageLabel")
+			image.SliceCenter = Rect.new(67, 59, 323, 120)
+			image.Position = UDim2.new(0, -61, 0, -50)
+			image.BackgroundTransparency = 1
+			image.Name = "Frame"
+			image.ScaleType = Enum.ScaleType.Slice
+			image.Image = downloadVapeAsset("rendervape/assets/NotificationBackground.png")
+			image.Size = UDim2.new(1, 61, 0, 159)
+			image.Parent = frame
+			local uicorner = Instance.new("UICorner")
+			uicorner.CornerRadius = UDim.new(0, 6)
+			uicorner.Parent = frame
+			local frame2 = Instance.new("ImageLabel")
+			frame2.BackgroundColor3 = Color3.new(1, 1, 1)
+			frame2.Name = "Frame"
+			frame2:GetPropertyChangedSignal("BackgroundColor3"):Connect(function()
+				frame2.ImageColor3 = frame2.BackgroundColor3
 			end)
-		end)
-		return frame
+			frame2.BackgroundTransparency = 1
+			frame2.SliceCenter = Rect.new(2, 0, 224, 2)
+			frame2.Size = UDim2.new(1, -61, 0, 2)
+			frame2.ScaleType = Enum.ScaleType.Slice
+			frame2.Position = UDim2.new(0, 63, 1, -36)
+			frame2.ZIndex = 2
+			frame2.Image = downloadVapeAsset("rendervape/assets/NotificationBar.png")
+			frame2.BorderSizePixel = 0
+			frame2.Parent = image
+			local icon = Instance.new("ImageLabel")
+			icon.Name = "IconLabel"
+			icon.Image = downloadVapeAsset(customicon and "rendervape/"..customicon or "rendervape/assets/InfoNotification.png")
+			icon.BackgroundTransparency = 1
+			icon.Position = UDim2.new(0, -6, 0, -6)
+			icon.Size = UDim2.new(0, 60, 0, 60)
+			icon.Parent = frame
+			local icon2 = icon:Clone()
+			icon2.ImageColor3 = Color3.new(0, 0, 0)
+			icon2.ZIndex = -1
+			icon2.Position = UDim2.new(0, 1, 0, 1)
+			icon2.ImageTransparency = 0.5
+			icon2.Parent = icon
+			local textlabel1 = Instance.new("TextLabel")
+			textlabel1.Font = Enum.Font.Arial
+			textlabel1.TextSize = 14
+			textlabel1.RichText = true
+			textlabel1.TextTransparency = 0.1
+			textlabel1.TextColor3 = Color3.new(1, 1, 1)
+			textlabel1.BackgroundTransparency = 1
+			textlabel1.Position = UDim2.new(0, 46, 0, 17)
+			textlabel1.TextXAlignment = Enum.TextXAlignment.Left
+			textlabel1.TextYAlignment = Enum.TextYAlignment.Top
+			textlabel1.Text = (translations[top] ~= nil and translations[top] or top)
+			textlabel1.Parent = frame
+			local textlabel2 = textlabel1:Clone()
+			textlabel2.Position = UDim2.new(0, 46, 0, 44)
+			textlabel2.Font = Enum.Font.Arial
+			textlabel2.TextTransparency = 0
+			textlabel2.TextColor3 = Color3.fromRGB(170, 170, 170)
+			textlabel2.RichText = true
+			textlabel2.Text = bottom
+			textlabel2.Parent = frame
+			task.spawn(function()
+				pcall(function()
+					bettertween2(frame, UDim2.new(1, -(size - 4), 1, -(150 + 80 * offset)), Enum.EasingDirection.In, Enum.EasingStyle.Sine, 0.15, true)
+					task.wait(0.15)
+					frame2:TweenSize(UDim2.new(0, 0, 0, 2), Enum.EasingDirection.In, Enum.EasingStyle.Linear, duration, true)
+					task.wait(duration)
+					bettertween2(frame, UDim2.new(1, 0, 1, frame.Position.Y.Offset), Enum.EasingDirection.In, Enum.EasingStyle.Sine, 0.15, true)
+					task.wait(0.15)
+					frame:Remove()
+				end)
+			end)
+			return frame
+		end
 	end;
 
 
@@ -7064,8 +7073,14 @@ if shared.VapeExecuted then
 				if (aGuiLibrary["Type"] == "OptionsButton" or aGuiLibrary["Type"] == "Button") and (aGuiLibrary["Api"]["Keybind"] ~= nil and aGuiLibrary["Api"]["Keybind"] ~= "") and GuiLibrary["KeybindCaptured"] == false then
 					if input1.KeyCode == Enum.KeyCode[aGuiLibrary["Api"]["Keybind"]] and aGuiLibrary["Api"]["Keybind"] ~= GuiLibrary["GUIKeybind"] then
 						aGuiLibrary["Api"]["ToggleButton"](false)
-						if GuiLibrary["ToggleNotifications"] then
-							GuiLibrary["CreateNotification"]("Module Toggled", aGuiLibrary["Api"]["Name"]..' <font color="#FFFFFF">has been</font> <font color="'..(aGuiLibrary["Api"]["Enabled"] and '#32CD32' or '#FF6464')..'">'..(aGuiLibrary["Api"]["Enabled"] and "Enabled" or "Disabled")..'</font><font color="#FFFFFF">!</font>', 1)
+						if syn_toast_notification and getgenv().RenderIntents and getgenv().RenderIntents.Toast then
+							if GuiLibrary["ToggleNotifications"] then
+								GuiLibrary.CreateNotification('Module Toggled', `{aGuiLibrary["Api"]["Name"]} has been {(aGuiLibrary["Api"]["Enabled"] and "Enabled" or "Disabled")}!`)
+							end
+						else
+							if GuiLibrary["ToggleNotifications"] then
+								GuiLibrary["CreateNotification"]("Module Toggled", aGuiLibrary["Api"]["Name"]..' <font color="#FFFFFF">has been</font> <font color="'..(aGuiLibrary["Api"]["Enabled"] and '#32CD32' or '#FF6464')..'">'..(aGuiLibrary["Api"]["Enabled"] and "Enabled" or "Disabled")..'</font><font color="#FFFFFF">!</font>', 1)
+							end
 						end
 					end
 				end
