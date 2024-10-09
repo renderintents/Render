@@ -2946,7 +2946,9 @@ local function initiaterender()
 		end
 		getgenv().rendervapeload = {file = 'Init.lua', step = 4};
 	end
-	if getgenv().RenderIntents.GUI == 2 or getgenv().RenderIntents.GUI == 3 then return end
+	if getgenv().RenderIntents.GUI == 2 or getgenv().RenderIntents.GUI == 3 then 
+		return loadfile('risesix/main.lua')()
+	end
 	pcall(function()
 		if #ProfilesTextList.ObjectList == 0 then
 			table.insert(ProfilesTextList.ObjectList, "default")
