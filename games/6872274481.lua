@@ -36,7 +36,7 @@ type vapecolorslider = {
 	SetRainbow: (boolean | nil) -> (),
 	SetValue: (number, number, number) -> ()
 };
-v
+
 type vapedropdown = {
 	Value: string,
 	Object: Instance,
