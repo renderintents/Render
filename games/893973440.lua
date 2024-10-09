@@ -1,4 +1,4 @@
-z   --[[
+  --[[
 
   $$$$$$$\                            $$\                           $$\    $$\                              
   $$  __$$\                           $$ |                          $$ |   $$ |                             
@@ -15,7 +15,7 @@ z   --[[
    CustomModules/893973440.lua (Flee the facility) - SystemXVoid/BlankedVoid and Maxlasertech            
    https://renderintents.xyz                                                                                                                                                                                                                                                                     
 ]]
-local vape = shared.GuiLibrary
+local vape = shared.rendervape
 local cloneref = cloneref or function(data) return data end
 local getservice = function(service)
 	return cloneref(game:FindService(service))
@@ -91,7 +91,8 @@ local getcomputer = function()
             if beast ~= nil then
                 local mag = (beast.Character.HumanoidRootPart.Position - v.Screen.Position).Magnitude
                 local mag2 = (lplr.Character.HumanoidRootPart.Position - v.Screen.Position).Magnitude
-                if mag >= 35 and mag2 <= 35 or mag2 >= 35 or mag >= 35 then
+                print(mag)
+                if mag > 35 and mag2 <= 35 or mag2 >= 35 or mag > 35 then
                     return v
                 end
             end
@@ -113,10 +114,9 @@ local getcomputertrigger = function()
                 string = tostring(triggervalue)
             end
         end
-        return computer:FindFirstChild('ComputerTrigger'.. string) or nil
-    else
-        return nil
+        return computer:FindFirstChild('ComputerTrigger'.. string)
     end
+    return nil
 end
 
 local getExit = function()
@@ -131,23 +131,6 @@ local getExit = function()
     return nil
 end
 
-local gettarget = function(dist)
-    local target = nil
-    for i,v in players:GetPlayers() do
-        if v ~= lplr and isAlive(v, true) and isAlive(lplr, true) then
-            local mag = (v.Character.HumanoidRootPart.Position - lplr.Character.HumanoidRootPart.Position).Magnitude
-            if not target and mag <= (dist or math.huge) then
-                target = v
-            elseif target then
-                local newmag = (v.Character.HumanoidRootPart.Position - target.Character.HumanoidRootPart.Position).Magnitude
-                if newmag <= (dist or math.huge) then
-                    target = v
-                end
-            end
-        end
-    end
-    return target
-end
 
 local getfreezepod = function(check, check2)
     if store.started then
@@ -181,7 +164,7 @@ local getbeast = function(check)
     if isAlive(beast, true) and isAlive(lplr, true) then
         if check then
             local mag = (beast.Character.HumanoidRootPart.Position - lplr.Character.HumanoidRootPart.Position).Magnitude
-            if mag <= 35 then
+            if mag >= 35 then
                 return beast
             end
         else
@@ -214,7 +197,7 @@ run(function()
             if call then
                 repeat
                     if isBeast() then
-                        local target = gettarget(killaurarange.Value)
+                        local target = GetTarget({radius = killaurarange.Value})
                         if target then
                             lplr.Character:FindFirstChild('Hammer'):Activate()
                             lplr.Character:FindFirstChild('Hammer').HammerEvent:FireServer('HammerHit', ent.Character.HumanoidRootPart)
@@ -264,23 +247,23 @@ run(function()
     })
 end)
 
+local antideathnotification = false
 run(function()
     local antideath = {}
     local old
-    local antideathnotification = false
     antideath = exploit.Api.CreateOptionsButton({
         Name = 'AntiDeath',
         Function = function(call)
             if call then
                 table.insert(antideath.Connections, runservice.Stepped:Connect(function()
-                    if isBeast() or not isAlive(lplr, true) then return end
+                    if isBeast() or not isAlive() then return end
                     local beast = getbeast(true)
                     if beast then
                         old = lplr.Character.HumanoidRootPart.CFrame
                         lplr.Character.HumanoidRootPart.CFrame *= CFrame.new(0, 100, 0)
                         if not antideathnotification then
                             antideathnotification = true
-                            task.spawn(pcall, warningNotification, 'Render', 'the beast is near you ', 6)
+                            task.spawn(pcall, warningNotification, 'AntiDeath', 'the beast is near you ', 6)
                         end
                         if not isEnabled('AutoHack') then
                             task.delay(1.5, function()
@@ -304,11 +287,13 @@ run(function()
     local tween = nil
     local oldtrigger = nil
     local jumptick = 0
+    local currcomputer = nil
     autohack = utility.Api.CreateOptionsButton({
         Name = 'AutoHack',
         Function = function(call)
             if call then
                 table.insert(autohack.Connections, runservice.Stepped:Connect(function()
+                    if isBeast() then return end
                     local trigger = getcomputertrigger()
                     if trigger then
                         if not oldtrigger then
@@ -322,18 +307,28 @@ run(function()
                             if tween then 
                                 tween:Cancel() 
                             end
-                            lplr.Character.Humanoid.JumpPower = 40
-                            lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-                            lplr.Character.Humanoid.JumpPower = 36
+                            lplr.Character.HumanoidRootPart.CFrame *= CFrame.new(0, 10, 0)
                             jumptick = 0
+                            task.wait(0.4)
                         elseif not usejump.Enabled then
                             jumptick = 0
                         end
-                        if not tween then
-                            tween = tweenservice:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(1.2), {CFrame = trigger.CFrame + Vector3.new(30, 0, 0)})
+                        if not tween and not antideathnotification then
+                            if currcomputer ~= trigger or currcomputer == nil then
+                                currcomputer = trigger
+                                tween = tweenservice:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(4), {CFrame = trigger.CFrame + Vector3.new(50, 0, 0)})
+                            end
                             if (trigger.Position - lplr.Character.PrimaryPart.Position).Magnitude >= 2.5 then
+                                if tween then
+                                    tween:Play()
+                                    tween.Completed:Wait()
+                                    tween = nil
+                                    task.wait(2)
+                                end
+                                tween = tweenservice:Create(lplr.Character.HumanoidRootPart, TweenInfo.new(autohackspeed.Value / 2), {CFrame = trigger.CFrame})
                                 tween:Play()
                                 tween.Completed:Wait()
+                                tween = nil
                             end
                             jumptick += 1
                             tween = nil
@@ -352,9 +347,9 @@ run(function()
     autohackspeed = autohack.CreateSlider({
         Name = 'Tween Speed',
         Function = void,
-        Min = 8,
+        Min = 1,
         Max = 20,
-        Default = 19
+        Default = 13
     })
     usejump = autohack.CreateToggle({
         Name = 'Use JumpTick',
@@ -410,15 +405,14 @@ end)
 
 run(function()
     local autocapture = {}
-    local old
     autocapture = blatant.Api.CreateOptionsButton({
         Name = 'AutoCapture',
         Function = function(call)
             if call then
                 repeat
                     local pod = getfreezepod(false, true)
-                    if pod and not isBeast() or pod and lplr.Character:FindFirstChild('Part') then
-                        old = lplr.Character.HumanoidRootPart.CFrame
+                    if pod and isBeast() and lplr.Character:FindFirstChild('Part') then
+                        local old = lplr.Character.HumanoidRootPart.CFrame
                         lplr.Character.HumanoidRootPart.CFrame = pod.PodTrigger.CFrame
                         task.wait(0.5)
                         lplr.Character.HumanoidRootPart.CFrame = old
@@ -437,9 +431,9 @@ run(function()
         Function = function(call)
             if call then
                 repeat
-                    local target = gettarget(13)
-                    if isBeast() and target then
-                        lplr.Character:FindFirstChild('Hammer').HammerEvent:FireServer('HammerTieUp', target.Character['Right Leg'], lplr.Character.HumanoidRootPart.Position)
+                    local target = GetTarget({radius = 18})
+                    if isBeast() and target.RootPart then
+                        lplr.Character:FindFirstChild('Hammer').HammerEvent:FireServer('HammerTieUp', target.RootPart, lplr.Character.HumanoidRootPart.Position)
                     end
                     task.wait(1)
                 until (not autorope.Enabled)

@@ -301,6 +301,14 @@ pcall(function()
     store.items = require(replicatedstorage.Modules.ItemsData);
 end);
 
+function store:playanim(id: string?): number
+    if isAlive() then
+        local anim: Instance = Instance.new('Animation');
+        anim.AnimationId = `rbxassetid://{id}`;
+        lplr.Character.Humanoid.Animator:LoadAnimation(anim):Play();
+    end
+end
+
 function store:getinventory(plr: Player): inventoryobject
     local player = plr or lplr;
     local inv: inventoryobject = {items = {}, hand = {}, armor = {}};
@@ -559,12 +567,12 @@ run(function()
 end);
 
 local oldswordC0;
+local killaurarange: vapeminimodule = {Value = 30};
 run(function() --> code sucks because had to remove GetAllTarget implementation from this.
     local killaura: vapemodule = {};
     local killauraboxes : table = Performance.new();
     local killaurahighlight: vapemodule = {};
     local killaurahighlightcolor: table = newcolor();
-    local killaurarange: table = {Value = 30};
     local killauraAnimation: table = {Value = 'Charge'};
     local killaurasortmethod: table = {Value = 'Distance'};
     local killaurafacetarget: vapeminimodule = {};
@@ -654,6 +662,7 @@ run(function() --> code sucks because had to remove GetAllTarget implementation 
                                 animtween:Play();
                                 killauraplayinganim = true;
                                 repeat task.wait() until ((tick() - playedAt) >= v.duration or vapetarget.Targets.Killaura == nil or viewmodelhandle.Parent == nil);
+                                store:playanim(90863403397957)
                             end;
                         end)
                         task.wait()
@@ -662,7 +671,8 @@ run(function() --> code sucks because had to remove GetAllTarget implementation 
                 table.insert(killaura.Connections, runservice.Heartbeat:Connect(function()
                     local target = isAlive(lplr, true) and tostring(lplr.Team) ~= 'Spectator' and GetTarget({
                         radius = killaurarange.Value,
-                        pos = render.clone.old and render.clone.old.Position or lplr.Character.PrimaryPart.Position
+                        pos = lplr.Character.PrimaryPart.Position,
+                        friendly = false
                     });
                     if typeof(target) ~= 'table' or target.RootPart == nil then 
                         vapetarget.Targets.Killaura = nil;
@@ -677,13 +687,13 @@ run(function() --> code sucks because had to remove GetAllTarget implementation 
                         if oldtarget ~= v.Player.Character then 
                             for i: number, v: BoxHandleAdornment? in killauraboxes do 
                                 pcall(function() v:Destroy() end);
-                             end;
-                             table.clear(killauraboxes);
+                            end;
+                            table.clear(killauraboxes);
                         end;
                         local sword: table = store:itemfromMatch('Hammer') or store:getitemfromclass('Swords');
                         if sword and tostring(lplr.Team) ~= 'Spectators' then
                             if killaurahandcheck.Enabled and store.hand.name ~= sword.name then 
-                               return
+                                return
                             end;
                             oldtarget = v.Player.Character; 
                             vapetarget.Targets.Killaura = v;
@@ -698,9 +708,9 @@ run(function() --> code sucks because had to remove GetAllTarget implementation 
                             task.spawn(function()
                                 store:switchitem(sword.name)
                             end);
-                            for _: number = 1, 3 do 
-                                task.spawn(pcall, function() replicatedstorage.Remotes.SwordAttack:InvokeServer((v.RootPart.Position - lplr.Character.PrimaryPart.Position).Magnitude < 3 and v.RootPart.CFrame.LookVector or predictionvec, sword.name) end);
-                            end;
+                            for _: number = 1,3 do
+                                replicatedstorage.Remotes.ItemRemotes.SwordAttack:FireServer(v.RootPart.Position - v.RootPart.CFrame.LookVector, (v.RootPart.Position - lplr.Character.PrimaryPart.Position).Magnitude < 3 and v.RootPart.CFrame.LookVector or predictionvec, sword.name)
+                            end
                             render.targets:updatehuds(v);
                         end;
                     end
@@ -717,8 +727,17 @@ run(function() --> code sucks because had to remove GetAllTarget implementation 
                     tween:Create(camera:FindFirstChildOfClass('Model').PrimaryPart:FindFirstChildOfClass('Motor6D'), TweenInfo.new(0.4), {C0 = oldswordC0}):Play()
                 end)
             end 
+        end,
+        ExtraText = function()
+            return 'Suffocation'
         end
     });
+    killauraAnimation = killaura.CreateDropdown({
+        Name = 'Animation',
+        Function = void,
+        List = {'Charge', 'Render'},
+        Default = 'Render'
+    })
     killaurarange = killaura.CreateSlider({
         Name = 'Range',
         Min = 1,
@@ -768,11 +787,20 @@ run(function()
     local stafftable: table = httpservice:JSONDecode('["GameMaster4268","BedwarzAcMod","ohhiimnoobinarsenal2","DaiPlayzOnYT","llIIIlllllIIIIllII","doggy2918","Romansalt50","bubman920","minitoonfreind","Alexklysz2015","TanqrCletus","parham2020p","bedwarzontop1","BedwarzBlankMod","HamdanYTTVV","Tanpr_dom67","UseAsuraV4","GrumpyGravySeerp","Lordheaven_prime"]');
     local staffactions: table = {
         Uninject = function(plr: Player)
-            startergui:SetCore('SendNotification', {
-                Title = 'StaffDetector',
-                Text = `{plr.DisplayName} (@{plr.Name}) is an active staff for Bedwarz.`,
-                Duration = 60
-            });
+            if not syn_toast_notification  then
+                startergui:SetCore('SendNotification', {
+                    Title = 'StaffDetector',
+                    Text = `{plr.DisplayName} (@{plr.Name}) is an active staff for Bedwarz.`,
+                    Duration = 60
+                });
+            else
+                syn.toast_notification({
+                    Title = 'StaffDetector',
+                    Content = `{plr.DisplayName} (@{plr.Name}) is an active staff for Bedwarz.`,
+                    Duration = 60,
+                    Type = 4
+                })
+            end
             return vape.SelfDestruct()
         end,
         ServerHop = function()
@@ -854,10 +882,13 @@ run(function()
 end);
 
 run(function()
-    local bedfucker: table = {};
+    local bedfucker: vapemodule = {};
+    local bedfuckerswitchtool: vapeminimodule = {}
+    local bedfuckerboxtransparency: vapeminimodule = {}
     local bedfuckerbox: table = {};
     local bedfuckercolormain: table = newcolor();
     local bedfuckercolorbreak: table = newcolor();
+    local bedfuckerswitchtick: number = tick();
     local bedfuckerthread;
     local lasthighlight;
     local bedhighlight;
@@ -877,14 +908,19 @@ run(function()
         highlights[bed] = box;
         if box.Parent == nil then
             box.Parent = bedfuckerbox.Enabled and bed or nil;
-            tween:Create(box, TweenInfo.new(0.5, Enum.EasingStyle.Quad), {Transparency = 0.55}):Play(); 
+            tween:Create(box, TweenInfo.new(0.5, Enum.EasingStyle.Quad), {Transparency = bedfuckerboxtransparency.Value or 0.55}):Play(); 
         end;
         lastblock = bed;
         local tool: table? = store:getitemfromclass('Axes') or store:getitemfromclass('Pickaxes');
+        if bedfuckerswitchtool.Enabled and ((tick() - bedfuckerswitchtick) > 0.25 or not vapetarget.Targets.Killaura) then
+            bedfuckerswitchtick = tick();
+            store:switchitem(tool.name);
+        end
         local s, successful: boolean? = pcall(function()
             return replicatedstorage.Remotes.DamageBlock:InvokeServer(bed, tool and tool.name)
         end);
-        if s and successful then 
+        if s and successful then
+            store:playanim(17768898198);
             local colortween: Tween = tween:Create(box, TweenInfo.new(0.25, Enum.EasingStyle.Quad), {Color3 = Color3.fromHSV(bedfuckercolorbreak.Hue, bedfuckercolorbreak.Sat, bedfuckercolorbreak.Value)});
             colortween:Play();
             --colortween.Completed:Wait();
@@ -917,6 +953,11 @@ run(function()
             end
         end
     });
+    bedfuckerswitchtool = bedfucker.CreateToggle({
+        Name = 'Switch',
+        Default = true,
+        Function = void
+    })
     bedfuckerbox = bedfucker.CreateToggle({
         Name = 'Box',
         HoverText = 'Highlights the target bed.',
@@ -928,6 +969,11 @@ run(function()
             end)
         end
     });
+    bedfuckerboxtransparency = bedfucker.CreateSlider({
+        Name = 'Transparency',
+        Function = void,
+        Default = 0.36
+    })
     bedfuckercolormain = bedfucker.CreateColorSlider({
         Name = 'Main Color',
         Function = void
@@ -1182,7 +1228,7 @@ run(function()
                         end);
                         if #packagedvec > 2 then
                             task.wait(0.1 * schematicabuildtime.Value);
-                            task.spawn(replicatedstorage.Remotes.PlaceBlock.InvokeServer, replicatedstorage.Remotes.PlaceBlock, placepos + Vector3.new(unpack(packagedvec)), block.name);
+                            task.spawn( replicatedstorage.Remotes.ItemRemotes.PlaceBlock.InvokeServer, replicatedstorage.Remotes.PlaceBlock, placepos + Vector3.new(unpack(packagedvec)), block.name);
                         end;
                     end;
                     if schematica.Enabled then 
@@ -1208,3 +1254,292 @@ run(function()
     })
 end);
 
+run(function()
+    local loot: vapemodule = {}
+    local loottab = {
+        'Iron',
+        'Diamond',
+        'Emerald'
+    }
+    loot = exploit.Api.CreateOptionsButton({
+        Name = 'FakeLootDropper',
+        Function = function(call: boolean)
+            if call then
+                table.insert(loot.Connections, runservice.RenderStepped:Connect(function()
+                    for _: number = 1,2 do
+                        replicatedstorage.Remotes.DropItem:FireServer(loottab[math.random(1,3)], tostring(-math.huge))
+                    end
+                end))
+            end
+        end
+    })
+end)
+
+run(function()
+    local autobuy: vapemodule = {}
+    local autobuyradius: vapeminimodule = {}
+    local autobuyarmor: vapeminimodule = {}
+    local autobuysword: vapeminimodule = {}
+    local autobuycustom: vapeminimodule = {}
+    local autobuyignore: table = {}
+    local swordtier: table = {
+        [1] = {
+            name = 'Stone Sword', 
+            currency = 'Iron', 
+            price = 20
+        },
+        [2] = {
+            name = 'Iron Sword', 
+            currency = 'Iron', 
+            price = 70
+        },
+        [3] = {
+            name = 'Wooden Sword', 
+            currency = 'Emerald', 
+            price = 4
+        },
+        [4] = {
+            name = 'Emerald Sword', 
+            currency = 'Emerald', 
+            price = 20
+        }
+    }
+    local armortier: table = {
+        [1] = {
+            name = 'Leather Armor', 
+            currency = 'Iron', 
+            price = 
+            60
+        },
+        [2] = {
+            name = 'Iron Armor', 
+            currency = 'Iron', 
+            price = 150
+        },
+        [3] = {
+            name = 'Diamond Armor', 
+            currency = 'Emerald', 
+            price = 8
+        },
+        [4] = {
+            name = 'Emerald Armor', 
+            currency = 'Emerald', 
+            price = 40
+        }
+    }
+    local currswordtier: number = 0
+    local currarmortier: number = 0
+    local getnpc = function(npctype, distance)
+        if not isAlive() then return end
+        if npctype == nil then return end
+        if not workspace.Map:FindFirstChild('NpcContainer') or #workspace.Map:FindFirstChild('NpcContainer'):GetChildren() >= 0 then
+            table.clear(autobuyignore)
+            return
+        end
+        for i,v in workspace.Map:FindFirstChild('NpcContainer'):GetChildren() do
+            if (v.Name:lower() == 'teamupgrader' and npctype:lower():find('team') or v.Name:lower() == 'shopkeeper' and npctype:lower():find('person')) then
+                local mag = (lplr.Character.HumanoidRootPart.Position - v.PrimaryPart.Position).Magnitude
+                if mag < (distance or 23) then
+                    return v
+                end
+            end
+        end
+    end
+    local autobuyfunc = function(npc)
+        task.spawn(function()
+            if autobuyarmor.Enabled then
+                for i,v in armortier do
+                    local armor = lplr.ArmorFolder:FindFirstChild(v.name)
+                    if not armor and not autobuyignore[v.name] then
+                        local currency = store:getitem(v.currency)
+                        if currency then
+                            local amount = currency.amount
+                            if amount >= v.price then
+                                antihithook = true
+                                replicatedstorage.Remotes.PurchaseItem:InvokeServer(v.name)
+                                autobuyignore[v.name] = true
+                                task.wait()
+                                antihithook = false
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+        task.spawn(function()
+            for i,v in autobuycustom.ObjectList do
+                local item = v:split('/')
+                if #item <= 2 then return end
+                local currency = store:getitem(item[2])
+                if currency then
+                    local amount = currency.amount
+                    if amount >= tonumber(item[3]) then
+                        antihithook = true
+                        replicatedstorage.Remotes.PurchaseItem:InvokeServer(item[1])
+                        task.wait()
+                        antihithook = false
+                    end
+                end
+            end
+        end)
+        if autobuysword.Enabled then
+            for i,v in swordtier do
+                local item = store:getitem(v.name)
+                if not item and not autobuyignore[v.name] then
+                    local currency = store:getitem(v.currency)
+                    if currency then
+                        local amount = currency.amount
+                        if amount >= v.price then
+                            antihithook = true
+                            replicatedstorage.Remotes.PurchaseItem:InvokeServer(v.name)
+                            autobuyignore[v.name] = true
+                            task.wait()
+                            antihithook = false
+                        end
+                    end
+                end
+            end
+        end
+    end
+    autobuy = utility.Api.CreateOptionsButton({
+        Name = 'AutoBuy',
+        Function = function(call: boolean)
+            if call then
+                table.insert(autobuy.Connections, runservice.RenderStepped:Connect(function()
+                    local npc: Instance = pcall(getnpc, 'personal', autobuyradius.Value);
+                    if npc then
+                        pcall(autobuyfunc, npc);
+                    end;
+                end))
+            end;
+        end;
+    })
+    autobuyradius = autobuy.CreateSlider({
+        Name = 'Range',
+        Function = void,
+        Min = 1,
+        Max = 23,
+        Default = 16
+    })
+    autobuysword = autobuy.CreateToggle({
+        Name = 'Weapon',
+        Function = void,
+        Default = true
+    })
+    autobuyarmor = autobuy.CreateToggle({
+        Name = 'Armor',
+        Function = void,
+        Default = true
+    })
+    autobuycustom = autobuy.CreateTextList({
+        Name = 'Custom Item',
+        TempText = 'Enter <item>/<currency>/<amount>',
+        Function = void
+    })
+end);
+
+run(function()
+    local autowin: vapemodule = {}
+    local autowinspot: table = {};
+    local autowinthread: any;
+    autowin = utility.Api.CreateOptionsButton({
+        Name = 'AutoWin',
+        Function = function(call: boolean)
+            if call then
+                autowinthread = task.spawn(function()
+                    repeat
+                        if tostring(lplr.Team) ~= 'Spectators' then
+                            for i,v in store.beds do
+                                local part =  v:FindFirstChildWhichIsA('Part')
+                                if part then
+                                    autowincurrentpos = {cframe = part.CFrame, position = part.Position}
+                                    repeat task.wait(0.25) until part.Parent == nil
+                                end
+                                table.clear(autowincurrentpos)
+                            end
+                        end
+                        task.wait()
+                    until (not autowin.Enabled)
+                end)
+                table.insert(autowin.Connections, runservice.Stepped:Connect(function()
+                    if tostring(lplr.Team) ~= 'Spectators' and #autowinspot > 0 then
+                        local target = isAlive(lplr, true) and tostring(lplr.Team) ~= 'Spectator' and GetTarget({
+                            radius = killaurarange.Value,
+                            pos = autowinspot.position
+                        });
+                        if target then
+                            lplr.Character.PrimaryPart.CFrame = target.RootPart.CFrame
+                        else
+                            lplr.Character.PrimaryPart.CFrame = autowinspot.cframe
+                        end
+                    end
+                end))
+            else
+                pcall(task.cancel, autowinthread)
+            end
+        end
+    })
+end)
+
+
+run(function()
+    local scaffold: vapemodule = {}
+    local scaffoldtick: number = tick()
+    local scaffoldpositions: table = {}
+    local getPosition = function(root: Instance): ()
+        local nearlastblock: boolean = false;
+        for i,v in scaffoldpositions do
+            local mag = (root.Position - v).magnitude;
+            print(mag)
+            if mag < 1.25 then
+                nearlastblock = true;
+                table.clear(scaffoldpositions);
+                break;
+            end;
+        end;
+        if not nearlastblock then
+            table.insert(scaffoldpositions, (root.Position - Vector3.new(0, -10, 0)))
+            return (root.Position - Vector3.new(0, -10, 0))
+        end
+        return false
+    end;
+    scaffold = blatant.Api.CreateOptionsButton({
+        Name = 'Scaffold',
+        Function = function(call: boolean)
+            if call then
+                table.insert(scaffold.Connections, runservice.RenderStepped:Connect(function()
+                    if (tick() - scaffoldtick) >= 10 then
+                        table.clear(scaffoldpositions);
+                    end
+                    if isAlive() and lplr.Character.Humanoid.MoveDirection ~= Vector3.zero then
+                        local item: Instance = store:getitem('Wool');
+                        if item then
+                            local position: Vector3 = getPosition(lplr.Character.PrimaryPart);
+                            if position then
+                                replicatedstorage.Remotes.ItemRemotes.PlaceBlock:InvokeServer(lplr.Character.PrimaryPart.Position, position - Vector3.new(0, 30, 0), 'Wool');
+                            end
+                        end;
+                    end;
+                end))
+            end;
+        end;
+    });
+end);
+
+run(function()
+    local autojoin: vapemodule = {}
+    autojoin = exploit.Api.CreateOptionsButton({
+        Name = 'AutoJoin',
+        Function = function(call)
+            if call then
+                repeat
+                    if tostring(lplr.Team) == 'Spectator' then
+                        replicatedstorage.Remotes.PlayerStartGame:InvokeServer('Join');
+                    end;
+                    task.wait()
+                until (not autojoin.Enabled)
+            end;
+        end,
+        HoverText = 'Automatically joins the match regardless of the match ongoing.'
+    });
+end);

@@ -36,7 +36,7 @@ type vapecolorslider = {
 	SetRainbow: (boolean | nil) -> (),
 	SetValue: (number, number, number) -> ()
 };
-
+v
 type vapedropdown = {
 	Value: string,
 	Object: Instance,
@@ -101,7 +101,7 @@ type rendertarget = {
 local vape = shared.rendervape;
 local cloneref = cloneref or function(data) return data end;
 local getservice = function(service)
-	return cloneref(game:FindService(service))
+	return cloneref(game:GetService(service))
 end;
 
 local players = getservice('Players');
@@ -1949,6 +1949,7 @@ vape.RemoveObject('SilentAimOptionsButton')
 vape.RemoveObject('ReachOptionsButton')
 vape.RemoveObject('MouseTPOptionsButton')
 vape.RemoveObject('PhaseOptionsButton')
+vape.RemoveObject('DesyncOptionsButton')
 vape.RemoveObject('AutoClickerOptionsButton')
 vape.RemoveObject('SpiderOptionsButton')
 vape.RemoveObject('LongJumpOptionsButton')
@@ -2029,6 +2030,7 @@ run(function()
 	})
 end)
 
+local clicking
 run(function()
 	local autoclicker = {Enabled = false}
 	local noclickdelay = {Enabled = false}
@@ -2112,14 +2114,19 @@ run(function()
 					end)
 				end
 				table.insert(autoclicker.Connections, inputservice.InputBegan:Connect(function(input, gameProcessed)
-					if input.UserInputType == Enum.UserInputType.MouseButton1 then AutoClick() end
+					if input.UserInputType == Enum.UserInputType.MouseButton1 then clicking = true AutoClick() end
 				end))
 				table.insert(autoclicker.Connections, inputservice.InputEnded:Connect(function(input)
-					if input.UserInputType == Enum.UserInputType.MouseButton1 and AutoClickerThread then
-						task.cancel(AutoClickerThread)
-						AutoClickerThread = nil
+					if input.UserInputType == Enum.UserInputType.MouseButton1 then
+						clicking = false
+						if AutoClickerThread then
+							task.cancel(AutoClickerThread)
+							AutoClickerThread = nil
+						end
 					end
 				end))
+			else
+				clicking = false
 			end
 		end,
 		HoverText = 'Hold attack button to automatically click'
@@ -3037,6 +3044,7 @@ run(function()
 	local killauraaimcircle = {Enabled = false}
 	local killauraaimcirclepart
 	local killauraparticle = {Enabled = false}
+	local damagechance = {Value = 100}
 	local killauraparticlepart
 	local Killauranear = false
 	local killauraplaying = false
@@ -3442,7 +3450,7 @@ run(function()
 				end
 				task.spawn(function()
 					repeat
-						task.wait()
+						task.wait(0.15)
 						if not Killaura.Enabled then break end
 						render.targets:updatehuds();
 						vapeTargetInfo.Targets.Killaura = nil
@@ -3457,6 +3465,11 @@ run(function()
 									if not root then
 										continue
 									end
+									if damagechance.Value ~= 100 then
+										if math.random(damagechance.Value, 100) ~= 100 then
+											continue
+										end
+									end
 									local localfacing = entityLibrary.character.HumanoidRootPart.CFrame.lookVector
 									local vec = (plr.RootPart.Position - entityLibrary.character.HumanoidRootPart.Position).unit
 									local angle = math.acos(localfacing:Dot(vec))
@@ -3467,9 +3480,7 @@ run(function()
 									if killauratargetframe.Walls.Enabled then
 										if not bedwars.SwordController:canSee({player = plr.Player, getInstance = function() return plr.Character end}) then continue end
 									end
-									if killauranovape.Enabled and store.whitelist.clientUsers[plr.Player.Name] then
-										continue
-									end;
+
 									for i,v in killauraboxes do 
 										if i ~= root then 
 											tween:Create(v, TweenInfo.new(0.15), {Transparency = 1}):Play()
@@ -3506,7 +3517,7 @@ run(function()
 										render.targets:updatehuds(vapeTargetInfo.Targets.Killaura);
 										if animationdelay <= tick() then
 											animationdelay = tick() + (swordmeta.sword.respectAttackSpeedForEffects and swordmeta.sword.attackSpeed or (killaurasync.Enabled and 0.24 or 0.14))
-											if not killauraswing.Enabled then
+											if not killauraswing.Enabled or killauraswing.Enabled and not clicking then
 												bedwars.SwordController:playSwordEffect(swordmeta, false)
 											end
 											if swordmeta.displayName:find(' Scythe') then
@@ -3641,6 +3652,14 @@ run(function()
 		Max = 5,
 		Default = 1.8,
 		Function = void
+	})
+	damagechance = Killaura.CreateSlider({
+		Name = 'DamageChance',
+		Function = void,
+		Min = 1,
+		Max = 100,
+		Percent = true,
+		Default = 100
 	})
 	local animmethods = {}
 	for i,v in (anims) do table.insert(animmethods, i) end
@@ -4497,7 +4516,7 @@ run(function()
 									end
 									if ScaffoldAnimation.Enabled then
 										if not getPlacedBlock(speedCFrame) then
-										bedwars.ViewmodelController:playAnimation(bedwars.AnimationType.FP_USE_ITEM)
+											bedwars.ViewmodelController:playAnimation(bedwars.AnimationType.FP_USE_ITEM)
 										end
 									end
 									task.spawn(bedwars.placeBlock, speedCFrame, wool, ScaffoldAnimation.Enabled)
@@ -8098,7 +8117,7 @@ run(function()
 		end,
 		Closed = function()
 			for i, v in (collection:GetTagged('chest')) do
-				if ((entityLibrary.LocalPosition or entityLibrary.character.HumanoidRootPart.Position) - v.Position).magnitude <= ChestStealerDistance.Value then
+				if (lplr.Character.HumanoidRootPart.Position - v.Position).magnitude <= ChestStealerDistance.Value then
 					local chest = v:FindFirstChild('ChestFolderValue')
 					chest = chest and chest.Value or nil
 					local chestitems = chest and chest:GetChildren() or {}
@@ -8165,7 +8184,7 @@ run(function()
 		Default = true
 	})
 end)
-
+print(store.queueType)
 run(function()
 	local FastDrop = {Enabled = false}
 	FastDrop = vape.ObjectsThatCanBeSaved.UtilityWindow.Api.CreateOptionsButton({
@@ -8815,7 +8834,6 @@ run(function()
 								end
 							end
 						end
-						task.wait()
 					until (not Nuker.Enabled)
 				end)
 			else
@@ -10811,7 +10829,7 @@ run(function()
 		pcall(function() invisrenderstep:Disconnect() end);
 		for i,v in lplr.Character:GetDescendants() do 
 			pcall(function()
-				if v.CanCollide and v ~= lplr.Character.PrimaryPart then 
+				if v.CanCollide and v ~= lplr.Character.HumanoidRootPart then 
 					v.CanCollide = false;
 					table.insert(invisbaseparts, v);
 				end
@@ -11518,39 +11536,39 @@ run(function()
 		DamageIndicatorStrokeColor.Object.Visible = false
 	end);
 
-run(function()
-	local damagehighlightvisuals = {};
-	local highlightcolor = newcolor();
-	local highlightinvis = {Value = 4};
-	damagehighlightvisuals = visual.Api.CreateOptionsButton({
-		Name = 'HighlightVisuals',
-		HoverText = 'Changes the color of the damage highlight.',
-		Function = function(calling)
-			if calling then 
-				table.insert(damagehighlightvisuals.Connections, workspace.DescendantAdded:Connect(function(indicator)
-					if indicator.Name == '_DamageHighlight_' and indicator.ClassName == 'Highlight' then 
-						repeat 
-							indicator.FillColor = Color3.fromHSV(highlightcolor.Hue, highlightcolor.Sat, highlightcolor.Value);
-							indicator.FillTransparency = (0.1 * highlightinvis.Value);
-							task.wait()
-						until (indicator.Parent == nil)
-					end;
-				end))
+	run(function()
+		local damagehighlightvisuals = {};
+		local highlightcolor = newcolor();
+		local highlightinvis = {Value = 4};
+		damagehighlightvisuals = visual.Api.CreateOptionsButton({
+			Name = 'HighlightVisuals',
+			HoverText = 'Changes the color of the damage highlight.',
+			Function = function(calling)
+				if calling then 
+					table.insert(damagehighlightvisuals.Connections, workspace.DescendantAdded:Connect(function(indicator)
+						if indicator.Name == '_DamageHighlight_' and indicator.ClassName == 'Highlight' then 
+							repeat 
+								indicator.FillColor = Color3.fromHSV(highlightcolor.Hue, highlightcolor.Sat, highlightcolor.Value);
+								indicator.FillTransparency = (0.1 * highlightinvis.Value);
+								task.wait()
+							until (indicator.Parent == nil)
+						end;
+					end))
+				end
 			end
-		end
-	})
-	highlightcolor = damagehighlightvisuals.CreateColorSlider({
-		Name = 'Color',
-		Function = void
-	})
-	highlightinvis = damagehighlightvisuals.CreateSlider({
-		Name = 'Invisibility',
-		Min = 0,
-		Max = 10,
-		Default = 4,
-		Function = void
-	})
-end);
+		})
+		highlightcolor = damagehighlightvisuals.CreateColorSlider({
+			Name = 'Color',
+			Function = void
+		})
+		highlightinvis = damagehighlightvisuals.CreateSlider({
+			Name = 'Invisibility',
+			Min = 0,
+			Max = 10,
+			Default = 4,
+			Function = void
+		})
+	end);
 
 run(function()
 	local antihit = {};
@@ -12459,3 +12477,136 @@ run(function()
 	});
 end);
 
+
+run(function()
+    local desync: vapemodule = {};
+	local desyncvisual: vapeminimodule = {};
+	local desyncvisualcolor: vapecolorslider = newcolor();
+    local desyncdelay: vapeslider = {Value = 1};
+	local desyncupvelo: vapeslider = {Value = 1};
+	local desynctweendelay: vapeslider = {Value = 0};
+    local desyncspeedonly: vapeminimodule = {};
+    local desyncmaxheartbeat: vapeminimodule = {Value = 1e4};
+    local lastTeleport: number = tick();
+    local newroot: BasePart = {};
+    local oldroot: BasePart = {};
+	local oldtween: Tween;
+    local desyncthread;
+    local createclone = function()
+		repeat task.wait() until isAlive(lplr, true) or desync.Enabled == false;
+		task.wait(0.1);
+		if not desync.Enabled then return end;
+		lplr.Character.Parent = game;
+		oldroot = lplr.Character.PrimaryPart; 
+		newroot = oldroot:Clone();
+		newroot.Parent = lplr.Character;
+		lplr.Character.PrimaryPart = newroot;
+		oldroot.Parent = workspace;
+		lplr.Character.Parent = workspace;
+		oldroot.Transparency = 1;
+		entityLibrary.character.HumanoidRootPart = newroot;
+		render.clone = setmetatable({
+			old = oldroot,
+			new = newroot
+		}, {
+			__index = function(self: table, index: string)
+				local root: BasePart | nil = rawget(self, index);
+				if root and root.Parent ~= nil then 
+					return root;
+				end;
+			end
+		});
+	end;
+	local destructclone = function()
+		lplr.Character.Parent = game;
+		oldroot.Transparency = 1;
+		oldroot.Parent = lplr.Character;
+        lplr.Character.PrimaryPart = oldroot;
+		newroot.Parent = workspace;
+		lplr.Character.Parent = workspace;
+		entityLibrary.character.HumanoidRootPart = oldroot;
+		newroot:Destroy();
+		newroot = {}; 
+		oldroot = {};
+		render.clone = {}
+	end;
+    desync = blatant.Api.CreateOptionsButton({
+        Name = 'Desync',
+        HoverText = 'Delays serverside movement.',
+        Function = function(calling: boolean)
+            if calling then 
+                desyncthread = task.spawn(function()
+                    repeat
+                        task.wait()
+                        if store.matchState == 0 then 
+                            task.wait(0.25);
+                            continue;
+                        end;
+                        if isAlive(lplr, true) then
+                            oldroot.Velocity = Vector3.zero;
+							oldroot.Transparency = desyncvisual.Enabled and 0.5 or 1;
+							oldroot.Color = Color3.fromHSV(desyncvisualcolor.Hue, desyncvisualcolor.Sat, desyncvisualcolor.Value);
+                            if newroot.Parent ~= lplr.Character then 
+                                lastTeleport = tick();
+                                createclone();
+                            end;
+                            local lastTeleportSeconds: number = tick() - lastTeleport;
+                            if lastTeleportSeconds >= (0.1 * desyncdelay.Value) or desyncspeedonly.Enabled and getSpeed() <= 0 or store.lastdamage > tick() then 
+                                lastTeleport = tick();
+								oldtween = tween:Create(oldroot, TweenInfo.new(desyncspeedonly.Enabled and getSpeed() <= 0 and 0.01 or 0.1 * desynctweendelay.Value, Enum.EasingStyle.Linear), {CFrame = (newroot.CFrame + Vector3.new(0, desyncupvelo.Value, 0))});
+								oldtween:Play();
+								oldtween.Completed:Wait();
+                            end
+                        end
+                    until (not desync.Enabled)
+                end);
+
+                table.insert(desync.Connections, lplr:GetAttributeChangedSignal('LastTeleport'):Connect(function()
+                    lastTeleportSeconds = tick() - 0.3;
+                    newroot.CFrame = oldroot.CFrame;
+                end));
+            else 
+				pcall(function() oldtween:Cancel() end);
+                pcall(task.cancel, desyncthread);
+                pcall(destructclone);
+            end
+        end
+    });
+	desyncvisual = desync.CreateToggle({
+		Name = 'Visual',
+		HoverText = 'Shows the root.',
+		Function = function(calling: boolean): ()
+			desyncvisualcolor.Object.Visible = calling;
+		end
+	});
+    desyncspeedonly = desync.CreateToggle({
+        Name = 'Boost Only',
+        HoverText = 'Only runs when an active speed boost method\nin avaliable.',
+        Default = true,
+        Function = void
+    });
+	desyncvisualcolor = desync.CreateColorSlider({
+		Name = 'Root Color',
+		Function = void
+	});
+    desyncdelay = desync.CreateSlider({
+        Name = 'Tick',
+        Min = 1,
+        Max = 10,
+        Default = 2,
+        Function = void
+    });
+	desynctweendelay = desync.CreateSlider({
+		Name = 'Tween Delay',
+		Min = 0,
+		Max = 5,
+		Function = void
+	});
+	desyncupvelo = desync.CreateSlider({
+		Name = 'Velocity',
+		Min = 0,
+		Max = 80,
+		Function = void
+	});
+	desyncvisualcolor.Object.Visible = false;
+end);
