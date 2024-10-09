@@ -6895,12 +6895,12 @@ if shared.VapeExecuted then
     end
 
 	GuiLibrary["CreateNotification"] = function(top, bottom, duration, customicon)
-		if syn_toast_notification and getgenv().RenderIntents and getgenv().RenderIntents.Toast then
+		if syn_toast_notification and RenderIntents and RenderIntents.Toast then
 			syn.toast_notification({
 				Title = top,
 				Content = bottom,
 				Duration = duration,
-				Type = 4
+				Type = RenderIntents.Toast.Type or 4
 			})
 		else
 			local size = math.max( textService:GetTextSize(removeTags(bottom), 13, Enum.Font.Gotham, Vector2.new(99999, 99999)).X + 60, 266)
@@ -7073,7 +7073,7 @@ if shared.VapeExecuted then
 				if (aGuiLibrary["Type"] == "OptionsButton" or aGuiLibrary["Type"] == "Button") and (aGuiLibrary["Api"]["Keybind"] ~= nil and aGuiLibrary["Api"]["Keybind"] ~= "") and GuiLibrary["KeybindCaptured"] == false then
 					if input1.KeyCode == Enum.KeyCode[aGuiLibrary["Api"]["Keybind"]] and aGuiLibrary["Api"]["Keybind"] ~= GuiLibrary["GUIKeybind"] then
 						aGuiLibrary["Api"]["ToggleButton"](false)
-						if syn_toast_notification and getgenv().RenderIntents and getgenv().RenderIntents.Toast then
+						if syn_toast_notification and RenderIntents and RenderIntents.Toast then
 							if GuiLibrary["ToggleNotifications"] then
 								GuiLibrary.CreateNotification('Module Toggled', `{aGuiLibrary["Api"]["Name"]} has been {(aGuiLibrary["Api"]["Enabled"] and "Enabled" or "Disabled")}!`)
 							end
