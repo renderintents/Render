@@ -1,1 +1,0 @@
-{"simple":{"Keybind":"","Selected":false},"default":{"Keybind":"","Selected":true},"visual less":{"Keybind":"","Selected":false},"closet cheat":{"Keybind":"","Selected":false}}
