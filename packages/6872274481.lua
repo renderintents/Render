@@ -11014,49 +11014,7 @@ run(function()
 		HoverText = 'Automatically shoots projectiles and\nnearby targets.',
 		Function = function(calling)
 			if calling then 
-				projectileaurathread = task.spawn(function()
-					repeat 
-						task.wait();
-						for i,v in store.localInventory.inventory.items do 
-							local target = projaurasortfuncs[projaurasort.Value]();
-							local projdata = bedwars.ItemTable[v.itemType] and bedwars.ItemTable[v.itemType].projectileSource;
-							if target then 
-								if target.npc and table.find(mobdisabledprojectiles, v.itemType) then 
-									continue
-								end;
-								if projaurakillauradisable.Enabled and killauraNearPlayer then 
-									continue
-								end;
-								local ammo = getammo(v);
-								if store.matchState ~= 0 and (lplr:GetAttribute('PlayingAsKit') or store.equippedKit) == 'dragon_sword' then 
-									bedwars.Client:Get('DragonSwordFire'):SendToServer({target = target.RootPart.Parent});
-								end
-								if ammo.tool then 
-									if projdata and projdata.fireDelaySec and (tick() - lastfired[v.itemType]) < projdata.fireDelaySec then 
-										continue
-									else 
-										task.wait(0.02)
-									end;
-									betterswitch(v.tool);
-                                    projdata = projdata or {};
-                                    local selfpos = lplr.Character.PrimaryPart.Position;
-                                    local shootpos, shootvelo = predictGravity(target.RootPart.Position, target.RootPart.Velocity, (target.RootPart.Position - (selfpos + Vector3.new(0, 2, 0))).Magnitude / (projdata.launchVelocity or 100), target, workspace.Gravity);
-                                    local pos = CFrame.lookAt(lplr.Character.PrimaryPart.CFrame.lookVector, target.RootPart.CFrame.lookVector).Position;
-                                    local shootvec = CFrame.new(selfpos + Vector3.new(0, 2, 0), shootpos);
-                                    local predicted = LaunchDirection(selfpos + Vector3.new(0, 2, 0), shootpos, projdata.launchVelocity or 100, projdata.gravitationalAcceleration or 196.2, false);
-                                    if predicted then 
-                                        task.spawn(function() 
-                                            bedwars.Client:Get(bedwars.ProjectileRemote):CallServerAsync(v.tool, tostring(ammo.tool), tostring(ammo.tool), selfpos + Vector3.new(0, 2, 0), selfpos, predicted, getservice('HttpService'):GenerateGUID(), {drawDurationSeconds = 1}, workspace:GetServerTimeNow() - 0.045)
-                                            lastfired[v.itemType] = tick();
-                                        end);
-                                    end
-								end
-							end;
-						end;
-					until (not projectileaura.Enabled)
-				end)
-			else 
-				task.cancel(projectileaurathread)
+				
 			end
 		end
 	})
