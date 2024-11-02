@@ -1,0 +1,1 @@
+{"simple":{"Selected":false,"Keybind":""},"default":{"Selected":true,"Keybind":""},"no visuals":{"Selected":false,"Keybind":""}}
