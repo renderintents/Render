@@ -4213,6 +4213,13 @@ run(function()
 		Name = 'NoSlowdown',
 		Function = function(callback)
 			if callback then
+				if cheatenginetrash then
+					repeat
+						if not isAlive() then return end
+						lplr.Character.Humanoid.WalkSpeed = 20;
+						task.wait();
+					until not NoSlowdown.Enabled;
+				end
 				OldSetSpeedFunc = bedwars.SprintController.setSpeed
 				bedwars.SprintController.setSpeed = function(tab1, val1)
 					local hum = entityLibrary.character.Humanoid
