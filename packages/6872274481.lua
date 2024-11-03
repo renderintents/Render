@@ -11490,7 +11490,7 @@ run(function()
 		repeat task.wait() until isAlive(lplr, true) and store.matchState ~= 0 or antihit.Enabled == false;
 		task.wait(0.1);
 		if not antihit.Enabled then return end;
-		lplr.Character.Parent = game;
+		lplr.Character.Parent = replicatedstorage;
 		oldroot = lplr.Character.HumanoidRootPart; 
 		newroot = oldroot:Clone();
 		newroot.Parent = lplr.Character;
@@ -11501,7 +11501,7 @@ run(function()
 		entityLibrary.character.HumanoidRootPart = newroot;
 	end;
 	local destructclone = function()
-		lplr.Character.Parent = game;
+		lplr.Character.Parent = replicatedstorage;
 		oldroot.Parent = lplr.Character;
 		newroot.Parent = workspace;
 		lplr.Character.PrimaryPart = oldroot;
