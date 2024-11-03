@@ -1867,7 +1867,7 @@ local function loadVape()
 		shared.VapeOpenGui = nil
 	end
 
-	coroutine.resume(saveSettingsLoop)
+	pcall(function() coroutine.resume(saveSettingsLoop) end)
 	shared.VapeFullyLoaded = true
 end
 
