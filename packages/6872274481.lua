@@ -10835,6 +10835,7 @@ run(function()
 		Name = 'Invisibility',
 		HoverText = 'Plays an animation which makes it harder\nfor targets to see you.',
 		Function = function(calling)
+			if cheatenginetrash then return end
 			if calling then 
 				invistask = task.spawn(invisFunction);
 				table.insert(invis.Connections, lplr.CharacterAdded:Connect(invisFunction))
