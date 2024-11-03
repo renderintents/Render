@@ -7225,6 +7225,9 @@ run(function()
 		Function = function(calling)
 			if calling then 
 				repeat 
+					if #trailparts >= 60 then
+						table.clear(trailparts);
+					end
 					if isAlive(lplr, true) and (lastpos == nil or (lplr.Character.PrimaryPart.Position - lastpos).Magnitude > traildistance.Value) then 
 						createtrailpart()
 					end
