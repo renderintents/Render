@@ -150,7 +150,7 @@ local isnetworkowner = function(part)
 end
 local getcustomasset = getsynasset or getcustomasset or function(location) return 'rbxasset://'..location end
 local queueonteleport = syn and syn.queue_on_teleport or queue_on_teleport or void
-local synapsev3 = syn and syn.toast_notification and 'V3' or ''
+local synapsev3 = ''
 local worldtoscreenpoint = function(pos)
 	if synapsev3 == 'V3' then
 		local scr = worldtoscreen({pos})
@@ -1242,6 +1242,15 @@ run(function()
 	local OldBreak
 	local getcheatengineinit = function()
 	end
+    local bowConstants = {RelX = 0, RelY = 0, RelZ = 0}
+    if not cheatenginetrash then
+        for i, v in debug.getupvalues(KnitClient.Controllers.ProjectileController.enableBeam) do
+            if type(v) == 'table' and rawget(v, 'RelX') then
+                bowConstants = v
+                break
+            end
+        end
+    end
 	bedwars = (cheatenginetrash and loadcheatenginemodule() or setmetatable({
 		AnimationType = require(replicatedstorage.TS.animation['animation-type']).AnimationType,
 		AnimationUtil = require(replicatedstorage['rbxts_include']['node_modules']['@easy-games']['game-core'].out['shared'].util['animation-util']).AnimationUtil,
@@ -1256,7 +1265,7 @@ run(function()
 		BlockPlacer = require(replicatedstorage['rbxts_include']['node_modules']['@easy-games']['block-engine'].out.client.placement['block-placer']).BlockPlacer,
 		BlockEngine = require(lplr.PlayerScripts.TS.lib['block-engine']['client-block-engine']).ClientBlockEngine,
 		BlockEngineClientEvents = require(replicatedstorage['rbxts_include']['node_modules']['@easy-games']['block-engine'].out.client['block-engine-client-events']).BlockEngineClientEvents,
-		BowConstantsTable = debug.getupvalue(KnitClient.Controllers.ProjectileController.enableBeam, 7),
+		BowConstantsTable = bowConstants,
 		CannonAimRemote = dumpRemote(debug.getconstants(debug.getproto(KnitClient.Controllers.CannonController.startAiming, 5))),
 		CannonLaunchRemote = dumpRemote(debug.getconstants(KnitClient.Controllers.CannonHandController.launchSelf)),
 		ClickHold = require(replicatedstorage['rbxts_include']['node_modules']['@easy-games']['game-core'].out.client.ui.lib.util['click-hold']).ClickHold,
@@ -3420,7 +3429,7 @@ run(function()
 						task.wait()
 						if not Killaura.Enabled then break end
 						vapeTargetInfo.Targets.Killaura = nil
-						local plrs = GetAllTargets(killaurarange.Value, true, killaurasortmethods[killaurasortmethod.Value])
+						pcall(function() local plrs = AllNearPosition(killaurarange.Value + 3, 3, killaurasortmethods[killaurasortmethod.Value])
 						local firstPlayerNear
 						if #plrs > 0 then
 							local sword, swordmeta = getAttackData()
@@ -3537,7 +3546,7 @@ run(function()
 						for i,v in (killauraboxes) do
 							local attacked = killauratarget.Enabled and plrs[i] or nil
 							v.Adornee = attacked and ((not killauratargethighlight.Enabled) and attacked.RootPart or (not vape.ObjectsThatCanBeSaved.ChamsOptionsButton.Api.Enabled) and attacked.Character or nil)
-						end
+						end end)
 					until (not Killaura.Enabled)
 				end)
 			else
@@ -4608,7 +4617,6 @@ run(function()
 		Name = 'Speed',
 		Function = function(callback)
 			if callback then
-				if identifyexecutor():find('Salad') then return end
 				RunLoops:BindToHeartbeat('Speed', function(delta)
 					if vape.ObjectsThatCanBeSaved['Lobby CheckToggle'].Api.Enabled then
 						if store.matchState == 0 then return end
