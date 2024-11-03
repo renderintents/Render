@@ -453,28 +453,6 @@ Friends.CreateColorSlider({
 		end
 	end
 })
-if identifyexecutor():find('Salad') then --> from salad real
-	function disableprotections(table)
-	    local prx = {}
-	    local mt = {
-	        index = table,
-	        newindex = function(t, key, value)
-	            rawset(t, key, value)
-	        end
-	    }
-	    setmetatable(prx, mt)
-	    return prx
-	end
-	local oldcr = coroutine.resume
-	getgenv().coroutine = disableprotections(coroutine)
-	getgenv().coroutine.resume = function(co, ...)
-	    if coroutine.status(co) == "dead" then
-	        return true
-	    else
-	        return oldcr(co, ...)
-	    end
-	end
-end
 local ProfilesTextList = {RefreshValues = function() end}
 ProfilesTextList = Profiles.CreateTextList({
 	Name = "ProfilesList",
