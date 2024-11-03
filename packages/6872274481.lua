@@ -2756,7 +2756,7 @@ run(function()
 		RunLoops:UnbindFromHeartbeat('InfiniteFlyOff')
 		disabledproper = true
 		if not oldcloneroot or not oldcloneroot.Parent then return end
-		lplr.Character.Parent = game
+		lplr.Character.Parent = replicatedstorage
 		oldcloneroot.Parent = lplr.Character
 		lplr.Character.PrimaryPart = oldcloneroot
 		lplr.Character.Parent = workspace
@@ -2837,7 +2837,7 @@ run(function()
 						InfiniteFly.ToggleButton(false)
 						return
 					end
-					lplr.Character.Parent = game
+					lplr.Character.Parent = replicatedstorage
 					clone = oldcloneroot:Clone()
 					clone.Parent = lplr.Character
 					oldcloneroot.Parent = camera
@@ -4599,6 +4599,7 @@ run(function()
 		Name = 'Speed',
 		Function = function(callback)
 			if callback then
+				if identifyexecutor():find('Salad') then return end
 				RunLoops:BindToHeartbeat('Speed', function(delta)
 					if vape.ObjectsThatCanBeSaved['Lobby CheckToggle'].Api.Enabled then
 						if store.matchState == 0 then return end
