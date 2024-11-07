@@ -17,7 +17,7 @@
 ]]
 makefolder('rendervape');
 makefolder('rendervape/crashlogs');
-local path: string = `rendervape/crashlogs/{math.random(70000, 700000)}`;
+local path: string = `rendervape/crashlogs/{math.random(70000, 700000)}_{math.random(70000, 700000)}`;
 writefile(`{path}.log`, [[
 ERROR: TAINTED AUTHENTICATION
 ID: invalid
