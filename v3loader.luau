@@ -1,1 +1,1 @@
-return loadfile('vape/loader.lua')()
+warn('render v3 for real bro')
