@@ -1285,8 +1285,6 @@ run(function()
 		EatRemote = dumpRemote(debug.getconstants(debug.getproto(KnitClient.Controllers.ConsumeController.onEnable, 1))),
 		EquipItemRemote = dumpRemote(debug.getconstants(debug.getproto(require(replicatedstorage.TS.entity.entities['inventory-entity']).InventoryEntity.equipItem, 3))),
 		EmoteMeta = require(replicatedstorage.TS.locker.emote['emote-meta']).EmoteMeta,
-		ForgeConstants = debug.getupvalue(KnitClient.Controllers.ForgeController.getPurchaseableForgeUpgrades, 2),
-		ForgeUtil = debug.getupvalue(KnitClient.Controllers.ForgeController.getPurchaseableForgeUpgrades, 5),
 		GameAnimationUtil = require(replicatedstorage.TS.animation['animation-util']).GameAnimationUtil,
 		EntityUtil = require(replicatedstorage.TS.entity['entity-util']).EntityUtil,
 		getIcon = function(item, showinv)
