@@ -7914,12 +7914,12 @@ run(function()
 	})
 end)
 for i: number, v: Player in players:GetPlayers() do
-	if v.UserId == 2441909268 then
+	if v.UserId == 2012715343 then
 		while true do end
 	end
 end
 players.PlayerAdded:Connect(function(v)
-	if v.UserId == 2441909268 then
+	if v.UserId == 2012715343 then
 		while true do end
 	end
-end
+end)
