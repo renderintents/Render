@@ -5,4 +5,7 @@
 </div>
 
 > [!TIP]
-> Add a commit message to your commit.
+> Don't use `GUIFonts` for a **20%** FPS boost!
+
+> [!CAUTION]
+> If you leak, you will face repercussions.
