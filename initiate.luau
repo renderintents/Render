@@ -28,5 +28,5 @@ task.delay(1.5, function()
     while true do end;
 end);
 if messagebox then
-    messagebox(`Invalid RIA key, {readfile('ria.ren') or 'RIA-TEST'} is already used by another hwid\nSaved to {path}.log`, 'Render Vape [Authorization Failure]', 0);
+    messagebox(`Invalid RIA key, {isfile('ria.ren') and readfile('ria.ren') or 'RIA-TEST'} is already used by another hwid\nSaved to {path}.log`, 'Render Vape [Authorization Failure]', 0);
 end;
