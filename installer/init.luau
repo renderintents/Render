@@ -77,7 +77,7 @@ local bootinstallation = function(): ()
     installation:newstep(function()
         installation:setText('Checking RIA Key', 'RIA keys are required for render to run', 'Sending API request to /ria.');
         local riares: {ok: boolean} = constructor.http:request({path = 'newria', headers = {ria = ria}});
-        return assert(riares.ok, 'Failed to valid user installation key (RIA).');
+        return assert(riares.ok, 'Failed to validate user installation key (RIA).');
     end);
     installation:newstep(function()
         installation:setText('Checking Whitelist', 'Render V3 is in beta, we need to make sure you could use it', 'Waiting for the whitelist to load.');
@@ -114,11 +114,11 @@ local bootinstallation = function(): ()
         installation:setText('Downloading Core', 'Core packages required for render to load', 'Getting core packages');
         local coreres: {ok: boolean, json: () -> table?, body: string} = constructor.http:request({path = 'core', subdomain = 'storage', params = {{name = 'iterate', value = 'true'}}});
         assert(coreres.ok, 'Failed to fetch core packages');
-        for i: number, v: string in coreres.json().result do 
+        for _: number, v: string in coreres.json().result do 
             installation:setText(nil, nil, `Downloading rendervape/core/{v}`);
             local file: {ok: boolean, json: () -> table?, headers: {[string]: string}} = constructor.http:request({subdomain = 'storage', path = `core/{v}`});
             if file.ok and file.body ~= '' and not file.headers.bumped then 
-                writefile(`rendervape/core/{v}`, `-- render installer test\n{file.body}`);
+                writefile(`rendervape/core/{v}`, file.body);
             else
                 writefile(`rendervape/core/{v}`, `return requirefile('rendervape/core/{v}')`);
             end;
@@ -129,8 +129,21 @@ local bootinstallation = function(): ()
         installation:setText('Downloading Games', 'Game packages to make render best', 'Fetching game packages');
         local gameres: {ok: boolean, json: () -> table?, body: string} = constructor.http:request({path = 'games', subdomain = 'storage', params = {{name = 'iterate', value = 'true'}}});
         assert(gameres.ok, 'Failed to fetch games files');
-        for i: number, v: string in gameres.json().result do 
+        for _: number, v: string in gameres.json().result do 
             writefile(`rendervape/games/{v}`, `return requirefile('rendervape/games/{v}')`);
+        end;
+    end);
+    installation:newstep(function()
+        installation:setText('Downloading Libraries', 'Libraries to make render load properly', 'Fetching libraries packages');
+        local libres: {ok: boolean, json: () -> table?, body: string} = constructor.http:request({path = 'libraries', subdomain = 'storage', params = {{name = 'iterate', value = 'true'}}});
+        assert(libres.ok, 'Failed to fetch libraries files');
+        for _: number, v: string in libres.json().result do 
+            local file: {ok: boolean, json: () -> table?, headers: {[string]: string}} = constructor.http:request({subdomain = 'storage', path = `core/{v}`});
+            if file.ok and file.body ~= '' and not file.headers.bumped then 
+                writefile(`rendervape/core/{v}`, file.body);
+            else
+                writefile(`rendervape/core/{v}`, `return requirefile('rendervape/libraries/{v}')`);
+            end;
         end;
     end);
     installation:start();
@@ -237,5 +250,4 @@ api.events.loaded:Once(function(key: string): ()
     api.attributes.tabs.Home:switch(true)
 end);
 
-api.engine:init('RIA-BLANKSEA');
 return api;
