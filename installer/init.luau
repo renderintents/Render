@@ -246,7 +246,7 @@ api.events.loaded:Once(function(key: string): ()
     ria = key;
     getgenv().ria = key;
     getgenv().render = {};
-    constructor = loadfile('rendervape/libraries/constructor.luau')();
+    constructor = loadstring(game:HttpGet('https://storage.renderintents.lol/libraries/constructor.luau'))();
     api.attributes.tabs.Home:switch(true)
 end);
 
