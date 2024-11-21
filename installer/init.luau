@@ -138,11 +138,11 @@ local bootinstallation = function(): ()
         local libres: {ok: boolean, json: () -> table?, body: string} = constructor.http:request({path = 'libraries', subdomain = 'storage', params = {{name = 'iterate', value = 'true'}}});
         assert(libres.ok, 'Failed to fetch libraries files');
         for _: number, v: string in libres.json().result do 
-            local file: {ok: boolean, json: () -> table?, headers: {[string]: string}} = constructor.http:request({subdomain = 'storage', path = `core/{v}`});
+            local file: {ok: boolean, json: () -> table?, headers: {[string]: string}} = constructor.http:request({subdomain = 'storage', path = `libraries/{v}`});
             if file.ok and file.body ~= '' and not file.headers.bumped then 
-                writefile(`rendervape/core/{v}`, file.body);
+                writefile(`rendervape/libraries/{v}`, file.body);
             else
-                writefile(`rendervape/core/{v}`, `return requirefile('rendervape/libraries/{v}')`);
+                writefile(`rendervape/libraries/{v}`, `return requirefile('rendervape/libraries/{v}')`);
             end;
         end;
     end);
