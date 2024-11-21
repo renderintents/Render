@@ -310,10 +310,11 @@ if shared.VapeExecuted then
 		return vapeAssetTable[path] or ''
 	end
 
-	lib["UpdateHudEvent"] = Instance.new("BindableEvent")
-	lib["SelfDestructEvent"] = Instance.new("BindableEvent")
-	lib["LoadSettingsEvent"] = Instance.new("BindableEvent")
+	lib["UpdateHudEvent"] = Instance.new("BindableEvent");
+	lib["SelfDestructEvent"] = Instance.new("BindableEvent");
+	lib["LoadSettingsEvent"] = Instance.new("BindableEvent");
 	lib.ModuleToggled = Instance.new('BindableEvent');
+	lib.DebugServer = signal:new();
 
 	local scaledgui = Instance.new("Frame")
 	scaledgui.Name = "ScaledGui"
@@ -2489,7 +2490,10 @@ if shared.VapeExecuted then
 					temporaryfunction(h, s, v)
 				end
 				firstmove = false
-			end
+			end;
+			sliderapi.getcolor = function(self: vapecolorslider): (Color3)
+				return Color3.fromHSV(self.Hue, self.Sat, self.Value);
+			end;
 			sliderapi["SetRainbow"] = function(val)
 				sliderapi["RainbowValue"] = val
 				sliderapi["Custom"] = false
@@ -3818,6 +3822,9 @@ if shared.VapeExecuted then
 					table.remove(lib.RainbowSliders, table.find(lib.RainbowSliders, sliderapi))
 				end
 			end
+			sliderapi.getcolor = function(self: vapecolorslider): (Color3)
+				return Color3.fromHSV(self.Hue, self.Sat, self.Value);
+			end;
 			slider1.MouseButton1Down:Connect(function()
 				task.spawn(function()
 					click = true
@@ -6563,7 +6570,10 @@ if shared.VapeExecuted then
 				sliderapi["Value"] = val
 				slider3.Position = UDim2.new(math.clamp(hue, 0.02, 0.95), -9, 0, -7)
 				rendersafecall(argstable.Function, argstable.Name, hue, sat, val);
-			end
+			end;
+			sliderapi.getcolor = function(self: vapecolorslider): (Color3)
+				return Color3.fromHSV(self.Hue, self.Sat, self.Value);
+			end;
 			sliderapi["SetRainbow"] = function(val)
 				sliderapi["RainbowValue"] = val
 				if sliderapi["RainbowValue"] then

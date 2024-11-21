@@ -109,13 +109,15 @@
     infotext.Text = '';
 
     function loaderapi:setprogress(min: number, max: number?, step: string?, info: string?)
-        tween:Create(barmain, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {Size = UDim2.new(0, math.max(478 / ((max or min) / min)), 0, 11)}):Play();
-        if step then 
-            statustext.Text = tostring(step);
-        end;
-        if info then 
-            infotext.Text = tostring(info);
-        end;
+        pcall(function()
+            tween:Create(barmain, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {Size = UDim2.new(0, math.max(478 / ((max or min) / min)), 0, 11)}):Play();
+            if step then 
+                statustext.Text = tostring(step);
+            end;
+            if info then 
+                infotext.Text = tostring(info);
+            end;
+        end);
     end;
 
     function loaderapi:init()

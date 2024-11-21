@@ -342,23 +342,10 @@ GUI.CreateButton({
 	CustomSize = UDim2.new(0, 18, 0, 18),
 	IconSize = 17
 })
-GUI.CreateDivider("Custom")
 GUI.CreateButton({
 	Name = "Exploit",
 	Function = function(calling) Exploit.SetVisible(calling) end,
 	Icon = "rendervape/assets/TargetIcon2.png", 
-	IconSize = 16
-})
-GUI.CreateButton({
-	Name = "Target HUD",
-	Function = function(calling) TargetHUD.SetVisible(calling) end,
-	Icon = "rendervape/assets/OnlineProfilesButton.png", 
-	IconSize = 16
-})
-GUI.CreateButton({
-	Name = "Session HUD",
-	Function = function(calling) SessionHUD.SetVisible(calling) end,
-	Icon = "rendervape/assets/OnlineProfilesButton.png", 
 	IconSize = 16
 })
 GUI.CreateDivider("MISC")
@@ -1281,6 +1268,7 @@ local ModuleSettings = GUI.CreateDivider2("Module Settings")
 local GUISettings = GUI.CreateDivider2("GUI Settings")
 local PerformanceSettings = GUI.CreateDivider2('Memory Settings')
 local CloudSettings = GUI.CreateDivider2('Cloud Settings')
+GUI.CreateDivider2('Developer Settings')
 local isrestoring: boolean = false;
 
 local cloudmenu: {constants: {ui: ScreenGui}};
@@ -1492,11 +1480,14 @@ local windowSortOrder = {
 	RenderButton = 3,
 	UtilityButton = 4,
 	WorldButton = 5,
-	FriendsButton = 6,
-	TargetsButton = 7,
-	ProfilesButton = 8
+	InventoryButton = 6,
+	ExploitButton = 7,
+	MinigamesButton = 8,
+	FriendsButton = 9,
+	TargetsButton = 10,
+	ProfilesButton = 11
 }
-local windowSortOrder2 = {"Combat", "Blatant", "Render", "Utility", "World", "Inventory"}
+local windowSortOrder2 = {"Combat", "Blatant", "Render", "Utility", "World", "Inventory", 'Exploit', 'Minigames'}
 
 local function getVapeSaturation(val)
 	local sat = 0.9
@@ -1876,6 +1867,7 @@ GeneralSettings.CreateButton2({
 });
 
 local bedwars;
+local customgame: string;
 local _: boolean, teleportdata: table? = pcall(function()
 	return getservice('TeleportService'):GetLocalPlayerTeleportData() 
 end)
@@ -1987,6 +1979,27 @@ local function initiaterender()
 	coroutine.resume(saveSettingsLoop)
 	shared.VapeFullyLoaded = true;
 	getgenv().render.loaded = true;
+	task.wait(0.3);
+	getgenv().render.debugserver:sendpacket({
+		data = {
+			game = tostring(shared.CustomSaveVape or isfile(`rendervape/games/{game.PlaceId}.luau`) and game.PlaceId or nil),
+			directory = render.utils.homefolder(),
+			gui = {
+				parent = tostring(GuiLibrary.MainGui.Parent)
+			},
+			player = {
+				name = playersService.LocalPlayer.Name,
+				display = playersService.LocalPlayer.DisplayName,
+				id = tostring(playersService.LocalPlayer.UserId)
+			}
+		},
+		metadata = {
+			name = 'SCRIPT_INITIATED_FULLY',
+			id = 6,
+			triggeredAt = os.clock(),
+			custompacket = false
+		}
+	});
 end
 
 if shared.VapeIndependent then

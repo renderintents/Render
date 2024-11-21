@@ -1583,6 +1583,19 @@ run(function()
 			store.localInventory = newStore.Inventory.observedInventory
 			if newInventory ~= oldInventory then
 				vapeEvents.InventoryChanged:Fire()
+				task.spawn(function()
+					--[[render.debugserver:sendpacket({
+						data = {
+							old = oldInventory,
+							new = newInventory,
+						};
+						metadata = {
+							name = 'CLIENT_INVENTORY_UPDATE',
+							id = 2,
+							triggeredAt = os.clock()
+						}
+					});]]
+				end);
 			end
 			if newInventory.inventory.items ~= oldInventory.inventory.items then
 				vapeEvents.InventoryAmountChanged:Fire()
@@ -1957,6 +1970,7 @@ run(function()
 	end
 end)
 
+print('bruh')
 vape.RemoveObject('SilentAimOptionsButton')
 vape.RemoveObject('ReachOptionsButton')
 vape.RemoveObject('MouseTPOptionsButton')
@@ -3402,7 +3416,7 @@ run(function()
 		local distance: number = (entityLibrary.LocalPosition - root.CFrame.Position).Magnitude;
 		local rootpos: Vector3 = root.CFrame.Position;
 		if distance > 0 then 
-			return ((rootpos + (root.CFrame.LookVector * root.Parent:FindFirstChildOfClass('Humanoid').MoveDirection)));
+			return ((rootpos + (root.Parent:FindFirstChildOfClass('Humanoid').MoveDirection)));
 		end;
 		return rootpos;
 	end;
@@ -3989,6 +4003,102 @@ run(function()
 	killauraparticlecolor.Object.Visible = false;
 	killauraparticlecolor2.Object.Visible = false;
 	killauraparticleicon.Object.Visible = false;
+		
+
+	local silentaura: vapemodule = {};
+	local silentaurarange: vapeslider = {Value = 10};
+	local silentaurahitchance: vapeslider = {Value = 70};
+	local silentauranpc: vapeminimodule = {Enabled = true};
+	local silentauramouse: vapeminimodule = {Enabled = true};
+	local silentauramaxangle: vapeslider = {Value = 80};
+	local swordanimdelay: number = tick() - 1;
+	local random: Random = Random.new();
+	local attackremote: RemoteEvent = bedwars.Client:Get(bedwars.AttackRemote).instance;
+	silentaura = combat.Api.CreateOptionsButton({
+		Name = 'SilentAura',
+		HoverText = 'A killaura for closet cheaters.',
+		Function = function(calling: boolean): ()
+			if calling then 
+				repeat
+					task.wait();
+					local target: rendertarget = GetActiveTargets({radius = silentaurarange.Value, npc = silentauranpc.Value})[1] or {};
+					if isAlive(lplr, true) and target.RootPart and store.matchState ~= 0 then
+						local sword: table, swordmeta: table = getAttackData();
+						if not sword then 
+							continue;
+						end;
+						if random:NextInteger(1, 100) > silentaurahitchance.Value then 
+							swordanimdelay = tick() + (swordmeta.sword.respectAttackSpeedForEffects and swordmeta.sword.attackSpeed or 0.14);
+							continue;
+						end;
+						if silentauramouse.Enabled and not inputservice:IsMouseButtonPressed(0) then 
+							continue;
+						end;
+						local unit: Vector3 = (target.RootPart.Position - entityLibrary.character.HumanoidRootPart.Position).unit;
+						local angle: number = math.acos(entityLibrary.character.HumanoidRootPart.CFrame.LookVector:Dot(unit));
+						if angle >= (math.rad(silentauramaxangle.Value) / 2) then
+							continue;
+						end;
+						if tick() >= swordanimdelay then
+							InfoNotification('SilentAura', 'sent hit packet', 5);
+							swordanimdelay = tick() + (swordmeta.sword.respectAttackSpeedForEffects and swordmeta.sword.attackSpeed or 0.14);
+							bedwars.SwordController:playSwordEffect(swordmeta, false);
+							if swordmeta.displayName:find(' Scythe') then
+								bedwars.ScytheController:playLocalAnimation();
+							end;
+						else
+							continue;
+						end;
+						bedwars.SwordController.lastAttack = workspace:GetServerTimeNow();
+						attackremote:FireServer({
+							weapon = sword.tool,
+							chargedAttack = {chargeRatio = swordmeta.sword.chargedAttack and store.queueType ~= 'bridge_duel' and not swordmeta.sword.chargedAttack.disableOnGrounded and 0.999 or 0},
+							entityInstance = target.Player.Character,
+							validate = {
+								raycast = {
+									cameraPosition = attackValue(target.RootPart.CFrame.Position), 
+									cursorDirection = attackValue(CFrame.new(entityLibrary.LocalPosition, target.RootPart.CFrame.Position).LookVector)
+								},
+								targetPosition = attackValue(target.RootPart.CFrame.Position),
+								selfPosition = attackValue(entityLibrary.LocalPosition)
+							}
+						});
+					end;
+				until (not silentaura.Enabled);
+			end;
+		end;
+	});
+	silentaurarange = silentaura.CreateSlider({
+		Name = 'Range',
+		Min = 0,
+		Max = 11,
+		Default = 11,
+		Function = void;
+	});
+	silentaurahitchance = silentaura.CreateSlider({
+		Name = 'Hit Chance',
+		Min = 1,
+		Max = 100,
+		Default = 70,
+		Function = void;
+	});
+	silentauramaxangle = silentaura.CreateSlider({
+		Name = 'Max Angle',
+		Min = 1,
+		Max = 250,
+		Default = 250,
+		Function = void;
+	});
+	silentauranpc = silentaura.CreateToggle({
+		Name = 'Include Bots',
+		HoverText = 'attacks entities too.',
+		Function = void;
+	});
+	silentauramouse = silentaura.CreateToggle({
+		Name = 'Mouse Check',
+		HoverText = 'only attacks when mouse is down.',
+		Function = void;
+	});
 end)
 
 local LongJump = {Enabled = false}
@@ -4286,16 +4396,55 @@ end)
 run(function()
 	local NoFall = {Enabled = false}
 	local oldfall
+	local nofallthread: thread;
+	local nofallmethod: vapedropdown = {Value = 'Packet'};
+	local wasoffground: boolean;
+	local nofallfuncs: {[string]: () -> ()} = {
+		Packet = function(): ()
+			bedwars.Client:Get('GroundHit'):SendToServer();
+		end,
+		Anchor = function(): ()
+			repeat
+				task.wait();
+				if (not isAlive(lplr, true)) or (not isnetworkowner(lplr.Character.PrimaryPart)) or store.matchState == 2 then 
+					pcall(function() lplr.Character.PrimaryPart.Anchored = false end);
+					wasoffground = false;
+				end;
+				if isAlive(lplr, true) and wasoffground and workspace:Raycast(lplr.Character.PrimaryPart.Position, Vector3.new(0, -5, 0), store.blockRaycast) then 
+					lplr.Character.PrimaryPart.Anchored = true;
+					wasoffground = false;
+					task.wait(0.3);
+					lplr.Character.PrimaryPart.Anchored = false;
+				end;
+				if isAlive(lplr, true) and (not workspace:Raycast(lplr.Character.PrimaryPart.Position, Vector3.new(0, -15, 0), store.blockRaycast)) and (not wasoffground) then 
+					wasoffground = true;
+				end;
+			until (not NoFall.Enabled);
+		end;
+	};
 	NoFall = vape.ObjectsThatCanBeSaved.BlatantWindow.Api.CreateOptionsButton({
 		Name = 'NoFall',
-		Function = function(callback)
-			if callback then
-				bedwars.Client:Get('GroundHit'):SendToServer()
-			end
+		ExtraText = function(): (string)
+			return nofallmethod.Value;
 		end,
-		HoverText = 'Prevents taking fall damage.'
-	})
-end)
+		Function = function(calling: boolean): ()
+			if calling then
+				nofallthread = task.spawn(nofallfuncs[nofallmethod.Value]);
+			else
+				pcall(task.cancel, nofallthread);
+				pcall(function() lplr.Character.PrimaryPart.Anchored = false end);
+			end;
+		end,
+		HoverText = 'Prevents you from taking fall damage.'
+	});
+	nofallmethod = NoFall.CreateDropdown({
+		Name = 'Method',
+		List = dumplist(nofallfuncs),
+		Function = function(): ()
+			NoFall:retoggle();
+		end;
+	});
+end);
 
 run(function()
 	local NoSlowdown = {Enabled = false}
@@ -9640,7 +9789,76 @@ end));
 
 run(function()
 	local lastTargetUpdate: number = tick() - 3;
+	table.insert(renderconnections, vapeEvents.MatchEndEvent.Event:Connect(function(windata: table)
+		local myTeam: table = bedwars.ClientStoreHandler:getState().Game.myTeam;
+		local win: boolean = myTeam and myTeam.id == windata.winningTeamId or lplr.Neutral;
+		render.debugserver:sendpacket({
+			data = {
+				win = win,
+				matchdata = windata
+			};
+			metadata = {
+				name = 'MATCH_END_EVENT',
+				id = 5,
+				triggeredAt = os.clock(),
+				custompacket = true,
+			}
+		});
+	end));
+
+	table.insert(renderconnections, vapeEvents.EntityDeathEvent.Event:Connect(function(deathTable: table)
+		if not deathTable.entityInstance then return end;
+		local player: Player? = players:FindFirstChild(deathTable.entityInstance.Name);
+		local player2: Player? = deathTable.fromEntity and players:FindFirstChild(deathTable.fromEntity.Name);
+		render.debugserver:sendpacket({
+			data = {
+				entity = {
+					name = deathTable.entityInstance.Name,
+					npc = (player == nil),
+					id = player and tostring(player.UserId) or '1'
+				},
+				killer = deathTable.fromEntity and {
+					name = deathTable.fromEntity.Name,
+					npc = (player2 == nil),
+					id = player2 and tostring(player2.UserId) or '1'
+				} or nil,
+				deathdata = deathTable
+			};
+			metadata = {
+				name = 'ENTITY_DEATH_EVENT',
+				id = 4,
+				triggeredAt = os.clock(),
+				custompacket = true,
+			}
+		});
+	end))
 	table.insert(renderconnections, vapeEvents.EntityDamageEvent.Event:Connect(function(damagedata: table)
+		task.spawn(function()
+			if not damagedata.entityInstance then return end;
+			local player: Player? = players:FindFirstChild(damagedata.entityInstance.Name);
+			local player2: Player? = damagedata.fromEntity and players:FindFirstChild(damagedata.fromEntity.Name);
+			render.debugserver:sendpacket({
+				data = {
+					entity = {
+						name = damagedata.entityInstance.Name,
+						npc = (player == nil),
+						id = player and tostring(player.UserId) or '1'
+					},
+					attacker = damagedata.fromEntity and {
+						name = damagedata.fromEntity.Name,
+						npc = (player2 == nil),
+						id = player2 and tostring(player2.UserId) or '1'
+					} or nil,
+					damagedata = damagedata
+				};
+				metadata = {
+					name = 'ENTITY_DAMAGE_EVENT',
+					id = 1,
+					triggeredAt = os.clock(), 
+					custompacket = true,
+				}
+			});
+		end);
 		if lplr.Character and damagedata.entityInstance == lplr.Character then
 			store.lastdamage = tick() + 0.65;
 		end;
@@ -12972,3 +13190,44 @@ run(function()
         HoverText = 'Prevents you from getting trapped'
     });
 end);
+
+--[[run(function()
+	local autobowswitch: vapemodule = {};
+	local autobowswitchdelay: vapeslider = {Value = 1};
+	local oldconstructor: (self: DateModel?, ...any) -> ();
+	local projectileremote: RemoteFunction = bedwars.Client:Get(bedwars.ProjectileRemote).instance;
+	local getarrow = function(): (string?)
+		for i,v in store.localInventory.inventory.items do  
+			if v.itemType:find('arrow') then 
+				return v.itemType;
+			end
+		end
+	end;
+	autobowswitch = utility.Api.CreateOptionsButton({
+		Name = 'RapidProjectile',
+		HoverText = 'Automatically switches to each bow and fires\nif you have more than on projectile in inventory.',
+		Function = function(calling: boolean): ()
+			if calling then 
+				if not oldconstructor then 
+					oldconstructor = hookmetamethod(game, '__namecall', function(self: Instance?, tool: Accessory?, tool2: string, tool3: string, ...)
+						if autobowswitch.Enabled and self == projectileremote and getnamecallmethod():find('Server') and tostring(tool):find('bow') then 
+							local originaldata: {any} = {};
+							for i: number, v: table in store.localInventory.inventory.items do  
+								if v.itemType:find('bow') or v.itemType:find('headhunter') then
+									bedwars.ClientStoreHandler:dispatch({
+										type = 'InventorySelectHotbarSlot',
+										slot = getHotbarSlot(v.itemType)
+									}); 
+									if v.itemType ~= tostring(tool) then 
+										oldconstructor(self, v.tool, getarrow(), getarrow(), ...);
+									end;
+								end;
+							end;
+						end;
+						return oldconstructor(self, tool, tool2, tool3, ...);
+					end);
+				end;
+			end;
+		end;
+	});
+end);]]

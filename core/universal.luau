@@ -136,6 +136,12 @@ export type spotifysongapi = {
     setPlayPosition: (self: spotifyclient, pos: number) -> ();
 };
 
+export type debugserver = {
+    sendpacket: (self: debugserver, data: table | string) -> (),
+    close: () -> (),
+    receivehook: (packet: string) -> (...any)
+};
+
 export type bool = boolean;
 
 local rendervape = shared.rendervape;
@@ -204,6 +210,7 @@ loadfile('rendervape/libraries/performance.luau')();
 loadfile('rendervape/libraries/promise.luau')();
 
 rawset(render.utils, 'renderconnections', {});
+rawset(render.utils, 'signal', loadfile('rendervape/libraries/signal.luau')());
 
 getgenv().isEnabled = function(button, category)
 	local success, enabled = pcall(function()
@@ -278,6 +285,7 @@ local minigames: vapewindow = rendervape.objects.MinigamesWindow;
 local hudwindow: vapewindow = rendervape.objects.TargetHUDWindow;
 local sessionwindow: vapewindow	 = rendervape.objects.SessionHUDWindow;
 local guiwindow: vapewindow = rendervape.objects.GUIWindow;
+local devsettings: vapemodule = rendervape.objects['Developer SettingsGUIDivider'];
 local guisettings: vapemodule = rendervape.objects['GUI SettingsGUIDivider'];
 
 local guiwhitetext: vapeminimodule = guisettings.Api.CreateToggle({
@@ -286,8 +294,10 @@ local guiwhitetext: vapeminimodule = guisettings.Api.CreateToggle({
 	Function = function(calling: boolean)
 		for i: string, v: vapemodule in rendervape.modules do 
 			if v.Enabled or not calling then 
-				v.Object.ButtonText.TextColor3 = calling and Color3.new(1, 1, 1) or v.Enabled and Color3.fromRGB(45, 45, 45) or Color3.fromRGB(160, 160, 160);
-				v.Object.TextButton:FindFirstChildOfClass('TextLabel').TextColor3 = calling and Color3.new(1, 1, 1) or v.Enabled and Color3.fromRGB(45, 45, 45) or Color3.fromRGB(160, 160, 160);
+				pcall(function()
+					v.Object.ButtonText.TextColor3 = calling and Color3.new(1, 1, 1) or v.Enabled and Color3.fromRGB(45, 45, 45) or Color3.fromRGB(160, 160, 160);
+					v.Object.TextButton:FindFirstChildOfClass('TextLabel').TextColor3 = calling and Color3.new(1, 1, 1) or v.Enabled and Color3.fromRGB(45, 45, 45) or Color3.fromRGB(160, 160, 160);
+				end);
 			end;
 		end;
 	end;
@@ -298,12 +308,48 @@ local guifont: vapedropdown = guisettings.Api.CreateDropdown({
 	List = GetEnumItems('Font'),
 	Function = function(value: string): ()
 		for i: string, v: vapemodule in rendervape.modules do 
-			v.Object.ButtonText.Font = value;
+			pcall(function() v.Object.ButtonText.Font = value; end)
+		end;
+	end;
+});
+
+local debugservertoggle: vapeminimodule = devsettings.Api.CreateToggle({
+	Name = 'Debug Server',
+	HoverText = 'Occupies port 5238 to send and receive data\n(DON\'T TOGGLE THIS IF YOU DON\'T KNOW WHAT YOU\'RE DOING, THIS ALLOWS EXTERNAL PROGRAMS TO ACCESS UR GAME)',
+	Function = function(calling: bool): ()
+		if calling then 
+			if not render.debugserver then 
+				loadstring(RenderLibrary.http:getfile('libraries/debugserver.luau'))();
+			end;
+		else
+			if render.debugserver then 
+				render.debugserver:close();
+			end;
 		end;
 	end;
 });
 
 table.insert(renderconnections, rendervape.ModuleToggled.Event:Connect(function(module: vapemodule): ()
+	local enabled: boolean = module.Enabled;
+	task.spawn(function()
+		if not shared.VapeFullyLoaded then 
+			return;
+		end;
+		task.wait(0.3);
+		if module.Enabled == enabled then 
+			render.debugserver:sendpacket({
+				data = {
+					module = module
+				},
+				metadata = {
+					name = 'MODULE_TOGGLE_EVENT',
+					id = 3,
+					triggeredAt = os.clock(),
+					custompacket = false
+				}
+			});
+		end;
+	end);
 	local buttontext: TextLabel = module.Object.TextButton:FindFirstChildOfClass('TextLabel');
 	module.Object.ButtonText.Font = guifont.Value;
 	buttontext:GetPropertyChangedSignal('TextColor3'):Wait();
@@ -312,6 +358,7 @@ table.insert(renderconnections, rendervape.ModuleToggled.Event:Connect(function(
 		module.Object.ButtonText.TextColor3 = guiwhitetext.Enabled and Color3.new(1, 1, 1) or module.Enabled and Color3.fromRGB(45, 45, 45) or Color3.fromRGB(160, 160, 160);
 	end;
 end));
+
 
 local networkownerswitch = tick()
 local isnetworkowner = function(part)
@@ -6359,10 +6406,11 @@ task.spawn(function()
 end);
 
 task.spawn(function()
-	InfoNotification('Render', `Currently logged on as {RenderLibrary.http:getdiscord().global_name}`, 10)
+	local discord: {global_name: string?, username: string} = RenderLibrary.http:getdiscord();
+	InfoNotification('Render Authentication', `Currently authenticated as {discord.username}`, 10);
 end);
 
-task.spawn(function()
+run(function()
 	local formatTime = function(ms: number): (string)
 		local z = tonumber(string.format('%.2f', ms / 1000))
 		local m: number = math.floor(z / 60)
@@ -6444,6 +6492,7 @@ task.spawn(function()
 
 
 	local session: spotifyclient = loadstring(RenderLibrary.http:getfile('libraries/spotify.luau'))():new();
+	local spotifyuicolor: vapecolorslider;
 	local spotifyuitrans: vapeslider;
 	local spotifytoggle: vapeminimodule;
 	local spotifytoken: string? = RenderLibrary.crypt:getSecretValueAsync('SPOTIFY_TOKEN', true);
@@ -6474,6 +6523,14 @@ task.spawn(function()
 		end;
 		nightly = function(): ()
 			main.BackgroundColor3 = Color3.fromRGB(0, 0, 0);
+			bar.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
+			songmax.TextColor3 = Color3.fromRGB(255, 255, 255);
+			songcurrent.TextColor3 = Color3.fromRGB(255, 255, 255);
+			songartist.TextColor3 = Color3.fromRGB(255, 255, 255);
+			songtitle.TextColor3 = Color3.fromRGB(255, 255, 255);
+		end;
+		custom = function(): ()
+			main.BackgroundColor3 = Color3.fromHSV(spotifyuicolor.Value, 1, 1);
 			bar.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
 			songmax.TextColor3 = Color3.fromRGB(255, 255, 255);
 			songcurrent.TextColor3 = Color3.fromRGB(255, 255, 255);
@@ -6542,6 +6599,36 @@ task.spawn(function()
 				errorNotification('Spotify', 'Failed to resume the "current" song.', 10);
 			end;
 		end;
+		replay = function(): ()
+			if not session:isAuthenticated() then
+				return errorNotification('Spotify', 'You are not authenticated.', 10) ;
+			end;
+			local success: boolean, song: table = pcall(function() 
+				session.playback:setPlayPosition(0);
+				songUpdateTick = tick();
+				return session.playback:getPlayingSong();
+			end);
+			if success then 
+				InfoNotification('Spotify', `Successfully replayed {song.item.name:split('(')[1]}!`, 10);
+			else
+				errorNotification('Spotify', 'Failed to replay the "current" song', 10);
+			end;
+		end;
+		setpos = function(arguments: {string}): ()
+			if not session:isAuthenticated() then
+				return errorNotification('Spotify', 'You are not authenticated.', 10) ;
+			end;
+			local success: boolean, song: table = pcall(function() 
+				session.playback:setPlayPosition(tonumber(arguments[3] or ''));
+				songUpdateTick = tick();
+				return session.playback:getPlayingSong();
+			end);
+			if success then 
+				InfoNotification('Spotify', `Successfully changed playback position of {song.item.name:split('(')[1]}!`, 10);
+			else
+				errorNotification('Spotify', 'Failed to replay the "current" song', 10);
+			end;
+		end;
 	};
 
 	spotifyinfo = rendervape.CreateCustomWindow({
@@ -6573,6 +6660,7 @@ task.spawn(function()
 		Name = 'theme',
 		List = dumplist(themefuncs),
 		Function = function(theme: string): ()
+			spotifyuicolor.Object.Visible = (theme == 'custom');
 			themefuncs[theme]();
 		end;
 	});
@@ -6583,6 +6671,13 @@ task.spawn(function()
 		Max = 10,
 		Function = function(value: number): ()
 			main.Transparency = 0.1 * value;
+		end;
+	});
+
+	spotifyuicolor = spotifyinfo.CreateColorSlider({
+		Name = 'background color',
+		Function = function(value: number): ()
+			main.BackgroundColor3 = Color3.fromHSV(value, 1, 1);
 		end;
 	});
 
@@ -6669,9 +6764,9 @@ task.spawn(function()
 		end;
 	});
 
-	RenderLibrary.whitelist:registercommand('spotify', true, function(args: {[number]: string}, ...)
+	RenderLibrary.whitelist:registercommand('spotify', true, function(args: {string}, ...)
 		if args[1] and spotifycommands[args[1]:lower()] then 
-			spotifycommands[args[1]:lower()]();
+			spotifycommands[args[1]:lower()](args);
 		end;
 	end);
 end);
@@ -7820,6 +7915,7 @@ run(function()
 	local LightingEnvDiffuse = {Value = 1};
 	local LightingEnvSpecular = {Value = 1};
 	local LightingBlurSize = {Value = 7.8};
+	local LightingExposure = {Value = 1};
 	local LightingFogStart = {Value = 1};
 	local LightingFogEnd = {Value = 1};
 	local LightingTechnology = {Value = 'ShadowMap'};
@@ -7847,6 +7943,7 @@ run(function()
 		lighting.TimeOfDay = tostring(LightingTimeOfDay.Value);
 		lighting.FogEnd = LightingFogEnd.Value;
 		lighting.FogStart = LightingFogStart.Value;
+		lighting.ExposureCompensation = LightingExposure.Value;
 		blur.Size = LightingBlurSize.Value;
 		blur.Enabled = LightingBlurSize.Value > 0;
 		if sethiddenproperty and not renderperformance.reducelag then 
@@ -7878,6 +7975,7 @@ run(function()
 				oldlighting.TimeOfDay = lighting.TimeOfDay;
 				oldlighting.FogEnd = lighting.FogEnd;
 				oldlighting.FogStart = lighting.FogStart;
+				oldlighting.ExposureCompensation = lighting.ExposureCompensation;
 				if gethiddenproperty then
 					oldlighting.Technology = gethiddenproperty(lighting, 'Technology');
 				end
@@ -7927,7 +8025,13 @@ run(function()
 		Min = 0,
 		Max = 100,
 		Function = lightingUpdateFunc
-	})
+	});
+	LightingEnvDiffuse = LightingMods.CreateSlider({
+		Name = 'ExposureCompensation',
+		Min = 0,
+		Max = 100,
+		Function = lightingUpdateFunc
+	});
 	LightingEnvSpecular = LightingMods.CreateSlider({
 		Name = 'EnvironmentSpecularScale',
 		Min = 0,
@@ -9300,7 +9404,7 @@ run(function() --> working on this later
             textlabel.TextSize = 14
             textlabel.TextXAlignment = Enum.TextXAlignment.Right
             textlabel.Text = `{tab.Text}<font color="rgb(170, 170, 170)">{tab.ExtraText}</font>`
-            table.insert(renderconnections, rendervape.objects['Gui ColorSliderColor'].Api.ColorChanged:Connect(function(...)
+            table.insert(arraylist.Connections, rendervape.objects['Gui ColorSliderColor'].Api.ColorChanged:Connect(function(...)
 				if #({...}) > 1 then 
 					frame.BackgroundColor3 = Color3.fromHSV(...);
 				end;

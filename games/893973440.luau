@@ -111,7 +111,8 @@ export type gamestore = {
     active: boolean,
     computersValue: number,
     status: string,
-    escaped: boolean
+    escaped: boolean,
+    mapcreated: BindableEvent;
 };
 
 type entitylib = {
@@ -159,6 +160,7 @@ local guiwindow: vapewindow = gui.objects.GUIWindow;
 
 local store: gamestore = setmetatable({
     started = false;
+    mapcreated = Instance.new('BindableEvent'),
 }, {
     __index = function(self: gamestore, index: string): (any)
         if index == 'active' then 
@@ -184,6 +186,13 @@ function store:getbeast(): (Player?)
         end;
     end;
 end;
+
+table.insert(renderconnections, workspace.DescendantAdded:Connect(function(object: Model?): ()
+    task.wait(0.2);
+    if object == store.map then 
+        store.mapcreated:Fire(object);
+    end;
+end));
 
 run(function()
     local antierror: vapemodule = {};
@@ -350,3 +359,39 @@ run(function()
 end);
 
 
+    run(function()
+        local computeresp: vapemodule = {};
+        local computerespbackground: vapeminimodule = {};
+        local computerespfinishcheck: vapeminimodule = {};
+        local currentmap: Model?
+        local addcomputertag = function(pc: Model): ()
+            local image: ImageLabel = pc:WaitForChild('Screen', 9e9):FindFirstChildOfClass('BillboardGui'):FindFirstChildOfClass('ImageLabel');
+            image.ImageColor3 = pc.Screen.Color;
+            image.Parent.Enabled = true;
+            table.insert(computeresp.Connections, image.Parent:GetPropertyChangedSignal('Enabled'):Connect(function()
+                image.Parent.Enabled = true;
+            end));
+            table.insert(computeresp.Connections, pc.Screen:GetPropertyChangedSignal('Color'):Connect(function()
+                image.ImageColor3 = pc.Screen.Color;
+            end));
+        end;
+        computeresp = visual.Api.CreateOptionsButton({
+            Name = 'ComputerESP',
+            HoverText = 'Enables icons at computer locations.',
+            Function = function(calling: boolean): ()
+                if calling then 
+                    if store.map then 
+                        for _: number, v: Model? in store.map:GetChildren() do 
+                            if v.Name == 'ComputerTable' then 
+                                task.spawn(addcomputertag, v);
+                            end;
+                        end;
+                    end;
+                    table.insert(computeresp.Connections, store.mapcreated.Event:Connect(function(): ()
+                        repeat task.wait() until store.active;
+                        computeresp:retoggle();
+                    end));
+                end;
+            end;
+        });
+    end);
