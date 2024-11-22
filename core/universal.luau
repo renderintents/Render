@@ -180,6 +180,8 @@ local fakecam: Camera = Instance.new('Camera');
 local vapeInjected = true;
 local renderperformance = shared.renderperformance;
 
+task.wait(1)
+
 local render = {
 	events = setmetatable({}, {
 		__index = function(self, method)
