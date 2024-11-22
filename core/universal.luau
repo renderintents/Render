@@ -202,7 +202,7 @@ local render = {
 	sessionInfo = {labelInstances = {}}, 
 	session = {},
 	clone = {},
-	utils = loadstring(RenderLibrary.http:getfile('libraries/utils.luau'))();
+	utils = loadfile('rendervape/libraries/utils.luau')();
 };
 
 getgenv().render = render;
