@@ -121,7 +121,7 @@ end;
 local gui: ScreenGui = Instance.new('ScreenGui', gethui())
 gui.Name = httpservice:GenerateGUID(false):gsub('-', ''):lower();
 gui.ResetOnSpawn = false;
-gui.ZIndexBehavior = Enum.ZIndexBehvaior.Global;
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Global;
 installer.attributes.ui = gui;
 
 function installer.engine:makedraggable(gui: Frame?): ()
