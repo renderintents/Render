@@ -166,13 +166,13 @@ window:createSection('Home', function()
     headers.Font = Enum.Font.GothamBlack;
     headers.BackgroundTransparency = 1;
     headers.Size = UDim2.new(0, 238, 0, 82);
-    headers.ZIndex = 9e10;
+    headers.ZIndex = 3;
     headers.TextXAlignment = Enum.TextXAlignment.Left;
     rendericon.Image = 'rbxassetid://16852575555';
     rendericon.Size = UDim2.new(0, 35, 0, 35);
     rendericon.Position = UDim2.new(0.078, 0, 0.33, 0);
     rendericon.BackgroundTransparency = 1;
-    rendericon.ZIndex = 9e10;
+    rendericon.ZIndex = 4;
     rendericon.ImageColor3 = api.attributes.accentcolor.text;
     installbutton.Size = UDim2.new(0, 127, 0, 35);
     installbutton.ZIndex = 8;

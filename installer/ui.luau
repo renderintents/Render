@@ -172,7 +172,7 @@ function installer.engine:createwindow(): (windowengine)
     local toplist: Frame = Instance.new('Frame', main);
     local toplistlayout: UIListLayout = Instance.new('UIListLayout', toplist);
     main.Name = 'main';
-    main.ZIndex = 9e9;
+    main.ZIndex = 1;
     main.Size = UDim2.new(0, 449, 0, 372);
     main.Position = UDim2.new(0.438, 0, 0.167, 0);
     main.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
