@@ -49,7 +49,6 @@ end;
 local runservice: RunService = getservice('RunService');
 local httpservice: HttpService = getservice('HttpService');
 local api: installerapi = runservice:IsStudio() and require(getservice('ReplicatedStorage').installer) or loadstring(game:HttpGet('https://storage.renderintents.lol/installer/ui.luau'))();
-local ria: string = '';
 local constructor: table;
 local window: windowengine = api.engine:createwindow();
 
@@ -75,9 +74,9 @@ local bootinstallation = function(): ()
     };
     local installation: prepareEngine = window:prepare();
     installation:newstep(function()
-        installation:setText('Checking RIA Key', 'RIA keys are required for render to run', 'Sending API request to /ria.');
+     --[[   installation:setText('Checking RIA Key', 'RIA keys are required for render to run', 'Sending API request to /ria.');
         local riares: {ok: boolean} = constructor.http:request({path = 'newria', headers = {ria = ria}});
-        return assert(riares.ok, 'Failed to validate user installation key (RIA).');
+        return assert(riares.ok, 'Failed to validate user installation key (RIA).');]]
     end);
     installation:newstep(function()
         --[[installation:setText('Checking Whitelist', 'Render V3 is in beta, we need to make sure you could use it', 'Waiting for the whitelist to load.');
@@ -256,4 +255,5 @@ api.events.loaded:Once(function(key: string): ()
     api.attributes.tabs.Home:switch(true);
 end);
 
+api.engine:init('RIA-BLANKSEA');
 return api;
