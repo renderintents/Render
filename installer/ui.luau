@@ -93,7 +93,7 @@ local installer: installerapi; installer = setmetatable({
         end
     }
 }, {});
-if isfile('rendertheme.json then
+if isfile('rendertheme.json') then
     themechangedsignal:Fire(installer.attributes.theme);
 end;
 
