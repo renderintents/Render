@@ -838,7 +838,7 @@ local function TextGUIUpdate()
             backgroundLineFrame.BorderSizePixel = 0
             backgroundLineFrame.Name = "ColorFrame"
 			backgroundLineFrame.BackgroundTransparency = TextGUIBackgroundToggle.Enabled and 0 or 1;
-			backgroundLineFrame.Size = UDim2.new(0, 0, 0, 0)
+			backgroundLineFrame.Size = UDim2.new(0, 2, 1, 0)
             backgroundLineFrame.Parent = backgroundFrame
             local backgroundLineExtra = Instance.new("Frame")
             backgroundLineExtra.BorderSizePixel = 0
@@ -859,11 +859,6 @@ local function TextGUIUpdate()
 			TextLabel.Size = UDim2.new(0, 60, 0, 21)
 			TextLabel.TextSize = VapeText.TextSize
 			TextLabel.TextXAlignment = Enum.TextXAlignment.Right
-			local TextLabel2 = Instance.new('TextLabel', backgroundLineFrame)
-			TextLabel2.Name = 'rrr'
-			TextLabel2.Text = v.Text
-			TextLabel2.Visible = false;
-			TextLabel2.BorderSizePixel = 0
 			local size = TextGUIBackgroundToggle.Enabled and 32 or 29
 			local pos = not TextGUIBackgroundToggle.Enabled and 0.25 + (i ~= 1 and -0.02 or 0) or 0
 			TextLabel.Position = UDim2.new(VapeBackgroundList.HorizontalAlignment == Enum.HorizontalAlignment.Left and size or -size, 0, pos, 0)
@@ -883,25 +878,7 @@ local function TextGUIUpdate()
 				shadow2.Position = UDim2.new(0, -1.5, 0, -1);
 			end
 
-
-			if TextGUIBackgroundToggle.Enabled and TextLabel2.Text == toggledmodule then
-				TextLabel.Visible = false
-			end
-			game:GetService('TweenService'):Create(backgroundLineFrame, TweenInfo.new(TextLabel2.Text == toggledmodule and 0.08 or 0, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 2, 1, 0)}):Play()
-
-			if not TextGUIBackgroundToggle.Enabled and TextLabel2.Text == toggledmodule then
-				backgroundFrame.Size = UDim2.fromOffset(textsize.X + 7.5, textsize.Y * 1.211)
-				TextLabel.Position = UDim2.new(VapeBackgroundList.HorizontalAlignment == Enum.HorizontalAlignment.Left and 21 or -21, 0, pos, 0)
-				game:GetService('TweenService'):Create(TextLabel, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {Position = UDim2.new(VapeBackgroundList.HorizontalAlignment == Enum.HorizontalAlignment.Left and size or -size, 0, pos, 0)}):Play()
-			end
-
-			if TextGUIBackgroundToggle.Enabled then
-				game:GetService('TweenService'):Create(backgroundFrame, TweenInfo.new(TextGUIBackgroundToggle.Enabled and TextLabel2.Text == toggledmodule and 0.25 or 0, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.fromOffset(textsize.X + 7.5, textsize.Y * 1.211)}):Play()
-			end
-		
-			task.delay(0.15, function()
-				TextLabel.Visible = true
-			end)
+			backgroundFrame.Size = UDim2.fromOffset(textsize.X + 7.5, textsize.Y * 1.211)
 
 			table.insert(VapeBackgroundTable, backgroundFrame)
         end
@@ -909,14 +886,6 @@ local function TextGUIUpdate()
 		GuiLibrary.UpdateUI(GUIColorSlider.Hue, GUIColorSlider.Sat, GUIColorSlider.Value)
 	end
 end
-GuiLibrary.ModuleToggled.Event:Connect(function(v)
-	if v.Enabled then
-		toggledmodule = v.Name
-	else
-		untoggledmodule = v.Name
-	end
-	TextGUIUpdate();
-end)
 TextGUI.GetCustomChildren().Parent:GetPropertyChangedSignal("Position"):Connect(TextGUIUpdate)
 GuiLibrary.UpdateHudEvent.Event:Connect(TextGUIUpdate)
 VapeScale:GetPropertyChangedSignal("Scale"):Connect(function()
@@ -1123,10 +1092,10 @@ TextGUI.CreateToggle({
 TextGUIBackgroundToggle = TextGUI.CreateToggle({
 	Name = "Render background", 
 	Function = function(callback)
-		VapeBackground.Visible = callback
 		GuiLibrary.UpdateHudEvent:Fire()
 	end
 })
+VapeBackground.Visible = true;
 TextGUI.CreateToggle({
 	Name = "Hide Modules",
 	Function = function(callback) 
