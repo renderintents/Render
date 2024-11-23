@@ -67,7 +67,7 @@ end;
 
 local bootinstallation = function(): ()
     if constructor == nil or not api.attributes.loaded then 
-        return;
+        return
     end;
     local configuration: {[string]: {profiles: {[string]: table}, meta: {[string]: {Selected: boolean, Keybind: string}}}} = {
         meta = {},
@@ -218,7 +218,8 @@ window:createSection('Home', function()
     exitbutton.ImageLabel.Image = 'rbxassetid://17334988100';
     exitbutton.BackgroundColor3 = api.attributes.accentcolor.main:Lerp(Color3.fromRGB(10, 10, 10), 0.35);
     exitbutton.Position = UDim2.new(0.078, 0, 0.704, 0);
-    exitbutton.ZIndex = 9e15;
+    exitbutton.ZIndex = 4;
+    exitbutton.ImageLabel.ZIndex = 4;
     installbutton.MouseButton1Click:Connect(bootinstallation);
     exitbutton.MouseButton1Click:Connect(function() api.engine:destroy() end);
     for i: number, v: GuiObject in ({headers, rendericon, installbutton, exitbutton}) do 
