@@ -706,6 +706,8 @@ local VapeBackgroundTable = {}
 local VapeScale = Instance.new("UIScale")
 VapeScale.Parent = VapeLogoFrame
 --why do other platforms do rendering differently
+local toggledmodule = ''
+local untoggledmodule = ''
 local TextGUIOffsets = {
 	[Enum.Platform.Android] = {
 		6,
@@ -801,41 +803,120 @@ local function TextGUIUpdate()
             end
 		end
 
+		local toggledmod = toggledmodule
         for i,v in pairs(VapeBackground:GetChildren()) do
 			table.clear(VapeBackgroundTable)
-            if v:IsA("Frame") then v:Destroy() end
+			task.spawn(function()
+				if v:IsA("Frame") then 
+					if v.ColorFrame.rrr.Text == untoggledmodule then
+						game:GetService('TweenService'):Create(v.ColorFrame, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 0, 1, 0)}):Play()
+						local tween = game:GetService('TweenService'):Create(v, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.fromOffset(0, 0, 0, v.Size.Y)})
+						v.ColorFrame.TextLabel.Visible = false
+ 						tween:Play()
+						tween.Completed:Wait()
+						task.wait(0.3)
+						untoggledmodule = ''
+						return v:Destroy() 
+					end
+					v:Destroy() 
+				end
+			end)
         end
-        for i,v in pairs(backgroundList) do
-            local textsize = textService:GetTextSize(v, VapeText.TextSize, VapeText.Font, Vector2.new(1000000, 1000000))
+		for i,v in pairs(moduleList) do
+            local textsize = textService:GetTextSize(v.Text..v.ExtraText, VapeText.TextSize, VapeText.Font, Vector2.new(1000000, 1000000))
             local backgroundFrame = Instance.new("Frame")
             backgroundFrame.BorderSizePixel = 0
-            backgroundFrame.BackgroundTransparency = 0.45
+            backgroundFrame.BackgroundTransparency = TextGUIBackgroundToggle.Enabled and 0.5 or 1
             backgroundFrame.BackgroundColor3 = Color3.new()
             backgroundFrame.Visible = true
+			backgroundFrame.Size = UDim2.fromOffset(0, textsize.Y * 1.211)
             backgroundFrame.ZIndex = 0
             backgroundFrame.LayoutOrder = i
-            backgroundFrame.Size = UDim2.fromOffset(textsize.X + 10, textsize.Y * 1.211)
             backgroundFrame.Parent = VapeBackground
             local backgroundLineFrame = Instance.new("Frame")
-            backgroundLineFrame.Size = UDim2.new(0, 2, 1, 0)
             backgroundLineFrame.Position = (VapeBackgroundList.HorizontalAlignment == Enum.HorizontalAlignment.Left and UDim2.new() or UDim2.new(1, -2, 0, 0))
             backgroundLineFrame.BorderSizePixel = 0
             backgroundLineFrame.Name = "ColorFrame"
+			backgroundLineFrame.BackgroundTransparency = TextGUIBackgroundToggle.Enabled and 0 or 1;
+			backgroundLineFrame.Size = UDim2.new(0, 0, 0, 0)
             backgroundLineFrame.Parent = backgroundFrame
             local backgroundLineExtra = Instance.new("Frame")
             backgroundLineExtra.BorderSizePixel = 0
-            backgroundLineExtra.BackgroundTransparency = 0.95
+            backgroundLineExtra.BackgroundTransparency = TextGUIBackgroundToggle.Enabled and 0.95 or 1;
             backgroundLineExtra.BackgroundColor3 = Color3.new()
             backgroundLineExtra.ZIndex = 0
+			backgroundLineExtra.ClipsDescendants = false
             backgroundLineExtra.Size = UDim2.new(1, 0, 0, 2)
             backgroundLineExtra.Position = UDim2.new(0, 0, 1, -1)
             backgroundLineExtra.Parent = backgroundFrame
+			local TextLabel = Instance.new('TextLabel', backgroundLineFrame)
+			TextLabel.Font = VapeText.Font
+			TextLabel.RichText = true;
+			TextLabel.TextColor3 = Color3.fromHSV(GUIColorSlider.Hue, GUIColorSlider.Sat, GUIColorSlider.Value)
+			TextLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			TextLabel.Text = `{v.Text}<font color="rgb(170, 170, 170)">{v.ExtraText}</font>`
+			TextLabel.BackgroundTransparency = 1
+			TextLabel.Size = UDim2.new(0, 60, 0, 21)
+			TextLabel.TextSize = VapeText.TextSize
+			TextLabel.TextXAlignment = Enum.TextXAlignment.Right
+			local TextLabel2 = Instance.new('TextLabel', backgroundLineFrame)
+			TextLabel2.Name = 'rrr'
+			TextLabel2.Text = v.Text
+			TextLabel2.Visible = false;
+			TextLabel2.BorderSizePixel = 0
+			local size = TextGUIBackgroundToggle.Enabled and 32 or 29
+			local pos = not TextGUIBackgroundToggle.Enabled and 0.25 + (i ~= 1 and -0.02 or 0) or 0
+			TextLabel.Position = UDim2.new(VapeBackgroundList.HorizontalAlignment == Enum.HorizontalAlignment.Left and size or -size, 0, pos, 0)
+			TextLabel.BorderSizePixel = 0
+			local shadow
+			if textguishadow then
+				shadow = TextLabel:Clone();
+				shadow.Parent = TextLabel;
+				shadow.Position = UDim2.new(0, 2, 0, 1);
+				shadow.TextTransparency = 0.6
+				shadow.Name = 'TextShadow'
+				shadow.Visible = true
+				shadow.Text = `{v.Text}{v.ExtraText}`
+				shadow.TextColor3 = Color3.fromRGB(0, 0, 0);
+				local shadow2 = shadow:Clone()
+				shadow2.Parent = TextLabel;
+				shadow2.Position = UDim2.new(0, -1.5, 0, -1);
+			end
+
+
+			if TextGUIBackgroundToggle.Enabled and TextLabel2.Text == toggledmodule then
+				TextLabel.Visible = false
+			end
+			game:GetService('TweenService'):Create(backgroundLineFrame, TweenInfo.new(TextLabel2.Text == toggledmodule and 0.08 or 0, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 2, 1, 0)}):Play()
+
+			if not TextGUIBackgroundToggle.Enabled and TextLabel2.Text == toggledmodule then
+				backgroundFrame.Size = UDim2.fromOffset(textsize.X + 7.5, textsize.Y * 1.211)
+				TextLabel.Position = UDim2.new(VapeBackgroundList.HorizontalAlignment == Enum.HorizontalAlignment.Left and 21 or -21, 0, pos, 0)
+				game:GetService('TweenService'):Create(TextLabel, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {Position = UDim2.new(VapeBackgroundList.HorizontalAlignment == Enum.HorizontalAlignment.Left and size or -size, 0, pos, 0)}):Play()
+			end
+
+			if TextGUIBackgroundToggle.Enabled then
+				game:GetService('TweenService'):Create(backgroundFrame, TweenInfo.new(TextGUIBackgroundToggle.Enabled and TextLabel2.Text == toggledmodule and 0.25 or 0, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.fromOffset(textsize.X + 7.5, textsize.Y * 1.211)}):Play()
+			end
+		
+			task.delay(0.15, function()
+				TextLabel.Visible = true
+			end)
+
 			table.insert(VapeBackgroundTable, backgroundFrame)
         end
 
 		GuiLibrary.UpdateUI(GUIColorSlider.Hue, GUIColorSlider.Sat, GUIColorSlider.Value)
 	end
 end
+GuiLibrary.ModuleToggled.Event:Connect(function(v)
+	if v.Enabled then
+		toggledmodule = v.Name
+	else
+		untoggledmodule = v.Name
+	end
+	TextGUIUpdate();
+end)
 TextGUI.GetCustomChildren().Parent:GetPropertyChangedSignal("Position"):Connect(TextGUIUpdate)
 GuiLibrary.UpdateHudEvent.Event:Connect(TextGUIUpdate)
 VapeScale:GetPropertyChangedSignal("Scale"):Connect(function()
@@ -1092,25 +1173,13 @@ CustomText = TextGUI.CreateTextBox({
 	end
 })
 CustomText.Object.Visible = false
-
 local function newHealthColor(percent)
 	if percent > 0.5 then 
-		return Color3.fromRGB(5, 134, 105):lerp(Color3.fromRGB(255, 255, 0), (0.5 - (percent - 0.5)) / 0.5)
+		return Color3.fromRGB(43, 255, 0):lerp(Color3.fromRGB(255, 255, 0), (0.5 - (percent - 0.5)) / 0.5)
 	end
 	return Color3.fromRGB(255, 255, 0):lerp(Color3.fromRGB(249, 57, 55), (0.5 - percent) / 0.5)
 end
-local TargetInfo = GuiLibrary.CreateCustomWindow({
-	Name = "Target Info",
-	Icon = "rendervape/assets/TargetIcon3.png",
-	IconSize = 16
-})
-local TargetInfoToggle = GuiLibrary.ObjectsThatCanBeSaved.GUIWindow.Api.CreateCustomToggle({
-	Name = "Target Info",
-	Icon = "rendervape/assets/TargetInfoIcon2.png", 
-	Function = function(boolean)
-		TargetInfo.SetVisible(boolean)
-	end
-})
+
 local TargetInfoBackground = {Enabled = false}
 local TargetInfoBackgroundColor = {Hue = 0, Sat = 0, Value = 0}
 local TargetInfoMainFrame = Instance.new("Frame")
@@ -1119,23 +1188,21 @@ TargetInfoMainFrame.BorderSizePixel = 0
 TargetInfoMainFrame.BackgroundTransparency = 1
 TargetInfoMainFrame.Size = UDim2.new(0, 220, 0, 72)
 TargetInfoMainFrame.Position = UDim2.new(0, 0, 0, 5)
-TargetInfoMainFrame.Parent = TargetInfo.GetCustomChildren()
 local TargetInfoMainInfo = Instance.new("Frame")
 TargetInfoMainInfo.BackgroundColor3 = Color3.fromRGB(31, 30, 31)
 TargetInfoMainInfo.Size = UDim2.new(0, 220, 0, 80)
-TargetInfoMainInfo.BackgroundTransparency = 0.25
+TargetInfoMainInfo.BackgroundTransparency = 0.5
 TargetInfoMainInfo.Position = UDim2.new(0, 0, 0, 0)
 TargetInfoMainInfo.Name = "MainInfo"
 TargetInfoMainInfo.Parent = TargetInfoMainFrame
 local TargetInfoName = Instance.new("TextLabel")
-TargetInfoName.TextSize = 14
 TargetInfoName.Font = Enum.Font.Arial
 TargetInfoName.TextColor3 = Color3.fromRGB(162, 162, 162)
-TargetInfoName.Position = UDim2.new(0, 70, 0, 10)
+TargetInfoName.Position = UDim2.new(0, 70, 0, 13)
 TargetInfoName.TextStrokeTransparency = 1
 TargetInfoName.BackgroundTransparency = 1
 TargetInfoName.Size = UDim2.new(0, 80, 0, 20)
-TargetInfoName.Text = "Target name"
+TargetInfoName.Text = playersService.LocalPlayer.DisplayName or 'None'
 TargetInfoName.ZIndex = 2
 TargetInfoName.TextXAlignment = Enum.TextXAlignment.Left
 TargetInfoName.TextYAlignment = Enum.TextYAlignment.Top
@@ -1151,9 +1218,9 @@ TargetInfoName:GetPropertyChangedSignal("Text"):Connect(function()
 end)
 TargetInfoNameShadow.Parent = TargetInfoName
 local TargetInfoHealthBackground = Instance.new("Frame")
-TargetInfoHealthBackground.BackgroundColor3 = Color3.fromRGB(54, 54, 54)
+TargetInfoHealthBackground.BackgroundColor3 = Color3.fromRGB(26, 25, 26)
 TargetInfoHealthBackground.Size = UDim2.new(0, 140, 0, 4)
-TargetInfoHealthBackground.Position = UDim2.new(0, 72, 0, 32)
+TargetInfoHealthBackground.Position = UDim2.new(0, 71, 0, 35)
 TargetInfoHealthBackground.Parent = TargetInfoMainInfo
 local TargetInfoHealthBackgroundShadow = Instance.new("ImageLabel")
 TargetInfoHealthBackgroundShadow.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -1168,7 +1235,7 @@ TargetInfoHealthBackgroundShadow.ScaleType = Enum.ScaleType.Slice
 TargetInfoHealthBackgroundShadow.SliceCenter = Rect.new(10, 10, 118, 118)
 TargetInfoHealthBackgroundShadow.Parent = TargetInfoHealthBackground
 local TargetInfoHealth = Instance.new("Frame")
-TargetInfoHealth.BackgroundColor3 = Color3.fromRGB(40, 137, 109)
+TargetInfoHealth.BackgroundColor3 = Color3.fromRGB(115, 255, 110)
 TargetInfoHealth.Size = UDim2.new(1, 0, 1, 0)
 TargetInfoHealth.ZIndex = 3
 TargetInfoHealth.BorderSizePixel = 0
@@ -1183,16 +1250,14 @@ TargetInfoHealthExtra.Position = UDim2.new(1, 0, 0, 0)
 TargetInfoHealthExtra.Parent = TargetInfoHealth
 local TargetInfoImage = Instance.new("ImageLabel")
 TargetInfoImage.Size = UDim2.new(0, 50, 0, 50)
-TargetInfoImage.BackgroundTransparency = 1
+TargetInfoImage.BackgroundTransparency = 0
 TargetInfoImage.BackgroundColor3 = Color3.fromRGB(26, 25, 26)
 TargetInfoImage.Image = 'rbxthumb://type=AvatarHeadShot&id='..playersService.LocalPlayer.UserId..'&w=420&h=420'
 TargetInfoImage.Position = UDim2.new(0, 10, 0, 16)
 
-Instance.new('UICorner').CornerRadius = UDim.new(0, 10)
-
 TargetInfoImage.Parent = TargetInfoMainInfo
 local TargetInfoMainInfoCorner = Instance.new("UICorner")
-TargetInfoMainInfoCorner.CornerRadius = UDim.new(0, 4)
+TargetInfoMainInfoCorner.CornerRadius = UDim.new(0, 6)
 TargetInfoMainInfoCorner.Parent = TargetInfoMainInfo
 local TargetInfoHealthBackgroundCorner = Instance.new("UICorner")
 TargetInfoHealthBackgroundCorner.CornerRadius = UDim.new(0, 2048)
@@ -1204,63 +1269,88 @@ local TargetInfoHealthCorner2 = Instance.new("UICorner")
 TargetInfoHealthCorner2.CornerRadius = UDim.new(0, 2048)
 TargetInfoHealthCorner2.Parent = TargetInfoHealthExtra
 local TargetInfoHealthExtraCorner = Instance.new("UICorner")
-TargetInfoHealthExtraCorner.CornerRadius = UDim.new(0, 4)
+TargetInfoHealthExtraCorner.CornerRadius = UDim.new(0, 8)
 TargetInfoHealthExtraCorner.Parent = TargetInfoImage
-TargetInfo.CreateDropdown({
-	Name = "Font",
-	List = TextGUIFonts,
-	Function = function(val)
-		TargetInfoName.Font = Enum.Font[val]
-		TargetInfoNameShadow.Font = Enum.Font[val]
-	end
-})
 
-TargetInfoBackground = TargetInfo.CreateToggle({
-	Name = "Use Background",
-	Function = function(callback) 
-		TargetInfoMainInfo.BackgroundTransparency = callback and 0.25 or 1
-		TargetInfoName.TextColor3 = callback and Color3.fromRGB(162, 162, 162) or Color3.new(1, 1, 1)
-		TargetInfoName.Size = UDim2.new(0, 80, 0, callback and 16 or 18)
-		TargetInfoName.TextSize = callback and 14 or 15
-		TargetInfoHealthBackground.Size = UDim2.new(0, 138, 0, callback and 4 or 7)
-	end,
-	Default = true
-})
-local TargetInfoDisplayNames = TargetInfo.CreateToggle({
-	Name = "Use Display Names",
-	Function = function(callback) end,
-	Default = true
-})
-local TargetInfoHealthTween
-GuiLibrary.RemoveObject('VapeSettingsTarget InfoToggle');
+local playersimage = {}
+
+for i,v in game:GetService('Players'):GetPlayers() do
+	playersimage[v.Name] = 'rbxthumb://type=AvatarHeadShot&id='..v.UserId..'&w=420&h=420'
+end
+game:GetService('Players').PlayerAdded:Connect(function(v)
+	playersimage[v.Name] = 'rbxthumb://type=AvatarHeadShot&id='..v.UserId..'&w=420&h=420'
+end)
+
+local currentTarget: table = nil;
+local TargetInfoHealthTween;
+local damageanimation = nil;
+local damageanimation2 = nil;
 shared.VapeTargetInfo = {
 	UpdateInfo = function(tab, targetsize) 
-		if true then
+		if TargetInfoMainFrame.Parent then
 			local hasTarget = false
 			for _, v in pairs(shared.VapeTargetInfo.Targets) do
 				hasTarget = true
-				TargetInfoImage.Image = 'rbxthumb://type=AvatarHeadShot&id='..v.Player.UserId..'&w=420&h=420'
+				TargetInfoImage.Image = `rbxthumb://type=AvatarHeadShot&id={v.Player.UserId}&w=420&h=420`
 				TargetInfoHealth:TweenSize(UDim2.new(math.clamp(v.Humanoid.Health / v.Humanoid.MaxHealth, 0, 1), 0, 1, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.25, true)
 				TargetInfoHealthExtra:TweenSize(UDim2.new(math.clamp((v.Humanoid.Health / v.Humanoid.MaxHealth) - 1, 0, 1), 0, 1, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.25, true)
+				TargetInfoName.Text = (v.Player.DisplayName)
 				if TargetInfoHealthTween then TargetInfoHealthTween:Cancel() end
 				TargetInfoHealthTween = getservice("TweenService"):Create(TargetInfoHealth, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {BackgroundColor3 = newHealthColor(math.clamp(v.Humanoid.Health / v.Humanoid.MaxHealth, 0, 1))})
 				TargetInfoHealthTween:Play()
-				TargetInfoName.Text = (TargetInfoDisplayNames.Enabled and v.Player.DisplayName or v.Player.Name)
-				break
+				if damageanimation then
+					damageanimation.Completed:Wait();
+					task.wait(0.12)
+				end
+				if damageanimation2 then
+					task.wait(0.22)
+					damageanimation2.Completed:Wait();
+				end
+				if currentTarget and currentTarget.Player and currentTarget.Player == v.RootPart and currentTarget.Health > v.Humanoid.Health then
+					currentTarget.Health = v.Humanoid.Health
+					TargetInfoImage.ImageTransparency = 0.7
+					getservice("TweenService"):Create(TargetInfoImage, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {ImageColor3 = Color3.fromRGB(255, 0, 0)}):Play();
+					TargetInfoImage.BackgroundTransparency = 0.4
+					damageanimation = getservice("TweenService"):Create(TargetInfoImage, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(255, 21, 0)});
+					damageanimation:Play();
+					damageanimation = nil
+					task.wait(0.2)
+					getservice("TweenService"):Create(TargetInfoImage, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {ImageColor3 = Color3.fromRGB(255, 255, 255)}):Play();
+					damageanimation2 = getservice("TweenService"):Create(TargetInfoImage, TweenInfo.new(0.15, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {BackgroundColor3 = Color3.fromRGB(26, 25, 26)});
+					damageanimation2:Play()
+					TargetInfoImage.ImageTransparency = 0
+					TargetInfoImage.BackgroundTransparency = 0
+					damageanimation2.Completed:Wait();
+					damageanimation2 = nil
+				end
+				if currentTarget == nil or currentTarget.Player ~= v.Player then
+					currentTarget = {
+						Player = v.RootPart,
+						Health = v.Humanoid.Health	
+					};
+				end;
 			end
-			TargetInfoMainInfo.Visible = hasTarget
-		end
+			TargetInfoMainInfo.Visible = hasTarget or (TargetInfoMainInfo.Size ~= UDim2.new(0, 220, 0, 0))
+		end 
 	end,
 	Targets = {},
-	Object = TargetInfo
+	Object = setmetatable({
+		TargetInfoMainInfo = TargetInfoMainInfo;
+		TargetInfoName = TargetInfoName;
+		TargetInfoHealthBackground = TargetInfoHealthBackground;
+	}, {
+		__index = function()
+			return TargetInfoMainFrame
+		end;
+	})
 }
+TargetInfoName.TextSize = 14;
+TargetInfoNameShadow.TextSize = 14;
 task.spawn(function()
 	repeat
-		if shared.VapeTargetInfo then
-			shared.VapeTargetInfo.UpdateInfo()
-		end
+		shared.VapeTargetInfo.UpdateInfo();
 		task.wait()
-	until not vapeInjected
+	until GuiLibrary == nil
 end)
 
 local GeneralSettings = GUI.CreateDivider2("General Settings")
