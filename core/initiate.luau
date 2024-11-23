@@ -807,7 +807,9 @@ local function TextGUIUpdate()
 		local toggledmod = toggledmodule
         for i,v in pairs(VapeBackground:GetChildren()) do
 			table.clear(VapeBackgroundTable)
-		v:Destroy() 
+            if v:IsA("Frame") then 
+		        v:Destroy() 
+            end;
         end
 		for i,v in pairs(moduleList) do
             local textsize = textService:GetTextSize(v.Text..v.ExtraText, VapeText.TextSize, VapeText.Font, Vector2.new(1000000, 1000000))
@@ -1588,11 +1590,11 @@ GuiLibrary.UpdateUI = function(h, s, val, bypass)
 				end
 			end
 		end
-
-		if TextGUIBackgroundToggle.Enabled then
-			for i, v in pairs(VapeBackgroundTable) do
-				v.ColorFrame.BackgroundColor3 = backgroundTable[v.LayoutOrder] or Color3.new()
-			end
+        
+		local isEnabledbg = TextGUIBackgroundToggle.Enabled
+		for i, v in pairs(VapeBackgroundTable) do
+			if isEnabledbg then v.ColorFrame.BackgroundColor3 = backgroundTable[v.LayoutOrder] or Color3.new() end
+			v.ColorFrame.TextLabel.TextColor3 = backgroundTable[v.LayoutOrder] or Color3.fromHSV(GUIColorSlider.Hue, GUIColorSlider.Sat, GUIColorSlider.Value)
 		end
 		VapeText.Text = newTextGUIText
 
