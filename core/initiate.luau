@@ -1230,15 +1230,6 @@ local TargetInfoHealthExtraCorner = Instance.new("UICorner")
 TargetInfoHealthExtraCorner.CornerRadius = UDim.new(0, 8)
 TargetInfoHealthExtraCorner.Parent = TargetInfoImage
 
-local playersimage = {}
-
-for i,v in game:GetService('Players'):GetPlayers() do
-	playersimage[v.Name] = 'rbxthumb://type=AvatarHeadShot&id='..v.UserId..'&w=420&h=420'
-end
-game:GetService('Players').PlayerAdded:Connect(function(v)
-	playersimage[v.Name] = 'rbxthumb://type=AvatarHeadShot&id='..v.UserId..'&w=420&h=420'
-end)
-
 local currentTarget: table = nil;
 local TargetInfoHealthTween;
 local damageanimation = nil;
@@ -1264,8 +1255,8 @@ shared.VapeTargetInfo = {
 					task.wait(0.22)
 					damageanimation2.Completed:Wait();
 				end
-				if currentTarget and currentTarget.Player and currentTarget.Player == v.RootPart and currentTarget.Health > v.Humanoid.Health then
-					currentTarget.Health = v.Humanoid.Health
+				if currentTarget and type(currentTarget) == 'table' and currentTarget.Player and currentTarget.Player == v.RootPart and currentTarget.Health > v.Humanoid.Health then
+                    currentTarget.Health = v.Humanoid.Health
 					TargetInfoImage.ImageTransparency = 0.7
 					getservice("TweenService"):Create(TargetInfoImage, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {ImageColor3 = Color3.fromRGB(255, 0, 0)}):Play();
 					TargetInfoImage.BackgroundTransparency = 0.4
