@@ -807,21 +807,7 @@ local function TextGUIUpdate()
 		local toggledmod = toggledmodule
         for i,v in pairs(VapeBackground:GetChildren()) do
 			table.clear(VapeBackgroundTable)
-			task.spawn(function()
-				if v:IsA("Frame") then 
-					if v.ColorFrame.rrr.Text == untoggledmodule then
-						game:GetService('TweenService'):Create(v.ColorFrame, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 0, 1, 0)}):Play()
-						local tween = game:GetService('TweenService'):Create(v, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.fromOffset(0, 0, 0, v.Size.Y)})
-						v.ColorFrame.TextLabel.Visible = false
- 						tween:Play()
-						tween.Completed:Wait()
-						task.wait(0.3)
-						untoggledmodule = ''
-						return v:Destroy() 
-					end
-					v:Destroy() 
-				end
-			end)
+		v:Destroy() 
         end
 		for i,v in pairs(moduleList) do
             local textsize = textService:GetTextSize(v.Text..v.ExtraText, VapeText.TextSize, VapeText.Font, Vector2.new(1000000, 1000000))
