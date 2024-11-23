@@ -19,6 +19,7 @@ local textService = getservice("TextService")
 local playersService = getservice("Players")
 local inputService = getservice("UserInputService")
 local httpService = getservice("HttpService")
+local textguishadow = false;
 local tweenservice: TweenService = getservice('TweenService');
 local httprequest = (request or http and http.request or http_request or fluxus and fluxus.request or function() end)
 local isfile = isfile or function(file)
@@ -724,7 +725,12 @@ local TextGUIOffsets = {
 	}
 }
 TextGUIOffsets[Enum.Platform.IOS] = TextGUIOffsets[Enum.Platform.Android]
-local function TextGUIUpdate()
+local textguiupd: number = 0;
+local function TextGUIUpdate(moduleToggled: {Enabled: boolean, ExtraText: () -> (), Name: string}): ()
+    moduleToggled = moduleToggled or {Enabled = nil, Name = 'nil', ExtraText = function()
+        return ''
+    end};
+    textguiupd = 0;
 	local scaledgui = vapeInjected and GuiLibrary.MainGui.ScaledGui
 	if scaledgui and scaledgui.Visible then
 		local formattedText = ''
@@ -804,14 +810,24 @@ local function TextGUIUpdate()
             end
 		end
 
+        if moduleToggled.Name == 'nil' then return end;
+
 		local toggledmod = toggledmodule
         for i,v in pairs(VapeBackground:GetChildren()) do
 			table.clear(VapeBackgroundTable)
-            if v:IsA("Frame") then 
-		        v:Destroy() 
+            if v:IsA("Frame") and v.ColorFrame.rrr.Text == moduleToggled.Name and moduleToggled.Enabled == false then 
+                game:GetService('TweenService'):Create(v.ColorFrame, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 0, 1, 0)}):Play()
+                local tween = game:GetService('TweenService'):Create(v, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.fromOffset(0, 0, 0, v.Size.Y)})
+                v.ColorFrame.TextLabel.Visible = false
+                tween:Play();
+                tween.Completed:Wait();
+                task.wait(0.3);
+                v:Destroy();
+            elseif v:IsA('Frame') then
+                v:Destroy();
             end;
         end
-		for i,v in pairs(moduleList) do
+        for i,v in pairs(moduleList) do
             local textsize = textService:GetTextSize(v.Text..v.ExtraText, VapeText.TextSize, VapeText.Font, Vector2.new(1000000, 1000000))
             local backgroundFrame = Instance.new("Frame")
             backgroundFrame.BorderSizePixel = 0
@@ -827,7 +843,7 @@ local function TextGUIUpdate()
             backgroundLineFrame.BorderSizePixel = 0
             backgroundLineFrame.Name = "ColorFrame"
 			backgroundLineFrame.BackgroundTransparency = TextGUIBackgroundToggle.Enabled and 0 or 1;
-			backgroundLineFrame.Size = UDim2.new(0, 2, 1, 0)
+			backgroundLineFrame.Size = UDim2.new(0, 0, 0, 0)
             backgroundLineFrame.Parent = backgroundFrame
             local backgroundLineExtra = Instance.new("Frame")
             backgroundLineExtra.BorderSizePixel = 0
@@ -848,6 +864,11 @@ local function TextGUIUpdate()
 			TextLabel.Size = UDim2.new(0, 60, 0, 21)
 			TextLabel.TextSize = VapeText.TextSize
 			TextLabel.TextXAlignment = Enum.TextXAlignment.Right
+			local TextLabel2 = Instance.new('TextLabel', backgroundLineFrame)
+			TextLabel2.Name = 'rrr'
+			TextLabel2.Text = v.Text
+			TextLabel2.Visible = false;
+			TextLabel2.BorderSizePixel = 0
 			local size = TextGUIBackgroundToggle.Enabled and 32 or 29
 			local pos = not TextGUIBackgroundToggle.Enabled and 0.25 + (i ~= 1 and -0.02 or 0) or 0
 			TextLabel.Position = UDim2.new(VapeBackgroundList.HorizontalAlignment == Enum.HorizontalAlignment.Left and size or -size, 0, pos, 0)
@@ -867,7 +888,26 @@ local function TextGUIUpdate()
 				shadow2.Position = UDim2.new(0, -1.5, 0, -1);
 			end
 
-			backgroundFrame.Size = UDim2.fromOffset(textsize.X + 7.5, textsize.Y * 1.211)
+
+			if TextGUIBackgroundToggle.Enabled and moduleToggled.Name == v.Text and moduleToggled.Enabled then
+				TextLabel.Visible = false
+			end
+
+			game:GetService('TweenService'):Create(backgroundLineFrame, TweenInfo.new(moduleToggled.Name == v.Text and 0.08 or 0, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 2, 1, 0)}):Play()
+
+			if not TextGUIBackgroundToggle.Enabled and moduleToggled.Name == v.Text and moduleToggled.Enabled then
+				backgroundFrame.Size = UDim2.fromOffset(textsize.X + 7.5, textsize.Y * 1.211)
+				TextLabel.Position = UDim2.new(VapeBackgroundList.HorizontalAlignment == Enum.HorizontalAlignment.Left and 21 or -21, 0, pos, 0)
+				game:GetService('TweenService'):Create(TextLabel, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {Position = UDim2.new(VapeBackgroundList.HorizontalAlignment == Enum.HorizontalAlignment.Left and size or -size, 0, pos, 0)}):Play()
+			end
+
+			if TextGUIBackgroundToggle.Enabled then
+				game:GetService('TweenService'):Create(backgroundFrame, TweenInfo.new(TextGUIBackgroundToggle.Enabled and moduleToggled.Enabled and moduleToggled.Name == v.Text and 0.25 or 0, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.fromOffset(textsize.X + 7.5, textsize.Y * 1.211)}):Play()
+			end
+		
+			task.delay(0.15, function()
+				TextLabel.Visible = true
+			end)
 
 			table.insert(VapeBackgroundTable, backgroundFrame)
         end
@@ -875,6 +915,9 @@ local function TextGUIUpdate()
 		GuiLibrary.UpdateUI(GUIColorSlider.Hue, GUIColorSlider.Sat, GUIColorSlider.Value)
 	end
 end
+GuiLibrary.ModuleToggled.Event:Connect(function(module: table): ()
+	TextGUIUpdate(module);
+end)
 TextGUI.GetCustomChildren().Parent:GetPropertyChangedSignal("Position"):Connect(TextGUIUpdate)
 GuiLibrary.UpdateHudEvent.Event:Connect(TextGUIUpdate)
 VapeScale:GetPropertyChangedSignal("Scale"):Connect(function()
@@ -1065,8 +1108,8 @@ TextGUI.CreateSlider({
 TextGUI.CreateToggle({
 	Name = "Shadow", 
 	Function = function(callback) 
-        VapeTextExtra.Visible = callback 
-        VapeLogoShadow.Visible = callback 
+        textguishadow = callback;
+        VapeLogoShadow.Visible = callback ;
     end,
 	HoverText = "Renders shadowed text."
 })
