@@ -80,9 +80,9 @@ local bootinstallation = function(): ()
         return assert(riares.ok, 'Failed to validate user installation key (RIA).');
     end);
     installation:newstep(function()
-        installation:setText('Checking Whitelist', 'Render V3 is in beta, we need to make sure you could use it', 'Waiting for the whitelist to load.');
+        --[[installation:setText('Checking Whitelist', 'Render V3 is in beta, we need to make sure you could use it', 'Waiting for the whitelist to load.');
         repeat task.wait() until constructor.whitelist.state > 0;
-        return assert(constructor.whitelist:get(3) > 1, 'User is unauthorized for Render 3.0');
+        return assert(constructor.whitelist:get(3) > 1, 'User is unauthorized for Render 3.0');]]
     end);
     installation:newstep(function()
         installation:setText('Getting Profiles', 'Modern profiles to make render feel special', 'Sending API request to storage');
@@ -147,6 +147,9 @@ local bootinstallation = function(): ()
             end;
         end;
         writefile(`rendervape/libraries/utils.luau`, `return requirefile('rendervape/libraries/utils.luau')`);
+    end);
+    installation:newstep(function()
+        constructor:uninject();
     end);
     installation:start();
 end;
