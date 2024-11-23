@@ -12,7 +12,7 @@
                                                                                       $$ |                
                                                                                       \__|   
    A very sexy and overpowered vape mod created at Render Intents  
-   CustomModules/18901165922.lua (Pets GO aka gambling game) - Selunariorium and Maxlasertech            
+   CustomModules/18901165922.lua (Pets GO aka gambling game) - Selunar and Maxlasertech            
    https://renderintents.lol                                                                                                                                                                                                                                                                            
 ]]
 
@@ -109,6 +109,7 @@ local cloneref = cloneref or function(data) return data end;
 local getservice = function(service)
 	return cloneref(game:GetService(service))
 end;
+local cheatenginetrash = cheatenginetrash
 local rendervape: vapemain = gui;
 local vape: vapemain = rendervape;
 local players: Players = getservice('Players');
@@ -165,8 +166,23 @@ local store: table = {
             }
         },
         potions = {}
-    }; --> have to do this poorly :(    
+    } --> have to do this poorly :(    
 };
+
+run(function()
+    local suc, res = pcall(function()
+        return require(replicatedstorage.Library.Client:FindFirstChildWhichIsA('ModuleScript'));
+    end)
+    
+    if not suc then
+        cheatenginetrash = true;
+        alertNotification('Render', res, 10)
+    end    
+end)
+
+if not firesignal then
+    alertNotification('Render', 'All of the features might not be supported due to main function not working.', 10)
+end;
 
 for i: number, v: ModuleScript? in replicatedstorage.Library.Client:GetDescendants() do
     if v.ClassName == 'ModuleScript' then
@@ -175,13 +191,12 @@ for i: number, v: ModuleScript? in replicatedstorage.Library.Client:GetDescendan
 end;
 
 local getorbs = function(distance: number): (table)
-    assert(distance, 'Argument 1 is nil.')
     local tab: table = {};
     for i: number, v: Instance in workspace.__THINGS.Breakables:GetDescendants() do
         if v.Name == 'Hitbox' then
-            local mag = (lplr.Character.HumanoidRootPart.Position - v.Position).magnitude
+            local mag: number = (lplr.Character.HumanoidRootPart.Position - v.Position).magnitude
             if mag <= distance then
-                table.insert(tab, v.Parent.Parent)
+                table.insert(tab, v.Parent.Parent);
             end;
         end;
     end
@@ -190,20 +205,21 @@ end;
 
 task.spawn(function()
     repeat
-        if cheatenginetrash then
-            for i,v in workspace.__THINGS.Pets:GetChildren() do
-                if tonumber(v.Name) ~= nil then
-                    table.insert(store.pets, v) --> gets everyone pet instead!!
-                end
-            end
-            break;
-        end;
-        table.clear(store.pets)
-        for i: string, v: table in store.client.PlayerPet.GetByPlayer() do
-            table.insert(store.pets, i)
-        end;
         task.wait(1)
-    until not vapeInjected
+        if cheatenginetrash then
+            table.clear(store.pets)
+            for i: number, v: Model in workspace.__THINGS.Pets:GetChildren() do
+                if tonumber(v.Name) ~= nil then
+                    table.insert(store.pets, v); --> gets everyone pet instead!!
+                end;
+            end;
+            continue;
+        end;
+        table.clear(store.pets);
+        for i: string, v: table in store.client.PlayerPet.GetByPlayer() do
+            table.insert(store.pets, i);
+        end;
+    until not vapeInjected;
 end)
 
 run(function()
@@ -215,11 +231,11 @@ run(function()
             if call then
                 repeat
                     replicatedstorage.Network.Eggs_Roll:InvokeServer();
-                    task.wait()
-                until (not autoroll.Enabled)
-            end
-        end
-    })
+                    task.wait();
+                until (not autoroll.Enabled);
+            end;
+        end;
+    });
 end);
 
 run(function()
@@ -229,11 +245,11 @@ run(function()
         HoverText = 'Automatically gets all the relics for you',
         Function = function(call: boolean)
             if call then
-                for _: number = 1, 100 do
-                    replicatedstorage.Network.Relic_Found:InvokeServer(_);
+                for i: number = 1, 100 do
+                    replicatedstorage.Network.Relic_Found:InvokeServer(i);
                 end;
-            end
-        end
+            end;
+        end;
     })
 end);
 
@@ -246,25 +262,28 @@ run(function()
         HoverText = 'Automatically farms the breakables for you.',
         Function = function(call: boolean)
             if call then
+                if cheatenginetrash then
+                    warningNotification('Render', `This feature might work really slowly with {identifyexecutor() or 'cheat engine trash'}`, 7)
+                end
                 repeat
                     local orb: table = autofarmmode == 'Single' and getorbs(autofarmdistance.Value)[1] or getorbs(autofarmdistance.Value)
                     if type(orb) ~= 'table' and orb then
                         for i: number, v: string in store.pets do
                             replicatedstorage.Network.Breakables_JoinPetBulk:FireServer({
                                 [v] = tonumber(orb.Name)
-                            }) 
-                        end
+                            });
+                        end;
                     elseif type(orb) == 'table' then
                         for i: number, v: Instance in orb do
                             for i2: number, v2: string in store.pets do
                                 replicatedstorage.Network.Breakables_JoinPetBulk:FireServer({
                                     [v2] = tonumber(v.Name)
-                                })  
-                            end
-                        end
-                    end
-                    task.wait(0.5)
-                until not autofarm.Enabled
+                                });
+                            end;
+                        end;
+                    end;
+                    task.wait(cheatenginetrash and 3 or 0.5);
+                until not autofarm.Enabled;
             end
         end
     });
@@ -308,7 +327,7 @@ run(function()
                             v:Remove();
                         end;
                     end;
-                    task.wait()
+                    task.wait();
                 until not autoshoot.Enabled;
             end
         end
@@ -454,6 +473,9 @@ run(function()
             end;
         end
     });
+end)
+run(function()
+    
 end)
 run(function()
     local autodig: vapemodule = {Enabled = false};

@@ -160,7 +160,7 @@ local hudwindow: vapewindow = gui.objects.TargetHUDWindow;
 local guiwindow: vapewindow = gui.objects.GUIWindow;
 
 run(function()
-    local killaura: vapemodule = {};
+    local killaura: vapemodule = {Enabled = false};
     local killaurarange: vapeslider = {Value = 200};
     killaura = blatant.Api.CreateOptionsButton({
         Name = 'Killaura',

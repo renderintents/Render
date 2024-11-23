@@ -138,7 +138,6 @@ local utility: vapewindow = rendervape.ObjectsThatCanBeSaved.UtilityWindow;
 local world: vapewindow = rendervape.ObjectsThatCanBeSaved.WorldWindow;
 local exploit: vapewindow = rendervape.ObjectsThatCanBeSaved.ExploitWindow;
 local minigames: vapewindow = rendervape.ObjectsThatCanBeSaved.MinigamesWindow;
-local hudwindow: vapewindow = rendervape.ObjectsThatCanBeSaved.TargetHUDWindow;
 local guiwindow: vapewindow = rendervape.ObjectsThatCanBeSaved.GUIWindow;
 local inventory: vapewindow = rendervape.ObjectsThatCanBeSaved.InventoryWindow;
 
