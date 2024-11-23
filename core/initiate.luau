@@ -652,6 +652,7 @@ VapeText.BackgroundColor3 = Color3.new()
 VapeText.Font = Enum.Font.SourceSans
 VapeText.Text = ""
 VapeText.TextSize = 19
+VapeText.Visible = false
 local VapeTextExtra = Instance.new("TextLabel")
 VapeTextExtra.Name = "ExtraText"
 VapeTextExtra.Parent = VapeText
