@@ -176,6 +176,7 @@ local lplr = setmetatable({}, {
 local vapeConnections = {};
 local vapeCachedAssets = {}
 local vapeTargetInfo = shared.VapeTargetInfo;
+local vapetarget = vapeTargetInfo
 local fakecam: Camera = Instance.new('Camera');
 local vapeInjected = true;
 local renderperformance = shared.renderperformance;
@@ -6812,6 +6813,34 @@ run(function()
 			selectfuncs[value]();
 		end;
 	});
+
+	newhudoption.CreateDropdown({
+		Name = 'Font';
+		List = GetEnumItems('Font');
+		Function = function(val: string): () -> ()
+			vapetarget.Object.TargetInfoName.Font = Enum.Font[val];
+			--[[for i: number, v: Instance in targethuds.MainHUD:GetDescendants() do
+				if v.ClassName == 'TextLabel' then
+					v.Font = Enum.Font[val];
+				end
+			end;]] --> looks bad icl
+		end;
+		Default = Enum.Font.Arial;
+	});
+	
+	targetinfobackground = newhudoption.CreateToggle({
+		Name = 'Use Background';
+		Function = function(callback: boolean): () -> () 
+			vapetarget.Object.TargetInfoMainInfo.BackgroundTransparency = callback and 0.6 or 1;
+			vapetarget.Object.TargetInfoName.TextColor3 = callback and Color3.fromRGB(162, 162, 162) or Color3.new(1, 1, 1);
+			vapetarget.Object.TargetInfoName.Size = UDim2.new(0, 80, 0, callback and 16 or 18);
+			vapetarget.Object.TargetInfoName.TextSize = callback and 14 or 15;
+			vapetarget.Object.TargetInfoHealthBackground.Size = UDim2.new(0, 138, 0, callback and 4 or 7);
+		end;
+		Default = true;
+	});
+
+	vapetarget.Object.nig.Parent = newhudoption.GetCustomChildren();
 
 	task.spawn(function()
 		repeat
