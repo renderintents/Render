@@ -93,6 +93,9 @@ local installer: installerapi; installer = setmetatable({
         end
     }
 }, {});
+if isfile('rendertheme.json') then
+    themechangedsignal:Fire(installer.attributes.theme);
+end;
 
 local cloneref: (object: Instance) -> (Instance) = getfenv().cloneref or function(object) return object end;
 
