@@ -6778,7 +6778,7 @@ run(function()
 	local healthnumbers: securetable = Performance.new();
 	local lastTarget: BasePart?;
 	local mainhudframe: Frame = targethuds.instance.MainHUD;
-	local vapehudui: Frame = vapeTargetInfo.Object.GetCustomChildren():FindFirstChildOfClass('Frame');
+	local vapehudui: Frame = vapeTargetInfo.Object.aa
 	local selectedhud: Frame;
 	local newhudoption: vapemodule;
 	local selectfuncs: {[string]: () -> ()} = {
@@ -9470,4 +9470,3 @@ run(function() --> working on this later
         List = {'Packet V3', 'Adjust', 'Rise 6.0'}
     });
 end);
-
