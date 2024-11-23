@@ -49,7 +49,7 @@ end;
 local runservice: RunService = getservice('RunService');
 local httpservice: HttpService = getservice('HttpService');
 local api: installerapi = runservice:IsStudio() and require(getservice('ReplicatedStorage').installer) or loadstring(game:HttpGet('https://storage.renderintents.lol/installer/ui.luau'))();
-local ria: string;
+local ria: string = '';
 local constructor: table;
 local window: windowengine = api.engine:createwindow();
 

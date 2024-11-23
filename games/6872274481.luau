@@ -3716,13 +3716,13 @@ run(function()
 	killaurarange = Killaura.CreateSlider({
 		Name = 'Attack range',
 		Min = 1,
-		Max = 18,
+		Max = 21,
 		Function = function(val)
 			if killaurarangecirclepart then
 				killaurarangecirclepart.Size = Vector3.new(val * 0.7, 0.01, val * 0.7)
 			end
 		end,
-		Default = 18
+		Default = 21
 	})
 	killauraangle = Killaura.CreateSlider({
 		Name = 'Max angle',
