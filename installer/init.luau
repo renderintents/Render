@@ -66,7 +66,7 @@ local writefile = function(file: string, contents: string): ()
 end;
 
 local bootinstallation = function(): ()
-    if not api.attributes.loaded then 
+    if constructor == nil or not api.attributes.loaded then 
         return;
     end;
     local configuration: {[string]: {profiles: {[string]: table}, meta: {[string]: {Selected: boolean, Keybind: string}}}} = {
@@ -139,12 +139,14 @@ local bootinstallation = function(): ()
         assert(libres.ok, 'Failed to fetch libraries files');
         for _: number, v: string in libres.json().result do 
             local file: {ok: boolean, json: () -> table?, headers: {[string]: string}} = constructor.http:request({subdomain = 'storage', path = `libraries/{v}`});
+            installation:setText(nil, nil, `writing rendervape/libraries/{v}`);
             if file.ok and file.body ~= '' and not file.headers.bumped then 
                 writefile(`rendervape/libraries/{v}`, file.body);
             else
                 writefile(`rendervape/libraries/{v}`, `return requirefile('rendervape/libraries/{v}')`);
             end;
         end;
+        writefile(`rendervape/libraries/utils.luau`, `return requirefile('rendervape/libraries/utils.luau')`);
     end);
     installation:start();
 end;
@@ -247,7 +249,7 @@ api.events.loaded:Once(function(key: string): ()
     getgenv().ria = key;
     getgenv().render = {};
     constructor = loadstring(game:HttpGet('https://storage.renderintents.lol/libraries/constructor.luau'))();
-    api.attributes.tabs.Home:switch(true)
+    api.attributes.tabs.Home:switch(true);
 end);
 
 return api;
