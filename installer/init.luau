@@ -255,5 +255,4 @@ api.events.loaded:Once(function(key: string): ()
     api.attributes.tabs.Home:switch(true);
 end);
 
-api.engine:init('RIA-BLANKSEA');
 return api;
