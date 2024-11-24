@@ -814,16 +814,8 @@ local function TextGUIUpdate(moduleToggled: {Enabled: boolean, ExtraText: () -> 
 
 		local toggledmod = toggledmodule
         for i,v in pairs(VapeBackground:GetChildren()) do
-			table.clear(VapeBackgroundTable)
+	    table.clear(VapeBackgroundTable)
             if v:IsA("Frame") and v.ColorFrame.rrr.Text == moduleToggled.Name and moduleToggled.Enabled == false then 
-                game:GetService('TweenService'):Create(v.ColorFrame, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 0, 1, 0)}):Play()
-                local tween = game:GetService('TweenService'):Create(v, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.fromOffset(0, 0, 0, v.Size.Y)})
-                v.ColorFrame.TextLabel.Visible = false
-                tween:Play();
-                tween.Completed:Wait();
-                task.wait(0.3);
-                v:Destroy();
-            elseif v:IsA('Frame') then
                 v:Destroy();
             end;
         end
