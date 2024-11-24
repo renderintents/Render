@@ -10,6 +10,7 @@ local GuiLibrary
 local baseDirectory = "rendervape/"
 local vapeInjected = true
 local oldRainbow = false
+local loadtime: number = tick();
 local errorPopupShown = false
 local redownloadedAssets = false
 local profilesLoaded = false
@@ -2053,6 +2054,9 @@ local function initiaterender()
 	coroutine.resume(saveSettingsLoop)
 	shared.VapeFullyLoaded = true;
 	getgenv().render.loaded = true;
+	local notification = GuiLibrary.CreateNotification('Render', `Successfully Loaded in, Took {math.floor(tick() - loadtime)}`, 12, 'assets/InfoNotification.png');
+	notification.IconLabel.ImageColor3 = Color3.fromRGB(255, 255, 255)
+	notification.Frame.Frame.ImageColor3 = Color3.fromRGB(255, 255, 255)
 	task.wait(0.3);
 	getgenv().render.debugserver:sendpacket({
 		data = {
