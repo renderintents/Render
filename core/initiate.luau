@@ -815,7 +815,7 @@ local function TextGUIUpdate(moduleToggled: {Enabled: boolean, ExtraText: () -> 
 		local toggledmod = toggledmodule
         for i,v in pairs(VapeBackground:GetChildren()) do
 	    table.clear(VapeBackgroundTable)
-            if v:IsA("Frame") and v.ColorFrame.rrr.Text == moduleToggled.Name and moduleToggled.Enabled == false then 
+            if v:IsA("Frame") then 
                 v:Destroy();
             end;
         end
