@@ -1984,7 +1984,7 @@ local function initiaterender()
 	for i: string, v: {Selected: boolean, Keybind: string} in profiles do 
 		table.insert(parsedprofiles, i);
 	end;
-	task.spawn(function()
+	pcall(function()
 		if true then -- don't ask why :)
 		    getgenv().rendervapeload = {file = 'universal.luau', step = 3};
 			getgenv().renderloadui:setprogress(2, 4, 'Loading the universal modules...');
