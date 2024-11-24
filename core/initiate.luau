@@ -1984,26 +1984,28 @@ local function initiaterender()
 	for i: string, v: {Selected: boolean, Keybind: string} in profiles do 
 		table.insert(parsedprofiles, i);
 	end;
-	if true then -- don't ask why :)
-	    getgenv().rendervapeload = {file = 'universal.luau', step = 3};
-		getgenv().renderloadui:setprogress(2, 4, 'Loading the universal modules...');
-		customload(vapeGithubRequest("core/universal.luau"), "universal");
-		getgenv().renderloadui:setprogress(3, 4, 'Loading the game modules...');
-		if bedwars then 
-			customload(vapeGithubRequest("games/6872274481.luau"), "6872274481")
-		else
-			local success, response = pcall(function()
-				return isfile("rendervape/games/"..game.PlaceId..".luau") and readfile("rendervape/games/"..game.PlaceId..".luau") or game:HttpGet("https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/CustomModules/"..game.PlaceId..".lua") 
-			end)
-			if success and response ~= "404: Not Found" then 
-				customload(response, game.PlaceId)
-				if not isfile("rendervape/games/"..game.PlaceId..".luau") then 
-					pcall(writefile, "rendervape/games/"..game.PlaceId..".luau", response)
+	task.spawn(function()
+		if true then -- don't ask why :)
+		    getgenv().rendervapeload = {file = 'universal.luau', step = 3};
+			getgenv().renderloadui:setprogress(2, 4, 'Loading the universal modules...');
+			customload(vapeGithubRequest("core/universal.luau"), "universal");
+			getgenv().renderloadui:setprogress(3, 4, 'Loading the game modules...');
+			if bedwars then 
+				customload(vapeGithubRequest("games/6872274481.luau"), "6872274481")
+			else
+				local success, response = pcall(function()
+					return isfile("rendervape/games/"..game.PlaceId..".luau") and readfile("rendervape/games/"..game.PlaceId..".luau") or game:HttpGet("https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/CustomModules/"..game.PlaceId..".lua") 
+				end)
+				if success and response ~= "404: Not Found" then 
+					customload(response, game.PlaceId)
+					if not isfile("rendervape/games/"..game.PlaceId..".luau") then 
+						pcall(writefile, "rendervape/games/"..game.PlaceId..".luau", response)
+					end
 				end
 			end
+			getgenv().rendervapeload = {file = 'Init.lua', step = 4};
 		end
-		getgenv().rendervapeload = {file = 'Init.lua', step = 4};
-	end
+	end)
 	shared.renderconstructor.runtime:initiate();
 	task.spawn(function()
 		repeat task.wait() until shared.VapeFullyLoaded;
