@@ -1953,12 +1953,14 @@ if typeof(teleportdata) == 'table' and (teleportdata.match or teleportdata.custo
 	shared.CustomSaveVape = 6872274481;
 end;
 
+local failed = false;
 local function customload(data, file)
 	print(file)
 	local success, err = pcall(function()
 		loadstring(data)()
 	end)
 	if not success then
+		failed = true
 		GuiLibrary.SaveSettings = function() end
 		task.spawn(error, "Render - Failed to load "..file..".luau | "..err);
 		GuiLibrary:notify({
@@ -2008,7 +2010,7 @@ local function initiaterender()
 	end)
 	shared.renderconstructor.runtime:initiate();
 	task.spawn(function()
-		repeat task.wait() until shared.VapeFullyLoaded;
+		repeat task.wait() until shared.VapeFullyLoaded or failed;
 		getgenv().renderloadui:setprogress(4, 4, 'the Script has been loaded, enjoy!');
 		task.wait(0.5);
 		for i: number, v: GuiObject in getgenv().renderloadui.instance:GetDescendants() do 
