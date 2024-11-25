@@ -178,7 +178,9 @@ local store = {
 	switchdelay = tick(),
 	lastHit = tick()
 };
+
 store.raycast.FilterType = Enum.RaycastFilterType.Include;
+store.blockRaycast = store.raycast;
 
 local combat = vape.ObjectsThatCanBeSaved.CombatWindow;
 local blatant = vape.ObjectsThatCanBeSaved.BlatantWindow;
@@ -1351,7 +1353,7 @@ run(function()
 	local OldBreak
 
     pcall(function()
-        repeat task.wait() until Flamework.isInitialized;
+        repeat task.wait() until cheatenginetrash or Flamework.isInitialized;
     end);
 
 	bedwars = (cheatenginetrash and loadcheatenginemodule() or setmetatable({
@@ -1447,7 +1449,7 @@ run(function()
 	}))
 
 	getgenv().bedwars = bedwars; 
-
+	getgenv().bedwarsStore = store;
 	OldBreak = bedwars.BlockController.isBlockBreakable
 
 
@@ -11324,7 +11326,9 @@ run(function()
 		spear = 'spear',
 		carrot_cannon = 'carrot_rocket',
 		light_sword = 'sword_wave1',
-		firecrackers = 'firecrackers'
+		firecrackers = 'firecrackers',
+        wood_crossbow = 'crossbow_arrow',
+        tactical_crossbow = 'tactical_crossbow_arrow'
 	};
 	local projaurasortfuncs = {
 		Distance = function()
@@ -11349,9 +11353,9 @@ run(function()
 			end
 		end
 	end;
-	local getammo = function(item: table)
+	local getammo = function(item: table, second: boolean?)
 		local special = customprojectiles[item.itemType];
-		if (item.itemType:find('bow') or item.itemType:find('headhunter')) and special == nil then 
+		if (item.itemType:find('bow') or item.itemType:find('headhunter')) or (special == nil or (item.itemType:find('bow') and second)) then 
 			return getarrow() or {}; 
 		end;
 		if item.itemType:find('ninja_chakram') then 
@@ -11363,7 +11367,7 @@ run(function()
 		for i,v in projaurablacklist.ObjectList do 
 			if item.itemType:find(v:lower()) then 
 				return {};
-			end 
+			end;
 		end;
 		if special then 
 			return getItem(special) or {};
@@ -11378,9 +11382,9 @@ run(function()
 				end
 			end
 		end
-		return {};
+		return second and item.itemType:find('bow') and special and {tool = special} or {};
 	end;
-	local betterswitch = function(item: Accessory)
+	local betterswitch = function(item: Accessory, second: boolean?)
 		if item.Name == 'firecrackers' then 
 			if crackerdelay > tick() then 
 				return;
@@ -11395,13 +11399,17 @@ run(function()
 		local oldtime = tick() + (0.1 * oldval);
 		repeat task.wait() until tick() > oldtime or projauraswitchdelay.Value ~= oldval;
 	end;
+    local regexarrowstring = function(item: string): (string)
+        local splitted: {string} = item:split('_');
+        return item == 'wood_crossbow' and 'crossbow_arrow' or `{splitted[#splitted - 1]}_arrow`
+    end;
 	projectileaura = blatant.Api.CreateOptionsButton({
 		Name = 'ProjectileAura',
 		HoverText = 'Automatically shoots projectiles and\nnearby targets.',
 		Function = function(calling)
 			if calling then 
 				if renderperformance.reducelag then 
-					return 
+					return; 
 				end;
 				projectileaurathread = task.spawn(function()
 					repeat 
@@ -11412,17 +11420,20 @@ run(function()
 						for i,v in store.localInventory.inventory.items do 
 							local target = projaurasortfuncs[projaurasort.Value]();
 							local projdata = bedwars.ItemTable[v.itemType] and bedwars.ItemTable[v.itemType].projectileSource;
+							if projdata == nil and not cheatenginetrash then 
+								continue;
+							end;
 							if target then 
 								if target.npc and table.find(mobdisabledprojectiles, v.itemType) then 
 									continue
 								end;
 								if projaurakillauradisable.Enabled and (tick() - store.lastHit) < 0.45 then 
-									continue
+									continue;
 								end;
-								local ammo = getammo(v);
+								local ammo, ammo2 = getammo(v), getammo(v, true);
 								if store.matchState ~= 0 and (lplr:GetAttribute('PlayingAsKit') or store.equippedKit) == 'dragon_sword' then 
 									bedwars.Client:Get('DragonSwordFire'):SendToServer({target = target.RootPart.Parent});
-								end
+								end;
 								if ammo.tool then 
 									if projdata and projdata.fireDelaySec and (tick() - lastfired[v.itemType]) < projdata.fireDelaySec then 
 										continue
@@ -11436,7 +11447,7 @@ run(function()
                                     local predicted = LaunchDirection(selfpos + Vector3.new(0, 2, 0), shootpos, projdata.launchVelocity or 100, projdata.gravitationalAcceleration or 196.2, false);
                                     if predicted then 
                                         task.spawn(function() 
-                                            bedwars.Client:Get(bedwars.ProjectileRemote):CallServerAsync(v.tool, tostring(ammo.tool), tostring(ammo.tool), selfpos + Vector3.new(0, 2, 0), selfpos, predicted, getservice('HttpService'):GenerateGUID(), {drawDurationSeconds = 1}, workspace:GetServerTimeNow() - 0.045, true)
+                                            bedwars.Client:Get(bedwars.ProjectileRemote):CallServerAsync(v.tool, tostring(ammo.tool), ammo2.tool and tostring(ammo2.tool) or tostring(ammo.tool), selfpos + Vector3.new(0, 2, 0), selfpos, predicted, getservice('HttpService'):GenerateGUID(), {drawDurationSeconds = 1}, workspace:GetServerTimeNow() - 0.045, true)
                                             lastfired[v.itemType] = tick();
                                         end);
                                     end
@@ -11773,16 +11784,21 @@ run(function()
 			Function = function(calling)
 				if calling then 
 					repeat 
-						debug.setupvalue(bedwars.DamageIndicator, 10, setmetatable({Create = indicatorFunction}, {
-							__index = function(self, index)
-								local data = rawget(self, index);
-								if data == nil or not DamageIndicator.Enabled then 
-									return tween[index]
-								end
-								return data
-							end
-						}))
-						task.wait(1) 
+						if tostring(debug.getupvalue(bedwars.DamageIndicator, 2)) ~= '' then 
+							debug.setupvalue(bedwars.DamageIndicator, 10, setmetatable({Create = indicatorFunction}, {
+								__index = function(self, index)
+									local data = rawget(self, index);
+									if data == nil or not DamageIndicator.Enabled then 
+										return tween[index]
+									end
+									return data
+								end,
+								__tostring = function(): (string)
+									return ''
+								end;
+							}));
+						end;
+						task.wait() 
 					until (not DamageIndicator.Enabled)
 				else
 					debug.setupvalue(bedwars.DamageIndicator, 10, tween.Create)
@@ -12143,7 +12159,7 @@ run(function()
 	local cheaterdatabaseEnums: table = {
 		[1] = 'Voidware',
 		[2] = 'Skid Vape',
-		[3] = 'Cat V5',
+		[3] = 'Cat Vape',
 		[4] = 'Abyss',
 		[5] = 'N1san1ware'
 	};
@@ -12226,8 +12242,8 @@ run(function()
 			if calling then 
 				for i,v in players:GetPlayers() do 
 					if v ~= lplr then 
-						bootdetection(v)
-					end
+						bootdetection(v);
+					end;
 				end;
 				table.insert(hackerdetector.Connections, players.PlayerAdded:Connect(bootdetection))
 			else
@@ -13196,6 +13212,7 @@ end);
 	local autobowswitchdelay: vapeslider = {Value = 1};
 	local oldconstructor: (self: DateModel?, ...any) -> ();
 	local projectileremote: RemoteFunction = bedwars.Client:Get(bedwars.ProjectileRemote).instance;
+    local switching: boolean;
 	local getarrow = function(): (string?)
 		for i,v in store.localInventory.inventory.items do  
 			if v.itemType:find('arrow') then 
@@ -13203,30 +13220,55 @@ end);
 			end
 		end
 	end;
+    local regexarrowstring = function(item: string): (string)
+        local splitted: {string} = item:split('_');
+        return item == 'wood_crossbow' and 'crossbow_arrow' or `{splitted[#splitted - 1]}_arrow`
+    end;
 	autobowswitch = utility.Api.CreateOptionsButton({
 		Name = 'RapidProjectile',
 		HoverText = 'Automatically switches to each bow and fires\nif you have more than on projectile in inventory.',
 		Function = function(calling: boolean): ()
 			if calling then 
 				if not oldconstructor then 
-					oldconstructor = hookmetamethod(game, '__namecall', function(self: Instance?, tool: Accessory?, tool2: string, tool3: string, ...)
-						if autobowswitch.Enabled and self == projectileremote and getnamecallmethod():find('Server') and tostring(tool):find('bow') then 
-							local originaldata: {any} = {};
-							for i: number, v: table in store.localInventory.inventory.items do  
-								if v.itemType:find('bow') or v.itemType:find('headhunter') then
-									bedwars.ClientStoreHandler:dispatch({
-										type = 'InventorySelectHotbarSlot',
-										slot = getHotbarSlot(v.itemType)
-									}); 
-									if v.itemType ~= tostring(tool) then 
-										oldconstructor(self, v.tool, getarrow(), getarrow(), ...);
-									end;
-								end;
-							end;
-						end;
-						return oldconstructor(self, tool, tool2, tool3, ...);
-					end);
+                    oldconstructor = bedwars.ClientConstructor.Function.new;
+                    bedwars.ClientConstructor.Function.new = function(self: table, ...)
+                        local res = oldconstructor(self, ...);
+                        if switching or res.instance == nil or res.instance.Name ~= bedwars.ProjectileRemote then
+                            return res;
+                        end; 
+                        local hookedtable: RemoteFunction = setmetatable({
+                            InvokeServer = function(self: Instance?, tool: Accessory?, tool2: string, tool3: string, vec: Vector3, vec2: Vector3, vec3: Vector3, shotId: string, ...): (...any)
+                                local arrow: string = getarrow();
+                                for i: number, v: table in store.localInventory.inventory.items do  
+                                    switching = true;
+                                    if (tostring(tool):find('bow') or tostring(tool):find('headhunter')) and v.itemType:find('bow') or v.itemType:find('headhunter') then
+                                        bedwars.ClientStoreHandler:dispatch({
+                                            type = 'InventorySelectHotbarSlot',
+                                            slot = getHotbarSlot(v.itemType)
+                                        }); 
+                                        if v.itemType ~= tostring(tool) then 
+                                            task.wait(0.13);
+                                        end;
+                                    end;
+                                end;
+                                bedwars.ClientStoreHandler:dispatch({
+                                    type = 'InventorySelectHotbarSlot',
+                                    slot = getHotbarSlot(tostring(tool))
+                                });
+                                switching = false;
+                                return projectileremote:InvokeServer(tool, tool2, tool3, vec, vec2, vec3, shotId, ...);
+                            end;
+                        }, {
+                            __index = function(self: RemoteFunction, index: string): (...any)
+                                return (rawget(self, index) or projectileremote[index]);
+                            end;
+                        });
+                        res.instance = hookedtable;
+                        return res;
+					end;
 				end;
+            else
+                bedwars.ClientConstructor.Function.new = oldconstructor;
 			end;
 		end;
 	});

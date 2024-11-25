@@ -201,7 +201,7 @@ local render = {
 	sessionInfo = {labelInstances = {}}, 
 	session = {},
 	clone = {},
-	utils = loadfile('rendervape/libraries/utils.luau')();
+	utils = loadfile('rendervape/libraries/utils.luau')()
 };
 
 getgenv().render = render;
@@ -7658,7 +7658,6 @@ run(function()
 		local enabled = args[2] ~= nil and args[2]:lower() == 'true';
 		for i,v in rendervape.ObjectsThatCanBeSaved do 
 			if v.Type == 'OptionsButton' then 
-				print(v.Object.ButtonText.Text:lower())
 				if v.Object.ButtonText.Text:lower() == args[1]:lower() then 
 					if v.Api.Enabled ~= enabled then 
 						return v.Api.ToggleButton()
