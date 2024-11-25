@@ -1320,7 +1320,7 @@ run(function()
 		return result
 	end
 
-	repeat task.wait() until lplr.PlayerScripts:FindFirstChild('TS') and lplr.PlayerScripts.TS:FindFirstChild('knit')
+	repeat task.wait() until lplr.PlayerScripts:FindFirstChild('TS') and lplr.PlayerScripts.TS:FindFirstChild('knit');
 
 	getgenv().store = store;
 
@@ -1335,7 +1335,7 @@ run(function()
 		end
 	end;
 
-	if not KnitGotten then 
+	if executor:lower():find('salad') or not KnitGotten then 
 		cheatenginetrash = true;
 		getgenv().cheatenginetrash = true 
 	end;
