@@ -10,6 +10,7 @@ local GuiLibrary
 local baseDirectory = "rendervape/"
 local vapeInjected = true
 local oldRainbow = false
+local loadtime: number = tick();
 local errorPopupShown = false
 local redownloadedAssets = false
 local profilesLoaded = false
@@ -726,6 +727,7 @@ local TextGUIOffsets = {
 }
 TextGUIOffsets[Enum.Platform.IOS] = TextGUIOffsets[Enum.Platform.Android]
 local textguiupd: number = 0;
+local fadeoutTween
 local function TextGUIUpdate(moduleToggled: {Enabled: boolean, ExtraText: () -> (), Name: string}): ()
     moduleToggled = moduleToggled or {Enabled = nil, Name = 'nil', ExtraText = function()
         return ''
@@ -813,20 +815,28 @@ local function TextGUIUpdate(moduleToggled: {Enabled: boolean, ExtraText: () -> 
         if moduleToggled.Name == 'nil' then return end;
 
 		local toggledmod = toggledmodule
-        for i,v in pairs(VapeBackground:GetChildren()) do
-			table.clear(VapeBackgroundTable)
-            if v:IsA("Frame") and v.ColorFrame.rrr.Text == moduleToggled.Name and moduleToggled.Enabled == false then 
-                game:GetService('TweenService'):Create(v.ColorFrame, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 0, 1, 0)}):Play()
-                local tween = game:GetService('TweenService'):Create(v, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.fromOffset(0, 0, 0, v.Size.Y)})
-                v.ColorFrame.TextLabel.Visible = false
-                tween:Play();
-                tween.Completed:Wait();
-                task.wait(0.3);
-                v:Destroy();
-            elseif v:IsA('Frame') then
+        if fadeoutTween then
+            fadeoutTween:Cancel();
+        end
+        local animplayed = false
+        local backgrounds: {Instance} = VapeBackground:GetChildren()
+        for i,v in backgrounds do
+	        table.clear(VapeBackgroundTable);
+            if v:IsA("Frame") and v.ColorFrame.rrr.Text == moduleToggled.Name and not animplayed and not moduleToggled.Enabled then 
+                animplayed = true;
+                task.spawn(function()
+                    game:GetService('TweenService'):Create(v.ColorFrame, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 0, 1, 0)}):Play()
+                    fadeoutTween = game:GetService('TweenService'):Create(v, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.fromOffset(0, 0, 0, v.Size.Y)})
+                    v.ColorFrame.TextLabel.Visible = false
+                    fadeoutTween:Play();
+                    fadeoutTween.Completed:Wait();
+                    task.wait(0.3);
+                    v:Destroy();
+                end)
+            elseif v:IsA("Frame") then
                 v:Destroy();
             end;
-        end
+        end;
         for i,v in pairs(moduleList) do
             local textsize = textService:GetTextSize(v.Text..v.ExtraText, VapeText.TextSize, VapeText.Font, Vector2.new(1000000, 1000000))
             local backgroundFrame = Instance.new("Frame")
@@ -839,6 +849,11 @@ local function TextGUIUpdate(moduleToggled: {Enabled: boolean, ExtraText: () -> 
             backgroundFrame.LayoutOrder = i
             backgroundFrame.Parent = VapeBackground
             local backgroundLineFrame = Instance.new("Frame")
+            local TextLabel2 = Instance.new('TextLabel', backgroundLineFrame)
+			TextLabel2.Name = 'rrr'
+			TextLabel2.Text = v.Text
+			TextLabel2.Visible = false;
+			TextLabel2.BorderSizePixel = 0
             backgroundLineFrame.Position = (VapeBackgroundList.HorizontalAlignment == Enum.HorizontalAlignment.Left and UDim2.new() or UDim2.new(1, -2, 0, 0))
             backgroundLineFrame.BorderSizePixel = 0
             backgroundLineFrame.Name = "ColorFrame"
@@ -864,11 +879,6 @@ local function TextGUIUpdate(moduleToggled: {Enabled: boolean, ExtraText: () -> 
 			TextLabel.Size = UDim2.new(0, 60, 0, 21)
 			TextLabel.TextSize = VapeText.TextSize
 			TextLabel.TextXAlignment = Enum.TextXAlignment.Right
-			local TextLabel2 = Instance.new('TextLabel', backgroundLineFrame)
-			TextLabel2.Name = 'rrr'
-			TextLabel2.Text = v.Text
-			TextLabel2.Visible = false;
-			TextLabel2.BorderSizePixel = 0
 			local size = TextGUIBackgroundToggle.Enabled and 32 or 29
 			local pos = not TextGUIBackgroundToggle.Enabled and 0.25 + (i ~= 1 and -0.02 or 0) or 0
 			TextLabel.Position = UDim2.new(VapeBackgroundList.HorizontalAlignment == Enum.HorizontalAlignment.Left and size or -size, 0, pos, 0)
@@ -1176,7 +1186,7 @@ CustomText = TextGUI.CreateTextBox({
 CustomText.Object.Visible = false
 local function newHealthColor(percent)
 	if percent > 0.5 then 
-		return Color3.fromRGB(43, 255, 0):lerp(Color3.fromRGB(255, 255, 0), (0.5 - (percent - 0.5)) / 0.5)
+		return Color3.fromRGB(115, 255, 110):lerp(Color3.fromRGB(255, 255, 0), (0.5 - (percent - 0.5)) / 0.5)
 	end
 	return Color3.fromRGB(255, 255, 0):lerp(Color3.fromRGB(249, 57, 55), (0.5 - percent) / 0.5)
 end
@@ -1991,26 +2001,36 @@ local function initiaterender()
 	for i: string, v: {Selected: boolean, Keybind: string} in profiles do 
 		table.insert(parsedprofiles, i);
 	end;
-	if true then -- don't ask why :)
-	    getgenv().rendervapeload = {file = 'universal.luau', step = 3};
-		getgenv().renderloadui:setprogress(2, 4, 'Loading the universal modules...');
-		customload(vapeGithubRequest("core/universal.luau"), "universal");
-		getgenv().renderloadui:setprogress(3, 4, 'Loading the game modules...');
-		if bedwars then 
-			customload(vapeGithubRequest("games/6872274481.luau"), "6872274481")
-		else
-			local success, response = pcall(function()
-				return isfile("rendervape/games/"..game.PlaceId..".luau") and readfile("rendervape/games/"..game.PlaceId..".luau") or game:HttpGet("https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/CustomModules/"..game.PlaceId..".lua") 
-			end)
-			if success and response ~= "404: Not Found" then 
-				customload(response, game.PlaceId)
-				if not isfile("rendervape/games/"..game.PlaceId..".luau") then 
-					pcall(writefile, "rendervape/games/"..game.PlaceId..".luau", response)
+    local suc, res = pcall(function()
+		if true then -- don't ask why :)
+		    getgenv().rendervapeload = {file = 'universal.luau', step = 3};
+			getgenv().renderloadui:setprogress(2, 4, 'Loading the universal modules...');
+			customload(vapeGithubRequest("core/universal.luau"), "universal");
+			getgenv().renderloadui:setprogress(3, 4, 'Loading the game modules...');
+			if bedwars then 
+				customload(vapeGithubRequest("games/6872274481.luau"), "6872274481")
+			else
+				local success, response = pcall(function()
+					return isfile("rendervape/games/"..game.PlaceId..".luau") and readfile("rendervape/games/"..game.PlaceId..".luau") or game:HttpGet("https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/CustomModules/"..game.PlaceId..".lua") 
+				end)
+				if success and response ~= "404: Not Found" then 
+					customload(response, game.PlaceId)
+					if not isfile("rendervape/games/"..game.PlaceId..".luau") then 
+						pcall(writefile, "rendervape/games/"..game.PlaceId..".luau", response)
+					end
 				end
 			end
+			getgenv().rendervapeload = {file = 'Init.lua', step = 4};
 		end
-		getgenv().rendervapeload = {file = 'Init.lua', step = 4};
-	end
+	end)
+    if not suc then
+        GuiLibrary:notify({
+			title = 'Initiation Failure',
+			text = `Intitiation Exception (Game module): {res}`,
+			duration = 20,
+			color = Color3.fromRGB(255, 0, 0)
+		})
+    end
 	shared.renderconstructor.runtime:initiate();
 	task.spawn(function()
 		repeat task.wait() until shared.VapeFullyLoaded;
@@ -2061,6 +2081,9 @@ local function initiaterender()
 	coroutine.resume(saveSettingsLoop)
 	shared.VapeFullyLoaded = true;
 	getgenv().render.loaded = true;
+	local notification = GuiLibrary.CreateNotification('Render', `Successfully Loaded in. Took {math.floor(tick() - loadtime)} seconds.`, 12, 'assets/InfoNotification.png');
+	notification.IconLabel.ImageColor3 = Color3.fromRGB(255, 255, 255)
+	notification.Frame.Frame.ImageColor3 = Color3.fromRGB(255, 255, 255)
 	task.wait(0.3);
 	getgenv().render.debugserver:sendpacket({
 		data = {
