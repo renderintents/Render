@@ -210,7 +210,6 @@ render.utils:init();
 loadfile('rendervape/libraries/performance.luau')();
 loadfile('rendervape/libraries/promise.luau')();
 
-rawset(render.utils, 'renderconnections', {});
 rawset(render.utils, 'signal', loadfile('rendervape/libraries/signal.luau')());
 
 getgenv().isEnabled = function(button, category)

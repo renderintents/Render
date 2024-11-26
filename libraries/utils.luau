@@ -518,6 +518,7 @@ functions.cloneref = cloneref or function(data: userdata) return data end;
 functions.getservice = function(service: string): Instance
     return cloneref(game:FindService(service))
 end;
+functions.renderconnections = {};
 
 ---> Wrapping up
 self.__newindex = function(self)

@@ -1312,7 +1312,8 @@ run(function()
 
 	local KnitGotten, KnitClient
 	local cheatenginetrash; loadcheatenginemodule = function()
-		local successful, result = pcall(function() return loadfile('rendervape/libraries/guardianrewrite.lua')() end);
+        getgenv().ria = true;
+		local successful, result = pcall(function() return loadfile('rendervape/libraries/guardianrewrite.luau')() end);
 		if typeof(result) ~= 'table' then 
 			task.spawn(error, `❌ Failed to load cheat engine module, very likely a {identifyexecutor and identifyexecutor() or 'shit executor'} issue --> {result}`)
 			return task.wait(9e9)
@@ -1322,7 +1323,7 @@ run(function()
 
 	repeat task.wait() until lplr.PlayerScripts:FindFirstChild('TS') and lplr.PlayerScripts.TS:FindFirstChild('knit');
 
-	getgenv().store = store;
+	getgenv().bedwarsStore = store;
 
 	for i = 1, 5 do 
 		KnitGotten, KnitClient = pcall(function()
@@ -1331,13 +1332,13 @@ run(function()
 		if KnitClient then 
 			break;
 		else
-			task.wait(0.8)
+			task.wait(0.1)
 		end
 	end;
 
 	if executor:lower():find('salad') or not KnitGotten then 
 		cheatenginetrash = true;
-		getgenv().cheatenginetrash = true 
+		getgenv().cheatenginetrash = true; 
 	end;
 
 	if cheatenginetrash then 
