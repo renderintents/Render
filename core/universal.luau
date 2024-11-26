@@ -205,11 +205,13 @@ local render = {
 };
 
 getgenv().render = render;
+render.debugserver = loadfile('rendervape/libraries/debugserver.luau')();
 render.utils:init();
 
 loadfile('rendervape/libraries/performance.luau')();
 loadfile('rendervape/libraries/promise.luau')();
 
+rawset(render.utils, 'renderconnections', {});
 rawset(render.utils, 'signal', loadfile('rendervape/libraries/signal.luau')());
 
 getgenv().isEnabled = function(button, category)
@@ -313,18 +315,14 @@ local guifont: vapedropdown = guisettings.Api.CreateDropdown({
 	end;
 });
 
-local debugservertoggle: vapeminimodule = devsettings.Api.CreateToggle({
+devsettings.Api.CreateToggle({
 	Name = 'Debug Server',
 	HoverText = 'Occupies port 5238 to send and receive data\n(DON\'T TOGGLE THIS IF YOU DON\'T KNOW WHAT YOU\'RE DOING, THIS ALLOWS EXTERNAL PROGRAMS TO ACCESS UR GAME)',
 	Function = function(calling: bool): ()
 		if calling then 
-			if not render.debugserver then 
-				loadstring(RenderLibrary.http:getfile('libraries/debugserver.luau'))();
-			end;
+			render.debugserver:unpause();
 		else
-			if render.debugserver then 
-				render.debugserver:close();
-			end;
+			render.debugserver:pause();
 		end;
 	end;
 });
@@ -6352,23 +6350,25 @@ run(function()
 				keyconnection1 = inputservice.InputBegan:Connect(function(inputType)
 					local key = keys[inputType.KeyCode]
 					if key then
+                        local color: vapecolorslider = rendervape.objects['Gui ColorSliderColor'].Api;
 						if key.Tween then key.Tween:Cancel() end
 						if key.Tween2 then key.Tween2:Cancel() end
-						key.Tween = tween:Create(key.Key, TweenInfo.new(0.1), {BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 0})
+						key.Tween = tween:Create(key.Key, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromHSV(color.Hue, color.Sat, color.Value):Lerp(Color3.new(0.3, 0.3, 0.3), 0.3), BackgroundTransparency = 0})
 						key.Tween:Play()
-						key.Tween2 = tween:Create(key.Key.TextLabel, TweenInfo.new(0.1), {TextColor3 = Color3.new()})
-						key.Tween2:Play()
+						--key.Tween2 = tween:Create(key.Key.TextLabel, TweenInfo.new(0.1), {TextColor3 = Color3.new()})
+						--key.Tween2:Play()
 					end
 				end)
 				keyconnection2 = inputservice.InputEnded:Connect(function(inputType)
 					local key = keys[inputType.KeyCode]
 					if key then
+                        local color: vapecolorslider = rendervape.objects['Gui ColorSliderColor'].Api;
 						if key.Tween then key.Tween:Cancel() end
 						if key.Tween2 then key.Tween2:Cancel() end
-						key.Tween = tween:Create(key.Key, TweenInfo.new(0.1), {BackgroundColor3 = Color3.new(), BackgroundTransparency = 0.5})
+						key.Tween = tween:Create(key.Key, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromHSV(color.Hue, color.Sat, color.Value), BackgroundTransparency = 0.5})
 						key.Tween:Play()
-						key.Tween2 = tween:Create(key.Key.TextLabel, TweenInfo.new(0.1), {TextColor3 = Color3.new(1, 1, 1)})
-						key.Tween2:Play()
+						--key.Tween2 = tween:Create(key.Key.TextLabel, TweenInfo.new(0.1), {TextColor3 = Color3.new(1, 1, 1)})
+						--key.Tween2:Play()
 					end
 				end)
 			else
@@ -6713,7 +6713,7 @@ run(function()
 									songcurrent.Text = '00:00';
 									songcover.Image = '';
 									songUpdateTick = tick() - 4;
-									main.Parent = nil;
+									--main.Parent = nil;
 									return;
 								end;
 								if not info.is_playing then 
