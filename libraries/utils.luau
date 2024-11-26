@@ -511,7 +511,12 @@ functions.httprequest = request or http and http.request or syn and syn.request 
     return (args.Method == nil or args.Method == 'GET') and game:HttpGet(args.Url) or {StatusCode = 404, Body = '{}', Success = false, Headers = {}} 
 end;
 
-functions.run = function(func) pcall(func) end;
+functions.run = function(func)
+	local suc, err = pcall(func);
+	if not suc then
+		functions.errorNotification('Render', err, 15);
+	end;
+end;
 functions.hookmetamethod = hookmetamethod or hookmt or hook_meta_method or functions.void;
 functions.getnamecallmethod = getnamecallmethod or function() return '' end;
 functions.cloneref = cloneref or function(data: userdata) return data end;
