@@ -1,7 +1,7 @@
 if not game:IsLoaded() then
 	game.Loaded:Wait()
 end;
-
+print("Render ontop") 
 local cloneref: (Instance) -> (Instance) = cloneref or function(instance) return instance end;
 local getservice = function(service: string): Instance 
 	return cloneref(game:FindService(service))
