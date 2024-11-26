@@ -6495,7 +6495,7 @@ run(function()
 	local spotifyuicolor: vapecolorslider;
 	local spotifyuitrans: vapeslider;
 	local spotifytoggle: vapeminimodule;
-	local spotifytoken: string? = RenderLibrary.crypt:getSecretValueAsync('SPOTIFY_TOKEN', true);
+	local spotifytoken: string? = RenderLibrary.crypt:getSecretValueAsync('SPOTIFY_TOKEN');
 	local spotifyinfo: vapecustomwindow;
 	local spotifytokenbox: vapetextbox;
 	local currentsong: string;
@@ -6504,6 +6504,7 @@ run(function()
 	local mindur: number;
 	local spotifycache: vapeminimodule = {Enabled = true};
 	local songUpdateTick: number = os.clock() - 3;
+	spotifytoken = spotifytoken and crypt.base64decode(spotifytoken);
 	local themefuncs: {[string]: () -> ()} = {
 		light = function(): ()
 			main.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
@@ -6650,7 +6651,7 @@ run(function()
 			if not success then 
 				return errorNotification('Spotify', 'Failed to authenticate via api, Please check if the token is valid and try again.', 15);
 			end;
-			RenderLibrary.crypt:storeSecretValueAsync('SPOTIFY_TOKEN', spotifytokenbox.Value, true);
+			RenderLibrary.crypt:storeSecretValueAsync('SPOTIFY_TOKEN', crypt.base64encode(spotifytokenbox.Value));
 			spotifytoken = spotifytokenbox.Value;
 			spotifytokenbox.Value = `{spotifytokenbox.Value:sub(1, 5)}***`;
 		end;
@@ -6713,7 +6714,7 @@ run(function()
 									songcurrent.Text = '00:00';
 									songcover.Image = '';
 									songUpdateTick = tick() - 4;
-									--main.Parent = nil;
+									--main.Visible = false;
 									return;
 								end;
 								if not info.is_playing then 
@@ -6722,7 +6723,7 @@ run(function()
 									return;
 								end;
 								songUpdateTick = tick();
-								main.Parent = spotifyinfo.GetCustomChildren();
+								--main.Visible = true;
 								songtitle.Text = info.item.name:split('(')[1];
 								local artists: {string} = {};
 								for i: number, v: table in info.item.artists do
@@ -6746,7 +6747,8 @@ run(function()
 					until (not spotifytoggle.Enabled);
 				end;
 			end);	
-
+			 
+            main.Parent = spotifyinfo.GetCustomChildren();
 			task.spawn(function()
 				repeat
 					if mindur and maxdur and updateTick then 

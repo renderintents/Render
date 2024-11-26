@@ -908,14 +908,14 @@ local function TextGUIUpdate(moduleToggled: {Enabled: boolean, ExtraText: () -> 
 			if not TextGUIBackgroundToggle.Enabled and moduleToggled.Name == v.Text and moduleToggled.Enabled then
 				backgroundFrame.Size = UDim2.fromOffset(textsize.X + 7.5, textsize.Y * 1.211)
 				TextLabel.Position = UDim2.new(VapeBackgroundList.HorizontalAlignment == Enum.HorizontalAlignment.Left and 21 or -21, 0, pos, 0)
-				game:GetService('TweenService'):Create(TextLabel, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {Position = UDim2.new(VapeBackgroundList.HorizontalAlignment == Enum.HorizontalAlignment.Left and size or -size, 0, pos, 0)}):Play()
+				game:GetService('TweenService'):Create(TextLabel, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {Position = UDim2.new(VapeBackgroundList.HorizontalAlignment == Enum.HorizontalAlignment.Left and size or -size, 0, pos, 0)}):Play()
 			end
 
 			if TextGUIBackgroundToggle.Enabled then
-				game:GetService('TweenService'):Create(backgroundFrame, TweenInfo.new(TextGUIBackgroundToggle.Enabled and moduleToggled.Enabled and moduleToggled.Name == v.Text and 0.25 or 0, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.fromOffset(textsize.X + 7.5, textsize.Y * 1.211)}):Play()
+				game:GetService('TweenService'):Create(backgroundFrame, TweenInfo.new(TextGUIBackgroundToggle.Enabled and moduleToggled.Enabled and moduleToggled.Name == v.Text and 0.35 or 0, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.fromOffset(textsize.X + 7.5, textsize.Y * 1.211)}):Play()
 			end
 		
-			task.delay(0.15, function()
+			task.delay(0.18, function()
 				TextLabel.Visible = true
 			end)
 
@@ -1443,12 +1443,6 @@ CloudSettings.CreateButton2({
 	end;
 });
 
-CloudSettings.CreateDropdown({
-	Name = 'Restore Mode',
-	List = {'yes', 'no'},
-	Function = print
-});
-
 task.spawn(function()
 	repeat task.wait() until render and render.utils.renderconnections;
 	CloudSettings.CreateButton2({
@@ -1486,12 +1480,6 @@ task.spawn(function()
 					end
 				end;
 				local updated: (number) = RenderLibrary.http:publishtocloud(updatearray);
-				print(updated)
-				if updated == #updatearray then
-					print('updated!')
-				else
-					print('failed')
-				end;
 				table.clear(updatearray);
 				task.wait(25);
 			end
@@ -1820,9 +1808,11 @@ local teleportConnection = playersService.LocalPlayer.OnTeleport:Connect(functio
 			teleportScript = teleportScript:gsub('rendervape/core/boot.luau', `risesix/main.luau`);
 		end;
 		GuiLibrary.SaveSettings()
-		queueonteleport(teleportScript)
-    end
-end)
+		if getgenv().salad == nil then 
+			queueonteleport(teleportScript);
+		end;
+    end;
+end);
 
 GuiLibrary.SelfDestruct = function()
 	task.spawn(function()
@@ -1971,7 +1961,6 @@ if typeof(teleportdata) == 'table' and (teleportdata.match or teleportdata.custo
 end;
 
 local function customload(data, file)
-	print(file)
 	local success, err = pcall(function()
 		loadstring(data)()
 	end)
@@ -2052,7 +2041,6 @@ local function initiaterender()
 		end
 	end)
 	local success, result = pcall(GuiLibrary.LoadSettings);
-	print(success, result or 'WTF')
 	if not success then 
 		pcall(function()
 			local notification = GuiLibrary.CreateNotification('Settings', `Failed to load GUI settings. --> {result}`, 25, "assets/WarningNotification.png")

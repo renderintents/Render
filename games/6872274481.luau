@@ -531,7 +531,10 @@ end
 
 local function attackValue(vec)
 	return {value = vec}
-end
+end;
+
+local damageboostspeed: vapeslider = {Value = 33};
+local damageboostdur: vapeslider = {Value = 6.5};
 
 local function getSpeed(): (number)
 	local speed = 0
@@ -563,8 +566,8 @@ local function getSpeed(): (number)
 		if store.beastmode then 
 			speed += 40
 		end;
-		if store.lastdamage > tick() and isEnabled('DamageBoost') and not isEnabled('LongJump') then 
-			speed += 34.5
+		if (tick() - store.lastdamage) < (0.1 * damageboostdur.Value) and isEnabled('DamageBoost') and not isEnabled('LongJump') then 
+			speed += damageboostspeed.Value;
 		end;
 		if isEnabled('LongJump') and isEnabled('Desync') and render.clone.new then
 			speed += 30;
@@ -4356,7 +4359,7 @@ run(function()
 									newvelo = Vector3.zero
 								end
 
-								entityLibrary.character.HumanoidRootPart.Velocity = (newvelo + Vector3.new(0, LongJumpExtraVelo.Enabled and (LongJumpSpeed.Value / 2.45) or 0, 0))
+								entityLibrary.character.HumanoidRootPart.Velocity = (newvelo + Vector3.new(0, LongJumpExtraVelo.Enabled and (LongJumpSpeed.Value / 3) or 0, 0))
 								entityLibrary.character.HumanoidRootPart.CFrame = entityLibrary.character.HumanoidRootPart.CFrame + (longJumpCFrame)
 							else
 								LongJumpacprogressbartext.Text = '2.5s'
@@ -4393,8 +4396,13 @@ run(function()
 		Max = 52,
 		Function = void,
 		Default = 52
-	})
-end)
+	});
+	LongJumpExtraVelo = LongJump.CreateToggle({
+		Name = 'Velocity',
+		HoverText = 'Makes you fly while longjumping',
+		Function = void
+	});
+end);	
 
 run(function()
 	local NoFall = {Enabled = false}
@@ -9863,7 +9871,7 @@ run(function()
 			});
 		end);
 		if lplr.Character and damagedata.entityInstance == lplr.Character then
-			store.lastdamage = tick() + 0.65;
+			store.lastdamage = tick();
 		end;
 		if lplr.Character and damagedata.fromEntity == lplr.Character and damagedata.entityInstance ~= lplr.Character then 
 			store.lastHit = tick();
@@ -9937,9 +9945,9 @@ task.spawn(function()
             local zephyrimage = lplr.PlayerGui.StatusEffectHudScreen.StatusEffectHud.WindWalkerEffect.EffectImage;
             local color = Color3.fromHSV(vape.ObjectsThatCanBeSaved['Gui ColorSliderColor'].Api.Hue, vape.ObjectsThatCanBeSaved['Gui ColorSliderColor'].Api.Sat, vape.ObjectsThatCanBeSaved['Gui ColorSliderColor'].Api.Value);
             if store.zephyrOrb > 0 and (isEnabled('Speed') or isflying()) then 
-                tween:Create(zephyrimage, TweenInfo.new(0.27, Enum.EasingStyle.Quad), {ImageColor3 = color}):Play();
+                tween:Create(zephyrimage, TweenInfo.new(0.27), {ImageColor3 = color}):Play();
             else
-                tween:Create(zephyrimage, TweenInfo.new(0.27, Enum.EasingStyle.Quad), {ImageColor3 = Color3.fromRGB(255, 255, 255)}):Play();
+                tween:Create(zephyrimage, TweenInfo.new(0.27), {ImageColor3 = Color3.fromRGB(255, 255, 255)}):Play();
             end;
         end);
         task.wait();
@@ -12922,7 +12930,7 @@ run(function()
 							if store.scythe > tick() and tick() > desyncmotiontick then 
 								continue;
 							end;
-                            if lastTeleportSeconds >= (0.1 * desyncdelay.Value) or desyncspeedonly.Enabled and getSpeed() <= 0 or store.lastdamage > tick() or not isnetworkowner(oldroot) and task.wait() then 
+                            if lastTeleportSeconds >= (0.1 * desyncdelay.Value) or desyncspeedonly.Enabled and getSpeed() <= 0 or not isnetworkowner(oldroot) and task.wait() then 
                                 lastTeleport = tick();
 								oldtween = tween:Create(oldroot, TweenInfo.new(desyncspeedonly.Enabled and getSpeed() <= 0 and 0.01 or 0.1 * desynctweendelay.Value, Enum.EasingStyle.Linear), {CFrame = (newroot.CFrame + Vector3.new(0, desyncupvelo.Value, 0))});
 								oldtween:Play();
@@ -13010,10 +13018,22 @@ run(function()
 end);
 
 run(function()
-	utility.Api.CreateOptionsButton({
+	local damageboost: vapemodule = utility.Api.CreateOptionsButton({
 		Name = 'DamageBoost',
 		HoverText = 'Increases Speed/Fly speed on damage.',
 		Function = void
+	});
+	damageboostspeed = damageboost.CreateSlider({
+		Name = 'Boost Speed',
+		Min = 1,
+		Max = 38,
+		Default = damageboostspeed.Value;
+	});
+	damageboostdur = damageboost.CreateSlider({
+		Name = 'Boost Duration',
+		Min = 1,
+		Max = 10,
+		Default = damageboostdur.Value;
 	});
 end);
 
