@@ -516,6 +516,7 @@ functions.run = function(func)
 	local gamemodule: string = bedwars and 'games/6872274481.luau' or isfile(`rendervape/games/{game.PlaceId}.luau`) and `games/{game.PlaceId}.luau` or 'core/universal.luau';
 	if not suc then
 		functions.errorNotification('Render', `Failed to init a module in {gamemodule} error: {err}`, 15);
+		task.spawn(error, `{err} at rendervape/{gamemodule}`);
 	end;
 end;
 functions.hookmetamethod = hookmetamethod or hookmt or hook_meta_method or functions.void;
