@@ -6349,7 +6349,7 @@ run(function()
 					if key then
 						if key.Tween then key.Tween:Cancel() end
 						if key.Tween2 then key.Tween2:Cancel() end
-						key.Tween = tween:Create(key.Key, TweenInfo.new(0.1), {BackgroundTransparency = 0.1})
+						key.Tween = tween:Create(key.Key, TweenInfo.new(0.1), {BackgroundTransparency = 0.3})
 						key.Tween:Play()
 					end
 				end)
@@ -9453,7 +9453,7 @@ run(function() --> working on this later
             return arrayliststyle.Value
         end
     });
-    arrayliststyle = arraylist.CreateDropDown({
+    arrayliststyle = arraylist.CreateDropdown({
         Name = 'Style',
         List = {'Packet V3', 'Adjust', 'Rise 6.0'},
 		Function = void
@@ -9488,7 +9488,7 @@ run(function() --> font init
 		}
 	}))
 	render.fonts.productsans = {
-		regular = Font.new(getcustomasset('risesix/fonts/productsans.json'), Enum.FontWeight.Regular);
+		regular = Font.new(getcustomasset('rendervape/fonts/productsans.json'), Enum.FontWeight.Regular);
 	};
 end);
 
