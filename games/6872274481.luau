@@ -546,9 +546,9 @@ local function getSpeed(): (number)
 	if lplr.Character then
 		local SpeedDamageBoost = lplr.Character:GetAttribute('SpeedBoost')
 		if SpeedDamageBoost and SpeedDamageBoost > 1 then
-			speed += (8 * (SpeedDamageBoost - 1))
+			speed += (10 * (SpeedDamageBoost - 1))
 			if isEnabled('Desync') and render.clone.new then 
-				speed += 10;
+				speed += 12;
 			end;
 		end
 		if store.grapple > tick() then
@@ -2780,6 +2780,7 @@ run(function()
 	})
 end)
 
+
 run(function()
 	local InfiniteFly = {Enabled = false}
 	local InfiniteFlyMode = {Value = 'CFrame'}
@@ -2841,8 +2842,7 @@ run(function()
 		if antihitEnabled then 
 			antihitEnabled = false;
 			if not isEnabled('AntiHit') then 
-				task.wait(0.3)
-				vape.ObjectsThatCanBeSaved.AntiHitOptionsButton.Api.ToggleButton();
+				task.delay(0.3, vape.ObjectsThatCanBeSaved.AntiHitOptionsButton.Api.ToggleButton);
 			end
 		end
 	end
@@ -3475,14 +3475,6 @@ run(function()
 				end)
 
 				oldViewmodelAnimation = oldViewmodelAnimation or bedwars.ViewmodelController.playAnimation;
-				oldPlaySound = oldPlaySound or bedwars.SoundManager.playSound;
-				bedwars.SoundManager.playSound = function(tab, soundid, ...)
-					if (soundid == bedwars.SoundList.SWORD_SWING_1 or soundid == bedwars.SoundList.SWORD_SWING_2) and Killaura.Enabled and killaurasound.Enabled and killauraNearPlayer then
-						return nil
-					end
-					return oldPlaySound(tab, soundid, ...)
-				end
-				
 				--[[bedwars.ViewmodelController.playAnimation = shared.risegui and oldViewmodelAnimation or function(Self, id, ...)
 					if id == 15 and killauraNearPlayer and killauraswing.Enabled and entityLibrary.isAlive then
 						return nil
@@ -3682,7 +3674,6 @@ run(function()
 				if killaurarangecirclepart then killaurarangecirclepart.Parent = nil end
 				if killauraparticlepart then killauraparticlepart.Parent = nil end
 				bedwars.ViewmodelController.playAnimation = oldViewmodelAnimation
-				bedwars.SoundManager.playSound = oldPlaySound
 				oldViewmodelAnimation = nil
 				pcall(function()
 					if entityLibrary.isAlive then
