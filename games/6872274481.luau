@@ -215,7 +215,7 @@ end;
 
 local networkownerswitch = tick()
 --ME WHEN THE MOBILE EXPLOITS ADD A DISFUNCTIONAL ISNETWORKOWNER (its for compatability I swear!!)
-local isnetworkowner = function(part)
+local isnetworkowner = identifyexecutor() == 'Synapse Z' and isnetworkowner or function(part)
 	local suc, res = pcall(function() return gethiddenproperty(part, 'NetworkOwnershipRule') end)
 	if suc and res == Enum.NetworkOwnership.Manual then
 		sethiddenproperty(part, 'NetworkOwnershipRule', Enum.NetworkOwnership.Automatic)
@@ -13089,6 +13089,9 @@ run(function()
 		actualduration = tostring(actualduration)
 		actualduration = actualduration:split('</b>')[1]
 		actualduration = tonumber(actualduration)
+
+		local miniduration = actualduration / 2
+		local lowestduration = actualduration / 5
 		local hud: Frame = Instance.new('Frame', effectholder);
 		hud.BackgroundColor3 = Color3.fromRGB(0, 1, 0);
 		hud.BackgroundTransparency = 0.5;
@@ -13125,7 +13128,7 @@ run(function()
 		effectdur.Position = UDim2.new(0.348, 0, 0.579, 0);
 		effectdur.Text = actualduration
 		effectdur.TextSize = 12;
-		effectdur.TextColor3 = effecthudcolor[math.random(1,4)]
+		effectdur.TextColor3 = Color3.fromRGB(0, 255, 0)
 		effectdur.TextXAlignment = 'Left';
 		effectdur.TextYAlignment = 'Top';
 		effectdur.Font = Enum.Font.ArimoBold;
@@ -13135,6 +13138,12 @@ run(function()
 			local connection2: RBXScriptConnection;
 			connection = args.instance:GetPropertyChangedSignal('Text'):Connect(function()
 				effectdur.Text = `{args.instance.ContentText} seconds`
+				if tonumber(args.instance.ContentText) <= miniduration then
+					effectdur.TextColor3 = Color3.new(1, 1, 0);
+				end;
+				if tonumber(args.instance.ContentText) <= lowestduration then
+					effectdur.TextColor3 = Color3.fromRGB(255, 0, 0);
+				end;
 			end)
 			connection2 = lplr.PlayerGui.StatusEffectHudScreen.StatusEffectHud.DescendantRemoving:Connect(function(v)
 				if v == args.instance then
@@ -13153,6 +13162,12 @@ run(function()
 						break
 					end
 					actualduration = actualduration - 0.1;
+					if tonumber(args.instance.ContentText) >= miniduration then
+						effectdur.TextColor3 = Color3.new(1, 1, 0);
+					end;
+					if tonumber(args.instance.ContentText) >= miniduration then
+						effectdur.TextColor3 = Color3.fromRGB(255, 0, 0);
+					end;
 					effectdur.Text = `{math.floor(actualduration)} seconds`
 					task.wait(0.08);
 				until (not effecthud.Enabled)
