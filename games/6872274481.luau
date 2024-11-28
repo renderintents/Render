@@ -165,7 +165,8 @@ local store = {
 		lagbacks = 0,
 		lagbackEvent = Instance.new('BindableEvent'),
 		reported = 0,
-		universalLagbacks = 0
+		universalLagbacks = 0,
+		selfdeath = 0
 	},
 	whitelist = {
 		chatStrings1 = {helloimusinginhaler = 'vape'},
@@ -196,12 +197,16 @@ for i,v in render.utils do
 	getfenv()[i] = v;
 end
 
-task.spawn(function()
+table.insert(renderconnections, task.spawn(function()
 	repeat 
 		camera = workspace.CurrentCamera or fakecam;
-		task.wait()
-	until (not vapeInjected)
-end);
+		task.wait(5)
+	until false
+end));
+
+table.insert(renderconnections, lplr.CharacterAdded:Connect(function()
+	store.statistics.selfdeath += 1
+end))
 
 local isfile = isfile or function(file)
 	local suc, res = pcall(function() return readfile(file) end)
@@ -13294,3 +13299,29 @@ end);
 		end;
 	});
 end);]]
+
+table.insert(renderconnections, task.spawn(function()
+	repeat
+		render.session.new({
+			{
+				name = 'kills', 
+				value = store.statistics.kills
+			},
+			{
+				name = 'death', 
+				value = store.statistics.selfdeath
+			}
+		})
+		render.session.new({
+			{
+				name = 'lagbacks', 
+				value = store.statistics.lagbacks
+			}, 
+			{
+				name = 'beds', 
+				value = store.statistics.beds
+			}
+		})
+		task.wait(1)
+	until false
+end))
