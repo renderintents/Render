@@ -4955,7 +4955,7 @@ run(function()
 							entityLibrary.character.HumanoidRootPart.CFrame = entityLibrary.character.HumanoidRootPart.CFrame + speedCFrame
 						end
 
-						if SpeedJump.Enabled and (not Scaffold.Enabled) and (SpeedJumpAlways.Enabled or killauraNearPlayer) then
+						if SpeedJump.Enabled and not Scaffold.Enabled and (not SpeedJumpAlways.Enabled and vapeTargetInfo.Targets.Killaura or SpeedJumpAlways.Enabled) then
 							if (entityLibrary.character.Humanoid.FloorMaterial ~= Enum.Material.Air) and entityLibrary.character.Humanoid.MoveDirection ~= Vector3.zero then
 								if SpeedJumpSound.Enabled then
 									pcall(function() entityLibrary.character.HumanoidRootPart.Jumping:Play() end)
@@ -12003,6 +12003,9 @@ run(function()
 		});
 	end;
 	local destructclone = function()
+		if not render.clone.old then
+			return;
+		end;
 		if isEnabled('InfiniteFly') then 
 			return 
 		end;
