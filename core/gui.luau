@@ -980,12 +980,11 @@ if shared.VapeExecuted then
 
 	lib["RemoveObject"] = function(objname)
 		pcall(function()
-			;
 			lib.ObjectsThatCanBeSaved[objname]["Object"]:Remove()
 			if lib.ObjectsThatCanBeSaved[objname]["Type"] == "OptionsButton" then
 				lib.ObjectsThatCanBeSaved[objname]["ChildrenObject"].Name = "RemovedChildren"
 			end
-                        pcall(functionkl lib.ObjectsThatCanBeSaved[objname].hidebuttonapi.Object:Remove(); end)
+                        pcall(function() lib.ObjectsThatCanBeSaved[objname].hidebuttonapi.Object:Remove(); end)
 			lib.ObjectsThatCanBeSaved[objname] = nil
 		end)
 	end
