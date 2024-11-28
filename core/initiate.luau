@@ -1,7 +1,7 @@
 if not game:IsLoaded() then
 	game.Loaded:Wait()
 end;
-print("Render ontop") 
+
 local cloneref: (Instance) -> (Instance) = cloneref or function(instance) return instance end;
 local getservice = function(service: string): Instance 
 	return cloneref(game:FindService(service))
@@ -607,8 +607,8 @@ VapeLogoFrame.Parent = TextGUI.GetCustomChildren()
 local VapeLogo = Instance.new("ImageLabel")
 VapeLogo.Parent = VapeLogoFrame
 VapeLogo.Name = "Logo"
-VapeLogo.Size = UDim2.new(0, 100, 0, 27)
-VapeLogo.Position = UDim2.new(1, -140, 0, 3)
+VapeLogo.Size = UDim2.new(0, 92, 0, 25)
+VapeLogo.Position = UDim2.new(1, -125, 0, 8)
 VapeLogo.BackgroundColor3 = Color3.new()
 VapeLogo.BorderSizePixel = 0
 VapeLogo.BackgroundTransparency = 1
@@ -616,7 +616,7 @@ VapeLogo.Visible = true
 VapeLogo.Image = downloadasset("rendervape/assets/VapeLogo3.png")
 local VapeLogoV4 = Instance.new("ImageLabel")
 VapeLogoV4.Parent = VapeLogo
-VapeLogoV4.Size = UDim2.new(0, 41, 0, 24)
+VapeLogoV4.Size = UDim2.new(0, 39, 0, 22)
 VapeLogoV4.Name = "Logo2"
 VapeLogoV4.Position = UDim2.new(1, 0, 0, 1)
 VapeLogoV4.BorderSizePixel = 0
@@ -673,11 +673,11 @@ VapeTextExtra.TextColor3 = Color3.new()
 VapeTextExtra.Font = Enum.Font.SourceSans
 VapeTextExtra.TextSize = 19
 local VapeCustomText = Instance.new("TextLabel")
-VapeCustomText.TextSize = 30
+VapeCustomText.TextSize = 26
 VapeCustomText.Font = Enum.Font.GothamBold
 VapeCustomText.Size = UDim2.new(1, 0, 1, 0)
 VapeCustomText.BackgroundTransparency = 1
-VapeCustomText.Position = UDim2.new(0, 0, 0, 35)
+VapeCustomText.Position = UDim2.new(0, 0, 0, 41)
 VapeCustomText.TextXAlignment = Enum.TextXAlignment.Left
 VapeCustomText.TextYAlignment = Enum.TextYAlignment.Top
 VapeCustomText.Text = ""
@@ -786,30 +786,18 @@ local function TextGUIUpdate(moduleToggled: {Enabled: boolean, ExtraText: () -> 
 			5,
 			1,
 			23,
-			23
+			10
 		}
         if TextGUI.GetCustomChildren().Parent then
-            if (TextGUI.GetCustomChildren().Parent.Position.X.Offset + TextGUI.GetCustomChildren().Parent.Size.X.Offset / 2) >= (gameCamera.ViewportSize.X / 2) then
-                VapeText.TextXAlignment = Enum.TextXAlignment.Right
-                VapeTextExtra.TextXAlignment = Enum.TextXAlignment.Right
-                VapeTextExtra.Position = UDim2.fromOffset(offsets[1], offsets[2])
-                VapeLogo.Position = UDim2.new(1, -142, 0, 8)
-                VapeText.Position = UDim2.new(1, -158, 0, (VapeLogo.Visible and (TextGUIBackgroundToggle.Enabled and 41 or 35) or 5) + 5 + (VapeCustomText.Visible and 25 or 0) - offsets[3])
-                VapeCustomText.Position = UDim2.fromOffset(0, VapeLogo.Visible and 35 or 0)
-                VapeCustomText.TextXAlignment = Enum.TextXAlignment.Right
-                VapeBackgroundList.HorizontalAlignment = Enum.HorizontalAlignment.Right
-                VapeBackground.Position = VapeText.Position + UDim2.fromOffset(-60, -2 + offsets[4])
-            else
-                VapeText.TextXAlignment = Enum.TextXAlignment.Left
-                VapeTextExtra.TextXAlignment = Enum.TextXAlignment.Left
-                VapeTextExtra.Position = UDim2.fromOffset(offsets[1], offsets[2])
-                VapeLogo.Position = UDim2.fromOffset(2, 8)
-                VapeText.Position = UDim2.fromOffset(6, (VapeLogo.Visible and (TextGUIBackgroundToggle.Enabled and 41 or 35) or 5) + 5 + (VapeCustomText.Visible and 25 or 0) - offsets[3])
-				VapeCustomText.Position = UDim2.fromOffset(0, VapeLogo.Visible and 35 or 0)
-				VapeCustomText.TextXAlignment = Enum.TextXAlignment.Left
-                VapeBackgroundList.HorizontalAlignment = Enum.HorizontalAlignment.Left
-                VapeBackground.Position = VapeText.Position + UDim2.fromOffset(-4, -2 + offsets[4])
-            end
+			VapeText.TextXAlignment = Enum.TextXAlignment.Right
+			VapeTextExtra.TextXAlignment = Enum.TextXAlignment.Right
+			VapeTextExtra.Position = UDim2.fromOffset(offsets[1], offsets[2])
+			VapeLogo.Position = UDim2.new(1, -125, 0, 8)
+			VapeText.Position = UDim2.new(1, -158, 0, (VapeLogo.Visible and (TextGUIBackgroundToggle.Enabled and 41 or 35) or 5) + 5 + (VapeCustomText.Visible and 25 or 0) - offsets[3])
+			VapeCustomText.Position = UDim2.fromOffset(0, VapeLogo.Visible and 38 or 0)
+			VapeCustomText.TextXAlignment = Enum.TextXAlignment.Right
+			VapeBackgroundList.HorizontalAlignment = Enum.HorizontalAlignment.Right
+			VapeBackground.Position = VapeText.Position + UDim2.fromOffset(-60, 24)
 		end
 
         if moduleToggled.Name == 'nil' then return end;
@@ -841,7 +829,7 @@ local function TextGUIUpdate(moduleToggled: {Enabled: boolean, ExtraText: () -> 
             local textsize = textService:GetTextSize(v.Text..v.ExtraText, VapeText.TextSize, VapeText.Font, Vector2.new(1000000, 1000000))
             local backgroundFrame = Instance.new("Frame")
             backgroundFrame.BorderSizePixel = 0
-            backgroundFrame.BackgroundTransparency = TextGUIBackgroundToggle.Enabled and 0.5 or 1
+            backgroundFrame.BackgroundTransparency = TextGUIBackgroundToggle.Enabled and 0.45 or 1
             backgroundFrame.BackgroundColor3 = Color3.new()
             backgroundFrame.Visible = true
 			backgroundFrame.Size = UDim2.fromOffset(0, textsize.Y * 1.211)
@@ -879,7 +867,7 @@ local function TextGUIUpdate(moduleToggled: {Enabled: boolean, ExtraText: () -> 
 			TextLabel.Size = UDim2.new(0, 60, 0, 21)
 			TextLabel.TextSize = VapeText.TextSize
 			TextLabel.TextXAlignment = Enum.TextXAlignment.Right
-			local size = TextGUIBackgroundToggle.Enabled and 32 or 29
+			local size = TextGUIBackgroundToggle.Enabled and 31.5 or 29
 			local pos = not TextGUIBackgroundToggle.Enabled and 0.25 + (i ~= 1 and -0.02 or 0) or 0
 			TextLabel.Position = UDim2.new(VapeBackgroundList.HorizontalAlignment == Enum.HorizontalAlignment.Left and size or -size, 0, pos, 0)
 			TextLabel.BorderSizePixel = 0
@@ -908,14 +896,14 @@ local function TextGUIUpdate(moduleToggled: {Enabled: boolean, ExtraText: () -> 
 			if not TextGUIBackgroundToggle.Enabled and moduleToggled.Name == v.Text and moduleToggled.Enabled then
 				backgroundFrame.Size = UDim2.fromOffset(textsize.X + 7.5, textsize.Y * 1.211)
 				TextLabel.Position = UDim2.new(VapeBackgroundList.HorizontalAlignment == Enum.HorizontalAlignment.Left and 21 or -21, 0, pos, 0)
-				game:GetService('TweenService'):Create(TextLabel, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {Position = UDim2.new(VapeBackgroundList.HorizontalAlignment == Enum.HorizontalAlignment.Left and size or -size, 0, pos, 0)}):Play()
+				game:GetService('TweenService'):Create(TextLabel, TweenInfo.new(0.25, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {Position = UDim2.new(VapeBackgroundList.HorizontalAlignment == Enum.HorizontalAlignment.Left and size or -size, 0, pos, 0)}):Play()
 			end
 
 			if TextGUIBackgroundToggle.Enabled then
-				game:GetService('TweenService'):Create(backgroundFrame, TweenInfo.new(TextGUIBackgroundToggle.Enabled and moduleToggled.Enabled and moduleToggled.Name == v.Text and 0.35 or 0, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.fromOffset(textsize.X + 7.5, textsize.Y * 1.211)}):Play()
+				game:GetService('TweenService'):Create(backgroundFrame, TweenInfo.new(TextGUIBackgroundToggle.Enabled and moduleToggled.Enabled and moduleToggled.Name == v.Text and 0.25 or 0, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.fromOffset(textsize.X + 8, textsize.Y * 1.211)}):Play()
 			end
 		
-			task.delay(0.18, function()
+			task.delay(0.15, function()
 				TextLabel.Visible = true
 			end)
 
@@ -1443,6 +1431,12 @@ CloudSettings.CreateButton2({
 	end;
 });
 
+CloudSettings.CreateDropdown({
+	Name = 'Restore Mode',
+	List = {'yes', 'no'},
+	Function = print
+});
+
 task.spawn(function()
 	repeat task.wait() until render and render.utils.renderconnections;
 	CloudSettings.CreateButton2({
@@ -1480,6 +1474,12 @@ task.spawn(function()
 					end
 				end;
 				local updated: (number) = RenderLibrary.http:publishtocloud(updatearray);
+				print(updated)
+				if updated == #updatearray then
+					print('updated!')
+				else
+					print('failed')
+				end;
 				table.clear(updatearray);
 				task.wait(25);
 			end
@@ -1598,8 +1598,8 @@ GuiLibrary.UpdateUI = function(h, s, val, bypass)
 		VapeCustomText.TextColor3 = VapeText.TextColor3
 		VapeLogoGradient.Color = ColorSequence.new({
 			ColorSequenceKeypoint.new(0, Color3.fromHSV(h, mainRainbowSaturation, rainbowGUICheck and 1 or val)),
-			ColorSequenceKeypoint.new(1, VapeText.TextColor3)
-		})
+			ColorSequenceKeypoint.new(1, Color3.fromHSV(h, mainRainbowSaturation, val / 1.2));
+		});
 		VapeLogoGradient2.Color = ColorSequence.new({
 			ColorSequenceKeypoint.new(0, Color3.fromHSV(h, TextGUIGradient.Enabled and rainbowGUICheck and mainRainbowSaturation or 0, 1)),
 			ColorSequenceKeypoint.new(1, Color3.fromHSV(TextGUIGradient.Enabled and mainRainbowGradient or h, TextGUIGradient.Enabled and rainbowGUICheck and mainRainbowSaturation or 0, 1))
@@ -1808,11 +1808,9 @@ local teleportConnection = playersService.LocalPlayer.OnTeleport:Connect(functio
 			teleportScript = teleportScript:gsub('rendervape/core/boot.luau', `risesix/main.luau`);
 		end;
 		GuiLibrary.SaveSettings()
-		if getgenv().salad == nil then 
-			queueonteleport(teleportScript);
-		end;
-    end;
-end);
+		queueonteleport(teleportScript)
+    end
+end)
 
 GuiLibrary.SelfDestruct = function()
 	task.spawn(function()
@@ -1961,6 +1959,7 @@ if typeof(teleportdata) == 'table' and (teleportdata.match or teleportdata.custo
 end;
 
 local function customload(data, file)
+	print(file)
 	local success, err = pcall(function()
 		loadstring(data)()
 	end)
@@ -1990,7 +1989,7 @@ local function initiaterender()
 	for i: string, v: {Selected: boolean, Keybind: string} in profiles do 
 		table.insert(parsedprofiles, i);
 	end;
-    local suc, res = pcall(function()
+    pcall(function()
 		if true then -- don't ask why :)
 		    getgenv().rendervapeload = {file = 'universal.luau', step = 3};
 			getgenv().renderloadui:setprogress(2, 4, 'Loading the universal modules...');
@@ -2012,14 +2011,6 @@ local function initiaterender()
 			getgenv().rendervapeload = {file = 'Init.lua', step = 4};
 		end
 	end)
-    if not suc then
-        GuiLibrary:notify({
-			title = 'Initiation Failure',
-			text = `Intitiation Exception (Game module): {res}`,
-			duration = 20,
-			color = Color3.fromRGB(255, 0, 0)
-		})
-    end
 	shared.renderconstructor.runtime:initiate();
 	task.spawn(function()
 		repeat task.wait() until shared.VapeFullyLoaded;
@@ -2041,6 +2032,7 @@ local function initiaterender()
 		end
 	end)
 	local success, result = pcall(GuiLibrary.LoadSettings);
+	print(success, result or 'WTF')
 	if not success then 
 		pcall(function()
 			local notification = GuiLibrary.CreateNotification('Settings', `Failed to load GUI settings. --> {result}`, 25, "assets/WarningNotification.png")
@@ -2069,7 +2061,7 @@ local function initiaterender()
 	coroutine.resume(saveSettingsLoop)
 	shared.VapeFullyLoaded = true;
 	getgenv().render.loaded = true;
-	local notification = GuiLibrary.CreateNotification('Render', `Successfully Loaded in. Took {math.floor(tick() - loadtime)} seconds.`, 12, 'assets/InfoNotification.png');
+	local notification = GuiLibrary.CreateNotification('Render', `Successfully Loaded in. Took {math.floor(tick() - loadtime)} seconds`, 12, 'assets/InfoNotification.png');
 	notification.IconLabel.ImageColor3 = Color3.fromRGB(255, 255, 255)
 	notification.Frame.Frame.ImageColor3 = Color3.fromRGB(255, 255, 255)
 	task.wait(0.3);
@@ -2100,5 +2092,6 @@ if shared.VapeIndependent then
 	shared.VapeFullyLoaded = true
 	return GuiLibrary
 else
+	print('Render ontop')
 	initiaterender()
 end
