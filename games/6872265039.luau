@@ -224,10 +224,16 @@ run(function()
             end;
         end
     })
+	local list = {}
+	for i: number, v: table in bedwars.queueMeta do
+		if v.title:find("Test") == nil then
+			table.insert(list, v.title..(i:find('voice') and ' (VOICE)' or ''))
+		end
+	end
     autoqueuemode = autoqueue.CreateDropdown({
         Name = 'Mode',
         Function = void,
-        List = bedwars.queueMeta
+        List = list
     })
 end);
 
