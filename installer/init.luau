@@ -113,14 +113,6 @@ local bootinstallation = function(): ()
         end;
     end);
     installation:newstep(function()
-        installation:setText('Downloading Custom Fonts', 'Better font the better', 'Downloading API request to storage');   
-        local result: table = constructor.http:request({path = 'fonts', subdomain = 'storage', params = {{name = 'iterate', value = 'true'}}});
-        assert(result.ok and result.json().success, 'Failed to fetch profiles');
-        for _: number, v: string in profileres.json().result do 
-            writefile(`rendervape/fonts/{_}`, v);
-        end;
-    end)
-    installation:newstep(function()
         installation:setText('Downloading Core', 'Core packages required for render to load', 'Getting core packages');
         local coreres: {ok: boolean, json: () -> table?, body: string} = constructor.http:request({path = 'core', subdomain = 'storage', params = {{name = 'iterate', value = 'true'}}});
         assert(coreres.ok, 'Failed to fetch core packages');
