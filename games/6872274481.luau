@@ -548,7 +548,7 @@ local function getSpeed(): (number)
 		if SpeedDamageBoost and SpeedDamageBoost > 1 then
 			speed += (10 * (SpeedDamageBoost - 1))
 			if isEnabled('Desync') and render.clone.new then 
-				speed += 12;
+				speed += 14;
 			end;
 		end
 		if store.grapple > tick() then
@@ -12639,8 +12639,8 @@ run(function()
 		Function = function(calling: boolean)
 			if calling then 
 				table.insert(autorewind.Connections, runservice.Heartbeat:Connect(function()
-					local block: RaycastParams = workspace:Raycast(entityLibrary.LocalPosition, Vector3.new(0, -1e4, 0), store.blockRacyast);
-					if block and workspace:Raycast(block.Position, Vector3.new(0, -30, 0), store.blockRaycast) and not istweening then 
+					local block: RaycastParams = workspace:Raycast(entityLibrary.LocalPosition, Vector3.new(0, -1e4, 0), store.raycast);
+					if block and workspace:Raycast(block.Position, Vector3.new(0, -30, 0), store.raycast) and not istweening then 
 						lastposition = block.Position
 					end;
 				end));
