@@ -1,9 +1,9 @@
 {
-    "message": "wow",
-    "pingids": ["<@&1303432209935634472>", "nig nogs"],
+    "message": "pro update!!",
+    "pingids": ["<@&1303432209935634472>"],
     "embeds":{
-        "title": "Render V3 changelogs (included the one from last night)",
-        "changelogs": "        Fixed switching to another config being buggy (its still a lil buggy)\n\n         Made render's speed boost & damageboost faster than a client called 'cat v5'\n\n       ACTUALLY Fixed antihit (if it doesnt work just mass dm @maxlasertech real)\n\n        Fixed Autorewind tping you to the void\n\n        Added Hide module options (basically from vape mc)\n\n        Fixed Effecthud Timer color not being accurate\n\n        Fixed bedwars lobby autoqueue\n\n        Maintenance most of the game support until further notices\n    "
+        "title": "🛠 Render Update has been pushed 🛠",
+        "changelogs": "ACTUALLY Fixed antihit (if it doesnt work just mass dm @maxlasertech real)\nSesssionHud should always show now (even without custom fonts)\nFixed switching to another config being buggy (its still a lil buggy)\nModule init error would stop showing (unless ur on debug session mode)\nMade render's speed boost & damageboost faster than a client called 'cat v5'\nFixed Autorewind tping you to the void\nAdded Hide module options (basically from vape mc)\nFixed Effecthud Timer color not being accurate\nFixed bedwars lobby autoqueue\nMaintenance most of the game support until further notices"
     },
-    "version": 0.3
+    "version": 0.4
 }
