@@ -11968,8 +11968,6 @@ run(function()
 	local bouncedelay = tick();
 	local notificationTick = tick();
 	local bounceskytime = {Value = 4};
-	local oldroot;
-	local newroot;
 	local createclone = function()
 		repeat task.wait() until isAlive(lplr, true) and store.matchState ~= 0 or antihit.Enabled == false;
 		task.wait(0.2);
@@ -11996,7 +11994,10 @@ run(function()
 		});
 	end;
 	local destructclone = function()
-		if isEnabled('InfiniteFly') or not store.matchState ~= 0 then 
+		if not render.clone.old then
+			return;
+		end;
+		if isEnabled('InfiniteFly') then 
 			return 
 		end;
 		lplr.Character.Parent = game;
@@ -12024,13 +12025,15 @@ run(function()
 					end
 				end));
 				table.insert(antihit.Connections, vapeEvents.EntityDamageEvent.Event:Connect(function(damagedata: table): ()
-					if lplr.Character and damagedata.entityInstance == lplr.Character and not isAlive() then
-						destructclone();
-					end;
-				end));
+					if damagedata.entityInstance == lplr.Character and not isAlive() then
+						destructclone()
+					end
+				end))
 				repeat 
-					if newroot.Parent ~= lplr.Character then 
-						lastTeleport = tick();
+					task.wait()
+					if not isAlive(lplr, true) then continue end
+					if render.clone.new.Parent ~= lplr.Character then 
+						bouncedelay = tick();
 						createclone();
 					end;
 					if killauraNearPlayer then 
@@ -12050,7 +12053,6 @@ run(function()
 							end
 						end
 					end
-					task.wait()
 				until (not antihit.Enabled)
 			else 
 				pcall(destructclone)
