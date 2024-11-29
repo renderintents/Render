@@ -204,7 +204,8 @@ if shared.VapeExecuted then
 		ToggleTooltips = false,
 		ObjectsThatCanBeSaved = {["Gui ColorSliderColor"] = {Api = {Hue = 0.44, Sat = 1, Value = 1}}},
 		MobileButtons = {},
-		RainbowSliders = {}
+		RainbowSliders = {},
+		RemovedMiniObjects = {}
 	}
 	local runService = game:GetService("RunService")
 	local inputService = game:GetService("UserInputService")
@@ -950,6 +951,10 @@ if shared.VapeExecuted then
 				end
 			end
 		end
+		for i,v in lib.RemovedMiniObjects do
+			table.clear(lib.RemovedMiniObjects);
+			v:Remove();
+		end;
 		loadedsuccessfully = true
 	end
 
@@ -981,10 +986,12 @@ if shared.VapeExecuted then
 	lib["RemoveObject"] = function(objname)
 		pcall(function()
 			lib.ObjectsThatCanBeSaved[objname]["Object"]:Remove()
+			if lib.ObjectsThatCanBeSaved[objname]["Object2"] then
+				lib.RemovedMiniObjects = lib.ObjectsThatCanBeSaved[objname]["Object2"]
+			end
 			if lib.ObjectsThatCanBeSaved[objname]["Type"] == "OptionsButton" then
 				lib.ObjectsThatCanBeSaved[objname]["ChildrenObject"].Name = "RemovedChildren"
 			end
-                        pcall(function() lib.ObjectsThatCanBeSaved[objname].hidebuttonapi.Object:Remove(); end)
 			lib.ObjectsThatCanBeSaved[objname] = nil
 		end)
 	end
@@ -2769,7 +2776,7 @@ if shared.VapeExecuted then
 						if buttonicon then
 							buttonicon.ImageColor3 = Color3.fromRGB(200, 200, 200)
 						end
-						pcall(function() print('disabled') indicatorframe.BackgroundColor3 = Color3.fromRGB(22, 22, 22) end)
+						pcall(function() indicatorframe.BackgroundColor3 = Color3.fromRGB(22, 22, 22) end)
 					end
 					rendersafecall(argstable.Function, argstable.Name, buttonapi.Enabled);
 					lib["UpdateHudEvent"]:Fire()
@@ -4131,7 +4138,7 @@ if shared.VapeExecuted then
 		hidemodule.Visible = false;
 		
 		local hidemoduleimg = Instance.new('ImageLabel', hidemodule)
-		hidemoduleimg.Image = 'rbxassetid://140490555503930'
+		hidemoduleimg.Image = 'rbxassetid://138696018251186'
 		hidemoduleimg.BackgroundTransparency = 1
 		hidemoduleimg.Visible = true;
 		hidemoduleimg.Position = UDim2.new(0, 6, 0, 0)
@@ -4169,6 +4176,9 @@ if shared.VapeExecuted then
 		hidelayout.SortOrder = Enum.SortOrder.LayoutOrder
 
 		local ischildvisible = nil;
+		local hidesizes = {
+			windowtitle = nil
+		}
 		windowapi.SetHideVisible = function(): ()
 			hiderscrollframe.Visible = not hiderscrollframe.Visible;
 			if children.Visible then
@@ -4176,16 +4186,34 @@ if shared.VapeExecuted then
 				children.Visible = false;
 			end
 			if hiderscrollframe.Visible then
-				hidemoduleimg.Image = 'rbxassetid://140490555503930'
-				hiderscrollframe.CanvasSize = UDim2.new(0, 0, 0, uilistlayout.AbsoluteContentSize.Y * (1 / lib["MainRescale"].Scale));
-			else
+				if hidesizes.windowtitle then
+					windowtitle.Size = hidesizes.windowtitle;
+				end
 				hidemoduleimg.Image = 'rbxassetid://138696018251186'
+			else
+				hidemoduleimg.Image = 'rbxassetid://140490555503930'
 				if ischildvisible then
 					children.Visible = true;
+					windowapi["ExpandToggle"]()
+					windowapi["ExpandToggle"]()
 					ischildvisible = nil;
 				end;
 			end;
 		end;
+
+		task.spawn(function()
+			repeat task.wait() until shared.vapegamesloaded;
+			local eee = false
+			if not children.Visible then
+				windowapi["ExpandToggle"]()
+				eee = true
+			end
+			hiderscrollframe.CanvasSize = children.CanvasSize
+			hidesizes.windowtitle = windowtitle.size
+			if eee then
+				windowapi["ExpandToggle"]()
+			end
+		end)
 
 		windowtitle.MouseButton2Click:Connect(windowapi["ExpandToggle"])
 		expandbutton.MouseButton1Click:Connect(windowapi["ExpandToggle"])
@@ -4201,7 +4229,51 @@ if shared.VapeExecuted then
 
 		windowapi["CreateOptionsButton"] = function(argstablemain)
 			lib.RemoveObject(`{argstablemain.Name}OptionsButton`)
-			local buttonapi = {hidebuttonapi = {Enabled = false}};
+			local buttonapi = {};
+			local mainbuttontext = Instance.new('TextButton', hiderscrollframe);
+			mainbuttontext.BackgroundColor3 = Color3.fromRGB(26, 25, 26)
+			mainbuttontext.Name = argstablemain.Name..'Button'
+			mainbuttontext.Size = UDim2.new(1, 0, 0, 40)
+			mainbuttontext.Text = ''
+			mainbuttontext.BorderSizePixel = 0
+			mainbuttontext.AutoButtonColor = false
+		
+			local bgtext = Instance.new('TextLabel', mainbuttontext)
+			bgtext.Font = Enum.Font.Arial
+			bgtext.TextColor3 = Color3.fromRGB(120, 120, 120)
+			bgtext.Text = argstablemain.Name
+			bgtext.BackgroundTransparency = 1
+			bgtext.Position = UDim2.new(0, 49, 0, -1)
+			bgtext.TextXAlignment = Enum.TextXAlignment.Left
+			bgtext.TextSize = 14
+			bgtext.Size = UDim2.new(0, 118, 0, 39)
+
+			local holder = Instance.new('Frame', mainbuttontext)
+			holder.Position = UDim2.new(0, 0, -0.025, 0)
+			holder.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			holder.Size = UDim2.new(0, 40, 0, 42)
+			holder.BorderSizePixel = 0
+		   holder.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+
+			local toggleboard = Instance.new('Frame', holder)
+			toggleboard.BackgroundTransparency = 1
+			toggleboard.Position = UDim2.new(0.325, 0, 0.308, 0)
+			toggleboard.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			toggleboard.Size = UDim2.new(0, 15, 0, 15)
+			toggleboard.BorderSizePixel = 0
+			toggleboard.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+
+			local togglestroke = Instance.new('UIStroke', toggleboard)
+			togglestroke.Thickness = 1.5
+			togglestroke.Color = Color3.fromRGB(30, 30, 30)
+
+			local backgroundtoggle = Instance.new('Frame', holder)
+			backgroundtoggle.BackgroundTransparency = 1
+			backgroundtoggle.Position = UDim2.new(0.37, 0, 0.36, 0)
+			backgroundtoggle.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			backgroundtoggle.Size = UDim2.new(0, 11, 0, 11)
+			backgroundtoggle.BorderSizePixel = 0
+			backgroundtoggle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 			local amount = #children:GetChildren()
 			local button = Instance.new("TextButton")
 			local currenttween = tweenService:Create(button, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {BackgroundColor3 = Color3.fromRGB(31, 30, 31)})
@@ -4399,67 +4471,24 @@ if shared.VapeExecuted then
 				end;
 			end;
 
-			local mainbuttontext = Instance.new('TextButton', hiderscrollframe);
-			mainbuttontext.BackgroundColor3 = Color3.fromRGB(26, 25, 26)
-			mainbuttontext.Name = 'AutoLeaveButton'
-			mainbuttontext.Size = UDim2.new(1, 0, 0, 40)
-			mainbuttontext.Text = ''
-			mainbuttontext.BorderSizePixel = 0
-			mainbuttontext.AutoButtonColor = false
-			
-			buttonapi.hidebuttonapi.Object = mainbuttontext
-
-			local bgtext = Instance.new('TextLabel', mainbuttontext)
-			bgtext.Font = Enum.Font.Arial
-			bgtext.TextColor3 = Color3.fromRGB(120, 120, 120)
-			bgtext.Text = argstablemain.Name
-			bgtext.BackgroundTransparency = 1
-			bgtext.Position = UDim2.new(0, 49, 0, -1)
-			bgtext.TextXAlignment = Enum.TextXAlignment.Left
-			bgtext.TextSize = 14
-			bgtext.Size = UDim2.new(0, 118, 0, 39)
-
-			local holder = Instance.new('Frame', mainbuttontext)
-			holder.Position = UDim2.new(0, 0, -0.025, 0)
-			holder.BorderColor3 = Color3.fromRGB(0, 0, 0)
-			holder.Size = UDim2.new(0, 40, 0, 42)
-			holder.BorderSizePixel = 0
-			holder.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-
-			local toggleboard = Instance.new('Frame', holder)
-			toggleboard.BackgroundTransparency = 1
-			toggleboard.Position = UDim2.new(0.325, 0, 0.308, 0)
-			toggleboard.BorderColor3 = Color3.fromRGB(0, 0, 0)
-			toggleboard.Size = UDim2.new(0, 15, 0, 15)
-			toggleboard.BorderSizePixel = 0
-			toggleboard.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-
-			local togglestroke = Instance.new('UIStroke', toggleboard)
-			togglestroke.Thickness = 1.5
-			togglestroke.Color = Color3.fromRGB(30, 30, 30)
-
-			local backgroundtoggle = Instance.new('Frame', holder)
-			backgroundtoggle.BackgroundTransparency = 1
-			backgroundtoggle.Position = UDim2.new(0.37, 0, 0.36, 0)
-			backgroundtoggle.BorderColor3 = Color3.fromRGB(0, 0, 0)
-			backgroundtoggle.Size = UDim2.new(0, 11, 0, 11)
-			backgroundtoggle.BorderSizePixel = 0
-			backgroundtoggle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-
 			buttonapi.Togglehidebutton = function(bool: boolean): ()
 				buttonapi.hidebuttonapi.Enabled = bool or not buttonapi.hidebuttonapi.Enabled
 				if buttonapi.hidebuttonapi.Enabled then
 					button.Visible = false
+					bgtext.TextColor3 = Color3.fromRGB(155, 155, 155)
 					togglestroke.Color = Color3.fromRGB(255, 255, 255)
 					tweenService:Create(backgroundtoggle, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {BackgroundTransparency = 0}):Play()
 				else
 					button.Visible = true
 					togglestroke.Color = Color3.fromRGB(30, 30, 30)
+					bgtext.TextColor3 = Color3.fromRGB(120, 120, 120)
 					tweenService:Create(backgroundtoggle, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {BackgroundTransparency = 1}):Play()
 				end
 			end;
 
 			mainbuttontext.MouseButton1Click:Connect(buttonapi.Togglehidebutton);
+			
+			buttonapi['Object2'] = mainbuttontext
 
 			buttonapi["ExpandToggle"] = function()
 				children2.Visible = not children2.Visible
@@ -6428,6 +6457,7 @@ if shared.VapeExecuted then
 			end
 			lib.ObjectsThatCanBeSaved[argstablemain2["Name"].."Window"]["SortOrder"] = #sorttable1
 
+			buttonapi["Object2"] = mainbuttontext
 			return buttonapi
 		end
 
