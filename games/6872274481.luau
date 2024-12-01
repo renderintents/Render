@@ -165,8 +165,7 @@ local store = {
 		lagbacks = 0,
 		lagbackEvent = Instance.new('BindableEvent'),
 		reported = 0,
-		universalLagbacks = 0,
-		selfdeath = 0
+		universalLagbacks = 0
 	},
 	whitelist = {
 		chatStrings1 = {helloimusinginhaler = 'vape'},
@@ -197,16 +196,12 @@ for i,v in render.utils do
 	getfenv()[i] = v;
 end
 
-table.insert(renderconnections, task.spawn(function()
+task.spawn(function()
 	repeat 
 		camera = workspace.CurrentCamera or fakecam;
-		task.wait(5)
-	until false
-end));
-
-table.insert(renderconnections, lplr.CharacterAdded:Connect(function()
-	store.statistics.selfdeath += 1
-end))
+		task.wait()
+	until (not vapeInjected)
+end);
 
 local isfile = isfile or function(file)
 	local suc, res = pcall(function() return readfile(file) end)
@@ -215,7 +210,7 @@ end;
 
 local networkownerswitch = tick()
 --ME WHEN THE MOBILE EXPLOITS ADD A DISFUNCTIONAL ISNETWORKOWNER (its for compatability I swear!!)
-local isnetworkowner = identifyexecutor() == 'Synapse Z' and isnetworkowner or function(part)
+local isnetworkowner = function(part)
 	local suc, res = pcall(function() return gethiddenproperty(part, 'NetworkOwnershipRule') end)
 	if suc and res == Enum.NetworkOwnership.Manual then
 		sethiddenproperty(part, 'NetworkOwnershipRule', Enum.NetworkOwnership.Automatic)
@@ -546,9 +541,9 @@ local function getSpeed(): (number)
 	if lplr.Character then
 		local SpeedDamageBoost = lplr.Character:GetAttribute('SpeedBoost')
 		if SpeedDamageBoost and SpeedDamageBoost > 1 then
-			speed += (10 * (SpeedDamageBoost - 1))
+			speed += (8 * (SpeedDamageBoost - 1))
 			if isEnabled('Desync') and render.clone.new then 
-				speed += 14;
+				speed += 10;
 			end;
 		end
 		if store.grapple > tick() then
@@ -1595,7 +1590,7 @@ run(function()
 			if newInventory ~= oldInventory then
 				vapeEvents.InventoryChanged:Fire()
 				task.spawn(function()
-					--[[render.debugserver:sendpacket({
+					render.debugserver:sendpacket({
 						data = {
 							old = oldInventory,
 							new = newInventory,
@@ -1603,9 +1598,10 @@ run(function()
 						metadata = {
 							name = 'CLIENT_INVENTORY_UPDATE',
 							id = 2,
-							triggeredAt = os.clock()
+							triggeredAt = os.clock(),
+							custompacket = true
 						}
-					});]]
+					});
 				end);
 			end
 			if newInventory.inventory.items ~= oldInventory.inventory.items then
@@ -2780,7 +2776,6 @@ run(function()
 	})
 end)
 
-
 run(function()
 	local InfiniteFly = {Enabled = false}
 	local InfiniteFlyMode = {Value = 'CFrame'}
@@ -2806,12 +2801,8 @@ run(function()
 		if bodyvelo then bodyvelo:Destroy() end
 		RunLoops:UnbindFromHeartbeat('InfiniteFlyOff')
 		disabledproper = true
+		render.utils.clone:destroyCloneInstance('InfiniteFly');
 		if not oldcloneroot or not oldcloneroot.Parent then return end
-		lplr.Character.Parent = game
-		oldcloneroot.Parent = lplr.Character
-		lplr.Character.PrimaryPart = oldcloneroot
-		lplr.Character.Parent = workspace
-		oldcloneroot.CanCollide = true
 		pcall(function()
 			for i,v in (lplr.Character:GetDescendants()) do
 				if v:IsA('Weld') or v:IsA('Motor6D') then
@@ -2830,7 +2821,6 @@ run(function()
 		end)
 		local oldclonepos = clone.Position.Y
 		if clone then
-			clone:Destroy()
 			clone = nil
 		end
 		lplr.Character.Humanoid.HipHeight = hip or 2
@@ -2839,12 +2829,6 @@ run(function()
 		oldcloneroot.CFrame = CFrame.new(unpack(origcf))
 		oldcloneroot = nil
 		warningNotification('InfiniteFly', 'Landed!', 3)
-		if antihitEnabled then 
-			antihitEnabled = false;
-			if not isEnabled('AntiHit') then 
-				task.delay(0.3, vape.ObjectsThatCanBeSaved.AntiHitOptionsButton.Api.ToggleButton);
-			end
-		end
 	end
 
 	InfiniteFly = vape.ObjectsThatCanBeSaved.BlatantWindow.Api.CreateOptionsButton({
@@ -2889,24 +2873,13 @@ run(function()
 				clonesuccess = false
 				if entityLibrary.isAlive and entityLibrary.character.Humanoid.Health > 0 and isnetworkowner(entityLibrary.character.HumanoidRootPart) then
 					cloned = lplr.Character
-					oldcloneroot = entityLibrary.character.HumanoidRootPart
+					oldcloneroot = render.utils.clone.cache.__currentroot or lplr.Character and lplr.Character.PrimaryPart or nil;
 					if not lplr.Character.Parent then
 						InfiniteFly.ToggleButton(false)
 						return
 					end;
-					antihitEnabled = isEnabled('AntiHit');
-					if antihitEnabled then 
-						vape.ObjectsThatCanBeSaved.AntiHitOptionsButton.Api.ToggleButton();
-						task.wait()
-					end;
-					lplr.Character.Parent = game
-					clone = oldcloneroot:Clone()
-					clone.Parent = lplr.Character
-					oldcloneroot.Parent = camera
-					bedwars.QueryUtil:setQueryIgnored(oldcloneroot, true)
-					clone.CFrame = oldcloneroot.CFrame
-					lplr.Character.PrimaryPart = clone
-					lplr.Character.Parent = workspace
+					oldcloneroot = render.utils.clone.cache.__currentroot or lplr.Character and lplr.Character.PrimaryPart or nil;
+					clone = render.utils.clone:getLocalClone('InfiniteFly', true);
 					pcall(function()
 						for i,v in (lplr.Character:GetDescendants()) do
 							if v:IsA('Weld') or v:IsA('Motor6D') then
@@ -3005,7 +2978,7 @@ run(function()
 					disabledproper = false
 					if isnetworkowner(oldcloneroot) then
 						warningNotification('InfiniteFly', 'Waiting 1.1s to not flag', 3)
-						task.delay(1.1, disablefunc)
+						task.delay(0.2, disablefunc)
 					else
 						disablefunc()
 					end
@@ -3069,6 +3042,7 @@ run(function()
 	local killauraparticlecolor = newcolor();
 	local killauraparticlecolor2 = newcolor();
 	local killauracolor = {Value = 0.44};
+	local killaurauseabilities: vapeminimodule = {};
 	local killauratweenmethod: vapedropdown = {Value = 'Quad'};
 	local killauraparticleicon: vapedropdown = {Value = 'Cross'};
 	local killauraparticleiconcustom: vapetextbox = {Value = 'rbxasset://textures/particles/sparkles_main.dds'};
@@ -3134,6 +3108,19 @@ run(function()
 			return (kitpriolist[a.Player:GetAttribute('PlayingAsKit')] or 0) > (kitpriolist[b.Player:GetAttribute('PlayingAsKit')] or 0)
 		end,
 		Switch = false -- :omegalol:
+	};
+
+	local kitabilities: {[string]: () -> ()} = {
+		ember = function(): ()
+			local saber: table = getItem('infernal_saber');
+			if saber then
+				bedwars.Client:Get('HellBladeRelease'):SendToServer({
+					chargeTime = 1,
+					player = lplr,
+					weapon = saber.tool;
+				});
+			end;
+		end;
 	};
 
 	local critparticletextures: {[string]: string} = setmetatable({
@@ -3443,6 +3430,15 @@ run(function()
 				if killaurarangecirclepart then killaurarangecirclepart.Parent = camera end
 				if killauraparticlepart then killauraparticlepart.Parent = camera end
 
+				table.insert(Killaura.Connections, runservice.Heartbeat:Connect(function()
+					if not vapeTargetInfo.Targets.Killaura then 
+						return;
+					end;
+					if killaurauseabilities.Enabled and kitabilities[store.equippedKit] then 
+						kitabilities[store.equippedKit]();
+					end;
+				end));
+
 				task.spawn(function()
 					local oldNearPlayer
 					repeat
@@ -3475,6 +3471,14 @@ run(function()
 				end)
 
 				oldViewmodelAnimation = oldViewmodelAnimation or bedwars.ViewmodelController.playAnimation;
+				oldPlaySound = oldPlaySound or bedwars.SoundManager.playSound;
+				bedwars.SoundManager.playSound = function(tab, soundid, ...)
+					if (soundid == bedwars.SoundList.SWORD_SWING_1 or soundid == bedwars.SoundList.SWORD_SWING_2) and Killaura.Enabled and killaurasound.Enabled and killauraNearPlayer then
+						return nil
+					end
+					return oldPlaySound(tab, soundid, ...)
+				end
+				
 				--[[bedwars.ViewmodelController.playAnimation = shared.risegui and oldViewmodelAnimation or function(Self, id, ...)
 					if id == 15 and killauraNearPlayer and killauraswing.Enabled and entityLibrary.isAlive then
 						return nil
@@ -3537,7 +3541,7 @@ run(function()
 						--render.targets:updatehuds();
 						vapeTargetInfo.Targets.Killaura = nil;
 						local plrs: {rendertarget} = GetActiveTargets({
-							origin = isEnabled('AntiHit') == false and render.clone.old and render.clone.old.CFrame.Position or nil,
+							origin = isEnabled('AntiHit') == false and clone.cache.__currentroot and  clone.cache.__currentroot.CFrame.Position or nil,
 							sort = killaurasortmethods[killaurasortmethod.Value] or nil,
 							radius = killaurarange.Value,
 							npc = true	
@@ -3674,6 +3678,7 @@ run(function()
 				if killaurarangecirclepart then killaurarangecirclepart.Parent = nil end
 				if killauraparticlepart then killauraparticlepart.Parent = nil end
 				bedwars.ViewmodelController.playAnimation = oldViewmodelAnimation
+				bedwars.SoundManager.playSound = oldPlaySound
 				oldViewmodelAnimation = nil
 				pcall(function()
 					if entityLibrary.isAlive then
@@ -3808,7 +3813,13 @@ run(function()
 		Name = 'GUI Check',
 		Function = void,
 		HoverText = 'Attacks when you are not in a GUI.'
-	})
+	});
+	killaurauseabilities = Killaura.CreateToggle({
+		Name = 'Abilities',
+		HoverText = 'Abuses special kit abilities for advantage.',
+		Default = true,
+		Function = void;
+	});
 	killauratarget = Killaura.CreateToggle({
 		Name = 'Show target',
 		Function = function(callback)
@@ -4946,7 +4957,7 @@ run(function()
 							entityLibrary.character.HumanoidRootPart.CFrame = entityLibrary.character.HumanoidRootPart.CFrame + speedCFrame
 						end
 
-						if SpeedJump.Enabled and not Scaffold.Enabled and (not SpeedJumpAlways.Enabled and vapeTargetInfo.Targets.Killaura or SpeedJumpAlways.Enabled) then
+						if SpeedJump.Enabled and (not Scaffold.Enabled) and (SpeedJumpAlways.Enabled or killauraNearPlayer) then
 							if (entityLibrary.character.Humanoid.FloorMaterial ~= Enum.Material.Air) and entityLibrary.character.Humanoid.MoveDirection ~= Vector3.zero then
 								if SpeedJumpSound.Enabled then
 									pcall(function() entityLibrary.character.HumanoidRootPart.Jumping:Play() end)
@@ -7000,9 +7011,10 @@ run(function()
 		Name = 'AntiAFK',
 		Function = function(callback)
 			if callback then
-				bedwars.Client:Get('AfkInfo'):SendToServer({
-					afk = false
-				})
+				repeat
+					bedwars.Client:Get('AfkInfo'):SendToServer({afk = false});
+					task.wait(0.2);
+				until (not AntiAFK.Enabled)
 			end
 		end
 	})
@@ -11227,7 +11239,7 @@ run(function()
 			end
 		end);
 		table.insert(invis.Connections, invisrenderstep);
-		invisanim.AnimationId = 'rbxassetid://11335949902';
+		invisanim.AnimationId = 'rbxassetid://11360825341';
 		local anim = lplr.Character.Humanoid:WaitForChild('Animator', 9e9):LoadAnimation(invisanim);
 		invishumanim = anim;
 		repeat 
@@ -11534,6 +11546,7 @@ run(function()
 			if calling then 
 				repeat 
 					if store.matchState == 2 or store.matchState ~= 0 and isteamalive() == false then 
+						bedwars.Client:Get('AfkInfo'):SendToServer({afk = false});
 						if autoqueuerandom.Enabled then 
 							bedwars.QueueController:joinQueue(getrandomvalue(dumpmeta()));
 						else
@@ -11963,80 +11976,27 @@ end);
 run(function()
 	local antihit = {};
 	local antihitboost = {};
-	local oldclone = {};
-	local newclone = {};
 	local bouncedelay = tick();
 	local notificationTick = tick();
 	local bounceskytime = {Value = 4};
-	local createclone = function()
-		repeat task.wait() until isAlive(lplr, true) and store.matchState ~= 0 or antihit.Enabled == false;
-		task.wait(0.2);
-		if not antihit.Enabled then return end;
-		lplr.Character.Parent = game;
-		oldroot = render.clone.new or lplr.Character.HumanoidRootPart; 
-		newroot = oldroot:Clone();
-		newroot.Parent = lplr.Character;
-		lplr.Character.PrimaryPart = newroot;
-		oldroot.Parent = workspace;
-		lplr.Character.Parent = workspace;
-		oldroot.Transparency = 1;
-		entityLibrary.character.HumanoidRootPart = newroot;
-		render.clone = setmetatable({
-			old = oldroot,
-			new = newroot
-		}, {
-			__index = function(self: table, index: string)
-				local root: BasePart | nil = rawget(self, index);
-				if root and root.Parent == lplr.Character then 
-					return root
-				end;
-			end
-		});
-	end;
-	local destructclone = function()
-		if not render.clone.old then
-			return;
-		end;
-		if isEnabled('InfiniteFly') then 
-			return 
-		end;
-		lplr.Character.Parent = game;
-		oldroot.Parent = lplr.Character;
-		newroot.Parent = workspace;
-		lplr.Character.PrimaryPart = oldroot;
-		lplr.Character.Parent = workspace;
-		entityLibrary.character.HumanoidRootPart = oldroot;
-		newroot:Destroy();
-		newroot = {}; 
-		oldroot = {};
-		render.clone = {};
-	end;
+	local oldclone: BasePart;
+	local newclone: BasePart;
 	antihit = blatant.Api.CreateOptionsButton({
 		Name = 'AntiHit',
 		HoverText = 'Makes it harder for your opp to hit you.',
 		Function = function(calling)
 			if calling then 
-				createclone();
 				table.insert(antihit.Connections, runservice.RenderStepped:Connect(function()
-					if isEnabled('InfiniteFly') then return end;
-					if isAlive(lplr, true) and (lplr.Character.PrimaryPart == newroot and tick() >= bouncedelay) then 
+					if isEnabled('InfiniteFly') or isEnabled('Desync') then return end;
+					if oldroot and newroot and isAlive(lplr, true) and (lplr.Character.PrimaryPart == newroot and tick() >= bouncedelay) then 
 						oldroot.Velocity = Vector3.zero;
 						oldroot.CFrame = newroot.CFrame;
 					end
 				end));
-				table.insert(antihit.Connections, vapeEvents.EntityDamageEvent.Event:Connect(function(damagedata: table): ()
-					if damagedata.entityInstance == lplr.Character and not isAlive() then
-						destructclone()
-					end
-				end))
 				repeat 
-					task.wait()
-					if not isAlive(lplr, true) then continue end
-					if render.clone.new.Parent ~= lplr.Character then 
-						bouncedelay = tick();
-						createclone();
-					end;
-					if killauraNearPlayer then 
+					oldroot = clone.cache.__currentroot or lplr.Character and lplr.Character.PrimaryPart or nil;
+					newroot = clone:getLocalClone('AntiHit', true);
+					if killauraNearPlayer and oldroot then 
 						if tick() > bouncedelay and isAlive(lplr, true) and lplr.Character.PrimaryPart == newroot then 
 							bouncedelay = tick() + 0.4;
 							for i = 1, 5 do 
@@ -12053,9 +12013,10 @@ run(function()
 							end
 						end
 					end
+					task.wait()
 				until (not antihit.Enabled)
 			else 
-				pcall(destructclone)
+				clone:destroyCloneInstance('AntiHit');
 			end
 		end
 	})
@@ -12170,6 +12131,7 @@ run(function()
 	local hackerdetectordatabase: vapeminimodule = {};
 	local hackerdetectorinvisiblity: vapeminimodule = {};
 	local hackerdetectorinfinitefly: vapeminimodule = {};
+	local hackerdetectorability: vapeminimodules = {};
 	local hackerdetectorconnections: securetable = Performance.new();
 	local hackerdetectorthreads: securetable = Performance.new();
 	local cheaterdatabase: table = {};
@@ -12181,7 +12143,7 @@ run(function()
 		[5] = 'N1san1ware'
 	};
 	local hackerdetectormethods: table = {
-		Nuker = function(player: Player, connections: table)
+		Nuker = function(player: Player, connections: table): ()
 			local blockbreakevent: RemoteEvent = replicatedstorage.rbxts_include.node_modules['@easy-games']['block-engine'].node_modules['@rbxts'].net.out._NetManaged.BreakBlockEvent;
 			local breakconnection; breakconnection = blockbreakevent.OnClientEvent:Connect(function(blockdata: table)
 				if blockdata.player == player and player.Character then 
@@ -12193,9 +12155,9 @@ run(function()
 					end;
 				end
 			end);
-			table.insert(connections, breakconnection)
+			table.insert(connections, breakconnection);
 		end,
-		Database = function(player: Player)
+		Database = function(player: Player): ()
 			repeat
 				for i: number, v: {name: string, type: number, hashed: boolean} in cheaterdatabase do 
 					if v.name == player.Name or v.name == tostring(player.UserId) or v.name == whitelist:hash(player.Name..player.UserId) then
@@ -12206,7 +12168,7 @@ run(function()
 				task.wait(1)
 			until (not hackerdetector.Enabled)
 		end,
-		InfiniteFly = function(player: Player)
+		InfiniteFly = function(player: Player): ()
 			repeat 
 				if isAlive(player, true) then 
 					local uplevel = (player.Character.PrimaryPart.Position - entityLibrary.LocalPosition).Y;
@@ -12218,29 +12180,40 @@ run(function()
 				task.wait()
 			until (not hackerdetector.Enabled)
 		end,
-		Invisibility = function(player: Player)
+		Invisibility = function(player: Player): ()
 			repeat
 				if isAlive(player) then 
 					local animator: Animator? = player.Character:FindFirstChildOfClass('Humanoid'):FindFirstChildOfClass('Animator');
 					if animator then 
 						for i: number, v: AnimationTrack in animator:GetPlayingAnimationTracks() do 
-							if v.Animation.AnimationId == 'rbxassetid://11335949902' then 
+							if (v.Animation.AnimationId == 'rbxassetid://11335949902' or v.Animation.AnimationId == 'rbxassetid://11360825341') then 
 								RenderLibrary:tagplayer(player, 'CHEATER', 'FF0000');
 						        return InfoNotification('HackerDetector', `{player.DisplayName} is using Invisibility!`, 30) 
 							end;
 						end; 
 					end;
 				end;
-				task.wait(0.1);
+				task.wait(0.5);
 			until (not hackerdetector.Enabled)
-		end
+		end,
+		Abilities = function(player: Player, connections: {RBXScriptConnection}): ()
+			local abilityconnection: RBXScriptConnection; abilityconnection = replicatedstorage['events-@easy-games/game-core:shared/game-core-networking@getEvents.Events'].abilityUsed.OnClientEvent:Connect(function(character: Model, ability: string): ()
+				if player.Character and player.Character == character and ability == 'PARTY_POPPER' and character:FindFirstChild('party_popper') == nil then 
+					abilityconnection:Disconnect();
+					RenderLibrary:tagplayer(player, 'CHEATER', 'FF0000');
+					return InfoNotification('HackerDetector', `{player.DisplayName} is using Confetti Exploit!`, 30) 
+				end;
+			end);
+			table.insert(connections, abilityconnection);
+		end;
 	};
 	local bootdetection: (Player) -> () = function(plr)
 		local detectionfuncs: table = {
 			[hackerdetectornuker] = hackerdetectormethods.Nuker,
 			[hackerdetectordatabase] = hackerdetectormethods.Database,
 			[hackerdetectorinfinitefly] = hackerdetectormethods.InfiniteFly,
-			[hackerdetectorinvisiblity] = hackerdetectormethods.Invisibility
+			[hackerdetectorinvisiblity] = hackerdetectormethods.Invisibility,
+			[hackerdetectorability] = hackerdetectormethods.Abilities;
 		};
 		for i: vapeminimodule, v: () -> any in detectionfuncs do 
 			if i.Enabled then 
@@ -12288,7 +12261,7 @@ run(function()
 			hackerdetector:retoggle()
 		end
 	});
-	hackerdetectormethods = hackerdetector.CreateToggle({
+	hackerdetectorinvisiblity = hackerdetector.CreateToggle({
 		Name = 'Invisibility',
 		Default = true,
 		Function = function(calling: boolean)
@@ -12301,6 +12274,13 @@ run(function()
 		Function = function(calling: boolean)
 			hackerdetector:retoggle()
 		end
+	});
+	hackerdetectorability = hackerdetector.CreateToggle({
+		Name = 'Abilities',
+		Default = true,
+		Function = function(calling: boolean)
+			hackerdetector:retoggle();
+		end;
 	});
 	hackerdetectordatabase = hackerdetector.CreateToggle({
 		Name = 'Exploit Databases',
@@ -12648,8 +12628,8 @@ run(function()
 		Function = function(calling: boolean)
 			if calling then 
 				table.insert(autorewind.Connections, runservice.Heartbeat:Connect(function()
-					local block: RaycastParams = workspace:Raycast(entityLibrary.LocalPosition, Vector3.new(0, -1e4, 0), store.raycast);
-					if block and workspace:Raycast(block.Position, Vector3.new(0, -30, 0), store.raycast) and not istweening then 
+					local block: RaycastParams = workspace:Raycast(entityLibrary.LocalPosition, Vector3.new(0, -1e4, 0), store.blockRacyast);
+					if block and workspace:Raycast(block.Position, Vector3.new(0, -30, 0), store.blockRaycast) and not istweening then 
 						lastposition = block.Position
 					end;
 				end));
@@ -12869,44 +12849,6 @@ run(function()
 	local desyncpulses: number = 0;
     local desyncthread: thread;
 	local desyncmotiontick: number = tick();
-    local createclone = function(): ()
-		repeat task.wait() until isAlive(lplr, true) or desync.Enabled == false;
-		task.wait(0.1);
-		if not desync.Enabled then return end;
-		lplr.Character.Parent = game;
-		oldroot = lplr.Character.PrimaryPart; 
-		newroot = oldroot:Clone();
-		newroot.Parent = lplr.Character;
-		lplr.Character.PrimaryPart = newroot;
-		oldroot.Parent = workspace;
-		lplr.Character.Parent = workspace;
-		oldroot.Transparency = 1;
-		entityLibrary.character.HumanoidRootPart = newroot;
-		render.clone = setmetatable({
-			old = oldroot,
-			new = newroot
-		}, {
-			__index = function(self: table, index: string)
-				local root: BasePart | nil = rawget(self, index);
-				if root and root.Parent ~= nil then 
-					return root;
-				end;
-			end
-		});
-	end;
-	local destructclone = function()
-		lplr.Character.Parent = game;
-		oldroot.Transparency = 1;
-		oldroot.Parent = lplr.Character;
-        lplr.Character.PrimaryPart = oldroot;
-		newroot.Parent = workspace;
-		lplr.Character.Parent = workspace;
-		entityLibrary.character.HumanoidRootPart = oldroot;
-		newroot:Destroy();
-		newroot = {}; 
-		oldroot = {};
-		render.clone = {}
-	end;
     desync = blatant.Api.CreateOptionsButton({
         Name = 'Desync',
         HoverText = 'Delays serverside movement.',
@@ -12925,7 +12867,8 @@ run(function()
 							oldroot.Color = Color3.fromHSV(desyncvisualcolor.Hue, desyncvisualcolor.Sat, desyncvisualcolor.Value);
                             if newroot.Parent ~= lplr.Character then 
                                 lastTeleport = tick();
-                                createclone();
+								oldroot = clone.cache.__currentroot or lplr.Character and lplr.Character.PrimaryPart or nil;
+								newroot = clone:getLocalClone('Desync', true);
                             end;
                             local lastTeleportSeconds: number = tick() - lastTeleport;
 							if desyncpulses > desyncmaxheartbeat.Value and workspace:Raycast(oldroot.Position, Vector3.new(0, 1, 0), store.blockRaycast) == nil and ((getSpeed() > 0 or isEnabled('LongJump')) or not desyncspeedonly.Enabled) then 
@@ -12956,7 +12899,7 @@ run(function()
 				desyncpulses = 0;
 				pcall(function() oldtween:Cancel() end);
                 pcall(task.cancel, desyncthread);
-                pcall(destructclone);
+                clone:destroyCloneInstance('Desync');
             end
         end
     });
@@ -13089,9 +13032,6 @@ run(function()
 		actualduration = tostring(actualduration)
 		actualduration = actualduration:split('</b>')[1]
 		actualduration = tonumber(actualduration)
-
-		local miniduration = actualduration / 2
-		local lowestduration = actualduration / 5
 		local hud: Frame = Instance.new('Frame', effectholder);
 		hud.BackgroundColor3 = Color3.fromRGB(0, 1, 0);
 		hud.BackgroundTransparency = 0.5;
@@ -13128,7 +13068,7 @@ run(function()
 		effectdur.Position = UDim2.new(0.348, 0, 0.579, 0);
 		effectdur.Text = actualduration
 		effectdur.TextSize = 12;
-		effectdur.TextColor3 = Color3.fromRGB(0, 255, 0)
+		effectdur.TextColor3 = effecthudcolor[math.random(1,4)]
 		effectdur.TextXAlignment = 'Left';
 		effectdur.TextYAlignment = 'Top';
 		effectdur.Font = Enum.Font.ArimoBold;
@@ -13138,12 +13078,6 @@ run(function()
 			local connection2: RBXScriptConnection;
 			connection = args.instance:GetPropertyChangedSignal('Text'):Connect(function()
 				effectdur.Text = `{args.instance.ContentText} seconds`
-				if tonumber(args.instance.ContentText) <= miniduration then
-					effectdur.TextColor3 = Color3.new(1, 1, 0);
-				end;
-				if tonumber(args.instance.ContentText) <= lowestduration then
-					effectdur.TextColor3 = Color3.fromRGB(255, 0, 0);
-				end;
 			end)
 			connection2 = lplr.PlayerGui.StatusEffectHudScreen.StatusEffectHud.DescendantRemoving:Connect(function(v)
 				if v == args.instance then
@@ -13162,12 +13096,6 @@ run(function()
 						break
 					end
 					actualduration = actualduration - 0.1;
-					if tonumber(args.instance.ContentText) >= miniduration then
-						effectdur.TextColor3 = Color3.new(1, 1, 0);
-					end;
-					if tonumber(args.instance.ContentText) >= miniduration then
-						effectdur.TextColor3 = Color3.fromRGB(255, 0, 0);
-					end;
 					effectdur.Text = `{math.floor(actualduration)} seconds`
 					task.wait(0.08);
 				until (not effecthud.Enabled)
@@ -13317,29 +13245,3 @@ end);
 		end;
 	});
 end);]]
-
-table.insert(renderconnections, task.spawn(function()
-	repeat
-		render.session.new({
-			{
-				name = 'kills', 
-				value = store.statistics.kills
-			},
-			{
-				name = 'death', 
-				value = store.statistics.selfdeath
-			}
-		})
-		render.session.new({
-			{
-				name = 'lagbacks', 
-				value = store.statistics.lagbacks
-			}, 
-			{
-				name = 'beds', 
-				value = store.statistics.beds
-			}
-		})
-		task.wait(1)
-	until false
-end))

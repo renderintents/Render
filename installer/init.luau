@@ -151,6 +151,9 @@ local bootinstallation = function(): ()
         writefile(`rendervape/libraries/utils.luau`, `return requirefile('rendervape/libraries/utils.luau')`);
     end);
     installation:newstep(function()
+        
+    end)
+    installation:newstep(function()
         constructor:uninject();
     end);
     installation:start();
