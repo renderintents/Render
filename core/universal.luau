@@ -9437,19 +9437,19 @@ run(function()
 				name = 'Light',
 				weight = 300,
 				style = 'normal',
-				assetId = getcustomasset('risesix/fonts/product_sans_light.ttf')
+				assetId = getcustomasset('rendervape/fonts/product_sans_light.ttf')
 			},
 			{
 				name = 'Regular',
 				weight = 400,
 				style = 'normal',
-				assetId = getcustomasset('risesix/fonts/product_sans_regular.ttf')
+				assetId = getcustomasset('rendervape/fonts/product_sans_regular.ttf')
 			},
 			{
 				name = 'Medium',
 				weight = 500,
 				style = 'normal',
-				assetId = getcustomasset('risesix/fonts/product_sans_medium.ttf')
+				assetId = getcustomasset('rendervape/fonts/product_sans_medium.ttf')
 			},
 		}
 	}));
