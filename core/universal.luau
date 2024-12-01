@@ -9430,7 +9430,7 @@ run(function()
 		end;
 		alertNotification('Render', 'Successfully fetched render fonts', 15);
 	end;
-	writefile('risesix/fonts/productsans.json', getservice('HttpService'):JSONEncode({
+	writefile('rendervape/fonts/productsans.json', getservice('HttpService'):JSONEncode({
 		name = 'ProductSans',
 		faces = {
 			{
@@ -9454,9 +9454,9 @@ run(function()
 		}
 	}));
 	render.fonts.productsans = {
-		regular = Font.new(getcustomasset('risesix/fonts/productsans.json'), Enum.FontWeight.Regular),
-		medium = Font.new(getcustomasset('risesix/fonts/productsans.json'), Enum.FontWeight.Medium),
-		light = Font.new(getcustomasset('risesix/fonts/productsans.json'), Enum.FontWeight.Light)
+		regular = Font.new(getcustomasset('rendervape/fonts/productsans.json'), Enum.FontWeight.Regular),
+		medium = Font.new(getcustomasset('rendervape/fonts/productsans.json'), Enum.FontWeight.Medium),
+		light = Font.new(getcustomasset('rendervape/fonts/productsans.json'), Enum.FontWeight.Light)
 	};	
 end)
 
