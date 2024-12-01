@@ -1,8 +1,1 @@
-[+] Added Rise 6.0 GUI (loader is later today)
-[=] Fixed Hide Modules buttons not registering 
-[=] Fixed all CLONE based modules (AntiHit, InfiniteFly and Desync) breaking your character when multiple of them are toggled
-[=] Fixed vault crashing, so the spotify interface works (tutorial tommorow)
-[=] Fixed AutoQueue and AutoAFK
-[=] Security Improvements
-[-] Removed Bridge Duel support till (rewriting)
-[=] Bug Fixes
+[+] Added Clone API to render (forgot to publish this, if render is broken for you reinstall)
