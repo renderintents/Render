@@ -1,3 +1,4 @@
+return errorNotification('Render', 'Failed to load "rendervape/games/16732694052.luau", Possibly due to this script being down.', 50);
 --[[
 
   $$$$$$$\                            $$\                           $$\    $$\                              
@@ -147,7 +148,13 @@ local inventory: vapewindow = vape.ObjectsThatCanBeSaved.InventoryWindow;
 local minigames: vapewindow = vape.ObjectsThatCanBeSaved.MinigamesWindow;
 
 local store: table = setmetatable({
-    events = replicatedstorage.events
+    events = replicatedstorage.events,
+    selfevents = setmetatable({}, {
+        __index = function(self: table, index: string): (BindableEvent)
+            self[index] = Instance.new('BindableEvent');
+            return self[index];
+        end
+    })
 }, {
     __index = function(self: table, index: string): (table)
         if tostring(index):find('getfishingrod') then
@@ -182,12 +189,18 @@ run(function()
         Name = 'AutoComplete',
         Function = function(call: boolean): () -> ()
             if call then
-                table.insert(autocomplete.Connections, lplr.PlayerGui.ChildAdded:Connect(function(v: ScreenGui): ()
+                table.insert(autocomplete.Connections, store.selfevents.reelEvent.Event:Connect(function(): ()
+                    isautoshaking = false;
                     store.events.reelfinished:FireServer(math.huge, true);
                 end))
-            end
+            end;
         end
     });
+    table.insert(autocomplete.Connections, lplr.PlayerGui.ChildAdded:Connect(function(v: ScreenGui): ()
+        if v.Name == 'reel' then
+            store.selfevents.reelEvent:Fire(v);
+        end;
+    end));
 end)
 
 local autocasted: boolean;
@@ -215,46 +228,55 @@ run(function()
     local autofreeze: vapemodule = {Enabled = false};
     autofreeze = utility.Api.CreateOptionsButton({
         Name = 'AutoFreeze',
-        Function = function(call: bool): ()
-            if call then
-                repeat
-                    if autocasted then
-                        task.delay(1, function()
-                            lplr.Character.PrimaryPart.Anchored = true;
-                        end);
-                    else
-                        lplr.Character.PrimaryPart.Anchored = false;
-                    end;
-                    task.wait()
-                until not autofreeze.Enabled;
-            end;
-        end
+        Function = void
     });
 end);
 
+local isautoshaking: boolean;
 run(function()
     local autoshake: vapemodule = {Enabled = false};
-    local autoshakecon: RBXScriptConnection;
+    local autoshakedelay: vapeslider = {Value = 0.5};
+    local autoshakesignal: BindableEvent = store.selfevents.shakeevent;
     autoshake = utility.Api.CreateOptionsButton({
         Name = 'AutoShake',
         Function = function(call: boolean): ()
             if call then
-                repeat
-                    if not autocasted then
-                        task.wait();
-                        continue;
-                    end;
-                    local shakeui: ScreenGui? = lplr.PlayerGui:FindFirstChild('shakeui');
-                    local button: ImageButton? = shakeui and shakeui.safezone:FindFirstChild('button');
-                    if button then
-                        firesignal(button.MouseButton1Click);
-                    end;
-                    task.wait(button and 0.6);
-                until not autoshake.Enabled
+                table.insert(autoshake.Connections, lplr.PlayerGui.ChildAdded:Connect(function(v: ScreenGui): ()
+                    if v.Name == 'shakeui' then
+                        isautoshaking = true;
+                        table.insert(autoshake.Connections, v.safezone.ChildAdded:Connect(function(v2: ImageButton): ()
+                            autoshakesignal:Fire(v2);
+                            lplr.Character.PrimaryPart.Anchored = isEnabled('AutoFreeze') and true or false;
+                        end))
+                    end
+                end))
+                table.insert(autoshake.Connections, autoshakesignal.Event:Connect(function(v)
+                    v.ImageTransparency = 1;
+                    v.BackgroundTransparency = 1;
+                    v.Size = UDim2.new(9e9, 9e9, 9e9, 9e9);
+                    task.wait(autoshakedelay.Value / 2);
+                    mouse1click();
+                end))
             end;
         end
     });
+    autoshakedelay = autoshake.CreateSlider({
+        Name = 'Delay',
+        Function = void,
+        Min = 0,
+        Max = 2,
+        Default = 0.25
+    });
+    local autoshakehook: (any, ...any) -> (any);
+    autoshakehook = hookmetamethod(game, '__namecall', newcclosure(function(self: any, ...): (any, ...any) -> (any)
+        local args: {any} = {...};
+        if getnamecallmethod() == 'FireServer' and autoshake.Enabled and isautoshaking and self == lplr.reset then
+            return nil;
+        end;
+        return autoshakehook(self, ...);
+    end));
 end);
+
 run(function()
     local locationchanger: vapemodule = {Enabled = false};
     local locationvalue: vapedropdown = {Value = ''};
@@ -309,22 +331,6 @@ run(function()
             lplr.Character.client.oxygen.Enabled = not antidrown.Enabled;
         until false;
     end));
-end)
-
-run(function()
-    local autosell: vapemodule = {Enabled = false};
-    autosell = inventory.Api.CreateOptionsButton({
-        Name = 'AutoSell',
-        HoverText = 'Automatically sells all of your fish.',
-        Function = function(call: bool): ()
-            if call then
-                repeat
-                    
-                    task.wait();
-                until not autosell.Enabled
-            end
-        end
-    })
 end)
 
 task.spawn(function()

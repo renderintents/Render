@@ -1994,6 +1994,7 @@ local function initiaterender()
 		    getgenv().rendervapeload = {file = 'universal.luau', step = 3};
 			getgenv().renderloadui:setprogress(2, 4, 'Loading the universal modules...');
 			customload(vapeGithubRequest("core/universal.luau"), "universal");
+			shared.vapegamesloaded = true;
 			getgenv().renderloadui:setprogress(3, 4, 'Loading the game modules...');
 			if bedwars then 
 				customload(vapeGithubRequest("games/6872274481.luau"), "6872274481")
@@ -2092,6 +2093,5 @@ if shared.VapeIndependent then
 	shared.VapeFullyLoaded = true
 	return GuiLibrary
 else
-	print('Render ontop')
 	initiaterender()
 end

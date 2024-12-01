@@ -165,7 +165,8 @@ local store = {
 		lagbacks = 0,
 		lagbackEvent = Instance.new('BindableEvent'),
 		reported = 0,
-		universalLagbacks = 0
+		universalLagbacks = 0,
+		selfdeath = 0
 	},
 	whitelist = {
 		chatStrings1 = {helloimusinginhaler = 'vape'},
@@ -196,12 +197,16 @@ for i,v in render.utils do
 	getfenv()[i] = v;
 end
 
-task.spawn(function()
+table.insert(renderconnections, task.spawn(function()
 	repeat 
 		camera = workspace.CurrentCamera or fakecam;
-		task.wait()
-	until (not vapeInjected)
-end);
+		task.wait(5)
+	until false
+end));
+
+table.insert(renderconnections, lplr.CharacterAdded:Connect(function()
+	store.statistics.selfdeath += 1
+end))
 
 local isfile = isfile or function(file)
 	local suc, res = pcall(function() return readfile(file) end)
@@ -210,7 +215,7 @@ end;
 
 local networkownerswitch = tick()
 --ME WHEN THE MOBILE EXPLOITS ADD A DISFUNCTIONAL ISNETWORKOWNER (its for compatability I swear!!)
-local isnetworkowner = function(part)
+local isnetworkowner = identifyexecutor() == 'Synapse Z' and isnetworkowner or function(part)
 	local suc, res = pcall(function() return gethiddenproperty(part, 'NetworkOwnershipRule') end)
 	if suc and res == Enum.NetworkOwnership.Manual then
 		sethiddenproperty(part, 'NetworkOwnershipRule', Enum.NetworkOwnership.Automatic)
@@ -541,9 +546,9 @@ local function getSpeed(): (number)
 	if lplr.Character then
 		local SpeedDamageBoost = lplr.Character:GetAttribute('SpeedBoost')
 		if SpeedDamageBoost and SpeedDamageBoost > 1 then
-			speed += (8 * (SpeedDamageBoost - 1))
+			speed += (14 * (SpeedDamageBoost - 1))
 			if isEnabled('Desync') and render.clone.new then 
-				speed += 10;
+				speed += 14;
 			end;
 		end
 		if store.grapple > tick() then
@@ -2925,7 +2930,6 @@ run(function()
 							local speedCFrame = {oldcloneroot.CFrame:GetComponents()}
 							speedCFrame[1] = clone.CFrame.X
 							if speedCFrame[2] < 1000 or (not goneup) then
-								task.spawn(warningNotification, 'InfiniteFly', 'Teleported Up', 3)
 								speedCFrame[2] = 100000
 								goneup = true
 							end
@@ -3434,7 +3438,7 @@ run(function()
 					if not vapeTargetInfo.Targets.Killaura then 
 						return;
 					end;
-					if killaurauseabilities.Enabled and kitabilities[store.equippedKit] then 
+					if killaurauseabilities.Enabled and kitabilities[store.equippedKit] then
 						kitabilities[store.equippedKit]();
 					end;
 				end));
@@ -3595,6 +3599,7 @@ run(function()
 										killauraNearPlayer = true
 										targetedPlayer = plr
 										vapeTargetInfo.Targets.Killaura = {
+											Npc = plr.Human,
 											RootPart = root,
 											Humanoid = {
 												Health = (plr.Player.Character:GetAttribute('Health') or plr.Humanoid.Health) + getShieldAttribute(plr.Player.Character),
@@ -4957,7 +4962,7 @@ run(function()
 							entityLibrary.character.HumanoidRootPart.CFrame = entityLibrary.character.HumanoidRootPart.CFrame + speedCFrame
 						end
 
-						if SpeedJump.Enabled and (not Scaffold.Enabled) and (SpeedJumpAlways.Enabled or killauraNearPlayer) then
+						if SpeedJump.Enabled and not Scaffold.Enabled and (not SpeedJumpAlways.Enabled and vapeTargetInfo.Targets.Killaura or SpeedJumpAlways.Enabled) then
 							if (entityLibrary.character.Humanoid.FloorMaterial ~= Enum.Material.Air) and entityLibrary.character.Humanoid.MoveDirection ~= Vector3.zero then
 								if SpeedJumpSound.Enabled then
 									pcall(function() entityLibrary.character.HumanoidRootPart.Jumping:Play() end)
@@ -6401,10 +6406,10 @@ run(function()
 		Normal = function(plr)
 			if NameTagsTeammates.Enabled and (not plr.Targetable) and (not plr.Friend) then return end
 			local thing = Instance.new('TextLabel')
+			thing.RichText = true
 			thing.BackgroundColor3 = Color3.new()
 			thing.BorderSizePixel = 0
 			thing.Visible = false
-			thing.RichText = true
 			thing.AnchorPoint = Vector2.new(0.5, 1)
 			thing.Name = plr.Player.Name
 			thing.Font = Enum.Font[NameTagsFont.Value]
@@ -11976,6 +11981,7 @@ end);
 run(function()
 	local antihit = {};
 	local antihitboost = {};
+	local antihitnonpc = {};
 	local bouncedelay = tick();
 	local notificationTick = tick();
 	local bounceskytime = {Value = 4};
@@ -11994,9 +12000,13 @@ run(function()
 					end
 				end));
 				repeat 
+					if store.matchState == 0 then 
+						task.wait(0.25);
+						continue;
+					end;
 					oldroot = clone.cache.__currentroot or lplr.Character and lplr.Character.PrimaryPart or nil;
 					newroot = clone:getLocalClone('AntiHit', true);
-					if killauraNearPlayer and oldroot then 
+					if killauraNearPlayer and (antihitnonpc.Enabled and not vapeTargetInfo.Targets.Killaura.Npc or true) and oldroot then 
 						if tick() > bouncedelay and isAlive(lplr, true) and lplr.Character.PrimaryPart == newroot then 
 							bouncedelay = tick() + 0.4;
 							for i = 1, 5 do 
@@ -12019,14 +12029,18 @@ run(function()
 				clone:destroyCloneInstance('AntiHit');
 			end
 		end
-	})
+	});
+	antihitnonpc = antihit.CreateToggle({
+		Name = 'NoNPC',
+		Function = void
+	});
 	bounceskytime = antihit.CreateSlider({
 		Name = 'Dodge Delay',
 		Min = 1,
 		Max = 6,
 		Default = 4,
 		Function = void
-	})
+	});
 end);
 
 run(function()
@@ -12155,7 +12169,7 @@ run(function()
 					end;
 				end
 			end);
-			table.insert(connections, breakconnection);
+			table.insert(connections, breakconnection)
 		end,
 		Database = function(player: Player): ()
 			repeat
@@ -12209,10 +12223,10 @@ run(function()
 	};
 	local bootdetection: (Player) -> () = function(plr)
 		local detectionfuncs: table = {
-			[hackerdetectornuker] = hackerdetectormethods.Nuker,
-			[hackerdetectordatabase] = hackerdetectormethods.Database,
-			[hackerdetectorinfinitefly] = hackerdetectormethods.InfiniteFly,
-			[hackerdetectorinvisiblity] = hackerdetectormethods.Invisibility,
+			[hackerdetectornuker] = hackerdetectormethods.Nuker;
+			[hackerdetectordatabase] = hackerdetectormethods.Database;
+			[hackerdetectorinfinitefly] = hackerdetectormethods.InfiniteFly;
+			[hackerdetectorinvisiblity] = hackerdetectormethods.Invisibility;
 			[hackerdetectorability] = hackerdetectormethods.Abilities;
 		};
 		for i: vapeminimodule, v: () -> any in detectionfuncs do 
@@ -12275,13 +12289,6 @@ run(function()
 			hackerdetector:retoggle()
 		end
 	});
-	hackerdetectorability = hackerdetector.CreateToggle({
-		Name = 'Abilities',
-		Default = true,
-		Function = function(calling: boolean)
-			hackerdetector:retoggle();
-		end;
-	});
 	hackerdetectordatabase = hackerdetector.CreateToggle({
 		Name = 'Exploit Databases',
 		HoverText = 'Checks whitelists of certain exploits.',
@@ -12289,6 +12296,14 @@ run(function()
 		Function = function(calling: boolean)
 			hackerdetector:retoggle()
 		end
+	});
+
+	hackerdetectorability = hackerdetector.CreateToggle({
+		Name = 'Abilities',
+		Default = true,
+		Function = function(calling: boolean)
+			hackerdetector:retoggle();
+		end;
 	});
 
 	hackerdetectorthreads.oncleanevent:Connect(function(threads: table)
@@ -12628,8 +12643,8 @@ run(function()
 		Function = function(calling: boolean)
 			if calling then 
 				table.insert(autorewind.Connections, runservice.Heartbeat:Connect(function()
-					local block: RaycastParams = workspace:Raycast(entityLibrary.LocalPosition, Vector3.new(0, -1e4, 0), store.blockRacyast);
-					if block and workspace:Raycast(block.Position, Vector3.new(0, -30, 0), store.blockRaycast) and not istweening then 
+					local block: RaycastParams = workspace:Raycast(entityLibrary.LocalPosition, Vector3.new(0, -1e4, 0), store.raycast);
+					if block and workspace:Raycast(block.Position, Vector3.new(0, -30, 0), store.raycast) and not istweening then 
 						lastposition = block.Position
 					end;
 				end));
@@ -13032,6 +13047,9 @@ run(function()
 		actualduration = tostring(actualduration)
 		actualduration = actualduration:split('</b>')[1]
 		actualduration = tonumber(actualduration)
+
+		local miniduration = actualduration / 2
+		local lowestduration = actualduration / 3.5
 		local hud: Frame = Instance.new('Frame', effectholder);
 		hud.BackgroundColor3 = Color3.fromRGB(0, 1, 0);
 		hud.BackgroundTransparency = 0.5;
@@ -13068,7 +13086,7 @@ run(function()
 		effectdur.Position = UDim2.new(0.348, 0, 0.579, 0);
 		effectdur.Text = actualduration
 		effectdur.TextSize = 12;
-		effectdur.TextColor3 = effecthudcolor[math.random(1,4)]
+		effectdur.TextColor3 = Color3.fromRGB(0, 255, 0)
 		effectdur.TextXAlignment = 'Left';
 		effectdur.TextYAlignment = 'Top';
 		effectdur.Font = Enum.Font.ArimoBold;
@@ -13078,6 +13096,12 @@ run(function()
 			local connection2: RBXScriptConnection;
 			connection = args.instance:GetPropertyChangedSignal('Text'):Connect(function()
 				effectdur.Text = `{args.instance.ContentText} seconds`
+				if tonumber(args.instance.ContentText) <= miniduration then
+					effectdur.TextColor3 = Color3.new(1, 1, 0);
+				end;
+				if tonumber(args.instance.ContentText) <= lowestduration then
+					effectdur.TextColor3 = Color3.fromRGB(255, 0, 0);
+				end;
 			end)
 			connection2 = lplr.PlayerGui.StatusEffectHudScreen.StatusEffectHud.DescendantRemoving:Connect(function(v)
 				if v == args.instance then
@@ -13096,6 +13120,12 @@ run(function()
 						break
 					end
 					actualduration = actualduration - 0.1;
+					if tonumber(args.instance.ContentText) >= miniduration then
+						effectdur.TextColor3 = Color3.new(1, 1, 0);
+					end;
+					if tonumber(args.instance.ContentText) >= miniduration then
+						effectdur.TextColor3 = Color3.fromRGB(255, 0, 0);
+					end;
 					effectdur.Text = `{math.floor(actualduration)} seconds`
 					task.wait(0.08);
 				until (not effecthud.Enabled)
@@ -13245,3 +13275,29 @@ end);
 		end;
 	});
 end);]]
+
+table.insert(renderconnections, task.spawn(function()
+	repeat
+		render.session.new({
+			{
+				name = 'kills', 
+				value = store.statistics.kills
+			},
+			{
+				name = 'death', 
+				value = store.statistics.selfdeath
+			}
+		})
+		render.session.new({
+			{
+				name = 'lagbacks', 
+				value = store.statistics.lagbacks
+			}, 
+			{
+				name = 'beds', 
+				value = store.statistics.beds
+			}
+		})
+		task.wait(1)
+	until false
+end))

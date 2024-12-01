@@ -1,4 +1,3 @@
-local DataStoreService = game:GetService("DataStoreService")
 --[[
 
   $$$$$$$\                            $$\                           $$\    $$\                              
@@ -21,6 +20,8 @@ type vapemain = {
     ObjectsThatCanBeSaved: table,
     objects: table
 };
+
+type bool = boolean
    
 type vapeminimodule = {
 	Enabled: boolean,
@@ -102,17 +103,12 @@ type rendertarget = {
 local gui: vapemain = shared.rendervape;
 local render: table = render or warn('❌ Failed to fetch the render main table.') or {};
 
-for i: (any), v: (...any) -> (...any) in render.utils do --> sideloads all render global utility functions from libraries/utils.lua
+for i: (any), v: (...any) -> (...any) in render.utils do
     getfenv()[i] = v;
 end;
 
 local vape: vapemain = gui;
 local GuiLibrary: vapemain = gui;
-local cloneref = cloneref or function(data) return data end;
-local getservice = function(service)
-	return cloneref(game:FindService(service))
-end;
-
 local players: Players = getservice('Players');
 local textservice: TextService = getservice('TextService');
 local lighting: Lighting = getservice('Lighting');
@@ -140,15 +136,15 @@ local vapeInjected: boolean = true;
 
 local store: table = setmetatable({}, {})
 
-local combat = vape.ObjectsThatCanBeSaved.CombatWindow;
-local blatant = vape.ObjectsThatCanBeSaved.BlatantWindow;
-local visual = vape.ObjectsThatCanBeSaved.RenderWindow;
-local exploit = vape.ObjectsThatCanBeSaved.ExploitWindow;
-local utility = vape.ObjectsThatCanBeSaved.UtilityWindow;
-local world = vape.ObjectsThatCanBeSaved.WorldWindow;
-local hudwindow = vape.ObjectsThatCanBeSaved.TargetHUDWindow;
-local minigames = vape.objects.MinigamesWindow;
-local inventory = vape.objects.InventoryWindow;
+local combat: vapewindow = vape.ObjectsThatCanBeSaved.CombatWindow;
+local blatant: vapewindow = vape.ObjectsThatCanBeSaved.BlatantWindow;
+local visual: vapewindow = vape.ObjectsThatCanBeSaved.RenderWindow;
+local exploit: vapewindow = vape.ObjectsThatCanBeSaved.ExploitWindow;
+local utility: vapewindow = vape.ObjectsThatCanBeSaved.UtilityWindow;
+local world: vapewindow = vape.ObjectsThatCanBeSaved.WorldWindow;
+local hudwindow: vapewindow = vape.ObjectsThatCanBeSaved.TargetHUDWindow;
+local minigames: vapewindow = vape.objects.MinigamesWindow;
+local inventory: vapewindow = vape.objects.InventoryWindow;
 
 task.spawn(function()
     for i: number, v: table in {'SilentAim', 'Reach', 'TriggerBot', 'SafeWalk', 'AntiVoid'} do
@@ -170,7 +166,7 @@ store = setmetatable({
             return function(equip_check: boolean): (boolean) -> {Tool}
                 local items: table = {};
                 if not equip_check then
-                    for i: number, v: Tool in lplr.Backpack:GetChildren() do
+                    for i: number, v: Tool? in lplr.Backpack:GetChildren() do
                         table.insert(items, v);
                     end;
                 end;
@@ -201,7 +197,7 @@ store = setmetatable({
             end;
         end;
         if index == 'getgun' then
-            return function()
+            return function(): (Tool) | {Tool}
                 local weapon: Tool = nil;
                 local damage: number = 0;
                 for i: number, v: {Tool} in store.getitems(true) do
@@ -215,8 +211,7 @@ store = setmetatable({
             end;
         end;
         return function() end;
-    end,
-    __tostring = 'store'
+    end
 });
 
 local playAnimation = function(id: number): (number) -> ()
@@ -238,7 +233,7 @@ run(function()
     namecall = hookmetamethod(game, '__namecall', newcclosure(function(self: any, ...): (any, ...any) -> (any)
         local args: {any} = {...};
         if not checkcaller() and getnamecallmethod() == 'FireServer' and silentaim.Enabled and self == replicatedstorage.ShootEvent then
-            local plr = GetTarget({radius = 100});
+            local plr = GetTarget({radius = 50});
             if plr then
                 args[1][2].Hit = plr.RootPart;
             end;
@@ -248,143 +243,108 @@ run(function()
     end));
 end);
 
-run(function() --> awh nah i aint rewriting this.
-    local killaura: vapemodule = {}
-    local killaurarange: vapeslider = {}
-    local killauramode: vapedropdown = {}
-    local killauranoanimation: vapeminimodule = {}
-    local killaurabox: vapeminimodule = {}
-    local killauraboxcolor: vapecolorslider = newcolor()
-    local killaurateamcheck: vapeminimodule = {}
-    local killauramodes: table = {
-        Single = function()
-            return GetTarget({
-                radius = killaurarange.Value or 100
-            })
-        end,
-        Multi = function()
-            return GetActiveTargets({
-                radius = killaurarange.Value or 100
-            });
-        end
-    }
-    local attackent = function(ent): (table?) -> ()
-        if not killaura.Enabled then return end
-        if killaurateamcheck.Enabled and ent.Team == lplr.Team then return end
-        local root = ent.Character.HumanoidRootPart
-        local weapon = store.getgun()
-        if weapon then
-            task.wait(0.1)
-            replicatedstorage.ShootEvent:FireServer({
-                [1] = {
-                    RayObject = Ray.new(Vector3.new(845.555908, 101.429337, 2269.43945), Vector3.new(-391.152252, 8.65560055, -83.2166901)),
-                    Distance = 7,
-                    Cframe = CFrame.new(840.310791, 101.334137, 2267.87988, 0.0636406094, 0.151434347, -0.986416459, 0, 0.988420188, 0.151741937, 0.997972965, -0.00965694897, 0.0629036576),
-                    Hit = root
-                }
-            }, weapon)
-        else
-            replicatedstorage.meleeEvent:FireServer(ent)
-            if not killauranoanimation.Enabled then
-                playAnimation(484926359)
-            end
-        end
-        vapetarget.Targets.Killaura = {
-            Humanoid = {
-                Health = ent.Character.Humanoid.Health,
-                MaxHealth = ent.Character.Humanoid.MaxHealth
-            },
-            Player = ent
-        }
-        render.targets:updatehuds(ent);
-    end
-    local kabox
+run(function()
+    local killaura: vapemodule = {Enabled = false};
+    local killaurarange: vapeslider = {Value = 10};
+    local killaurabox: vapeminimodule = {Enabled = false};
+    local killauraboxcolor: vapecolorslider = newcolor();
+    local killauraboxmaterial: vapedropdown = {Value = 'Neon'};
+    local killauraboxtransparency: vapeslider = {Value = 0.5}
+
+    local killauraboxes: {Part} = {};
+
     killaura = blatant.Api.CreateOptionsButton({
-        Name = 'Killaura', 
-        Function = function(call)
+        Name = 'Killaura',
+        Function = function(call: bool): (bool) -> ()
             if call then
-                kabox = Instance.new('Part', workspace)
-                kabox.Anchored = true
-                kabox.Transparency = 0.5
-                kabox.Material = Enum.Material.Neon
-                kabox.CanCollide = false
-                kabox.Size = Vector3.new(4, 6, 4)
-                kabox.Color = Color3.fromHSV(killauraboxcolor.Hue, killauraboxcolor.Sat, killauraboxcolor.Value)
-                table.insert(killaura.Connections, runservice.Stepped:Connect(function()
-                    if kabox and killaurabox.Enabled then
-                        local ent = GetTarget({
-                            radius = killaurarange.Value or 100
-                        });
-                        if ent then
-                            kabox.Transparency = 0.5
-                            kabox.Parent = ent.Character
-                            kabox.CFrame = ent.Character.HumanoidRootPart.CFrame
-                        else
-                            kabox.Transparency = 1
-                            kabox.Parent = workspace
-                        end
-                    end
-                end))
                 repeat
-                    local ent = killauramodes[killauramode.Value]()
-                    if ent and type(ent) == 'table' then
-                        for i, plr in ent do
-                            pcall(attackent, plr)
-                        end
-                    elseif ent and type(ent) ~= 'table' then
-                        pcall(attackent, ent)
+                    local plrs: {rendertarget} = GetAllTargets(killaurarange.Value);
+                    if #plrs > 0 then
+                        for i: number, v: rendertarget in plrs do
+                            if killaurabox.Enabled then
+                                if killauraboxes[v.Player.Name] and killauraboxes[v.Player.Name].Parent then
+                                    killauraboxes[v.Player.Name].CFrame = v.RootPart.CFrame;
+                                    killauraboxes[v.Player.Name].Color = Color3.fromHSV(killauraboxcolor.Hue, killauraboxcolor.Sat, killauraboxcolor.Value);
+                                    tween:Create(killauraboxes[v.Player.Name], TweenInfo.new(0.5), {Transparency =  0.1 * killauraboxtransparency.Value}):Play();
+                                elseif killauraboxes[v.Player.Name].Parent == nil then
+                                    table.remove(killauraboxes, table.find(killauraboxes, v.Player.Name));
+                                else
+                                    local killaurabox: Part = Instance.new('Part', v.RootPart.Parent);
+                                    killaurabox.Anchored = true;
+                                    killaurabox.Transparency = 1;
+                                    killaurabox.Material = Enum.Material[killauraboxmaterial.Value];
+                                    killaurabox.CanCollide = false;
+                                    killaurabox.Size = Vector3.new(4, 6, 4);
+                                    killaurabox.Color = Color3.fromHSV(killauraboxcolor.Hue, killauraboxcolor.Sat, killauraboxcolor.Value);
+                                    killaurabox.CFrame = v.RootPart.CFrame;
+                                    killauraboxes[v.Player.Name] = killaurabox;
+                                    tween:Create(killaurabox, TweenInfo.new(0.5), {Transparency =  0.1 * killauraboxtransparency.Value}):Play();
+                                end;
+                            end;
+                            replicatedstorage.meleeEvent:FireServer(v.Player);
+                            playAnimation(484926359);
+                            vapetarget.Targets.Killaura = {
+                                Humanoid = {
+                                    Health = v.Humanoid.Health,
+                                    MaxHealth = v.Humanoid.MaxHealth
+                                },
+                                Player = v.Player
+                            };
+                            render.targets:updatehuds(v);
+                        end;
                     else
-                        vapetarget.Targets.Killaura = nil
-                    end
-                    task.wait(0)
-                until (not killaura.Enabled)
+                        for i: string, v: Part in killauraboxes do
+                            pcall(function()
+                                tween:Create(killaurabox, TweenInfo.new(0.3), {Transparency = 1}):Play();
+                            end);
+                        end;
+                    end;
+                    task.wait()
+                until not killaura.Enabled
             else
-                render.targets:updatehuds();
-                vapetarget.Targets.Killaura = nil;
-                kabox:Remove();
-                kabox = nil;
-            end;
-        end,
-        ExtraText = function()
-            return 'Switch'
+                for i: string, v: Part in killauraboxes do 
+                    table.clear(killauraboxes);
+                    pcall(v.Destroy);
+                end;
+            end;    
         end
     });
     killaurarange = killaura.CreateSlider({
         Name = 'Range',
         Min = 1,
-        Max = 16,
-        Default = 16,
-        Function = void
-    });
-    killauramode = killaura.CreateDropdown({
-        Name = 'Mode',
-        List = {'Single', 'Multi'},
-        Function = void
-    });
-    killaurateamcheck = killaura.CreateToggle({
-        Name = 'TeamCheck',
-        Function = void
-    });
-    killauranoanimation = killaura.CreateToggle({
-        Name = 'NoAnimation',
-        Function = void
+        Max = 200,
+        Function = void,
+        Default = 100
     });
     killaurabox = killaura.CreateToggle({
-        Name = 'Box',
-        Function = function(call)
-            killauraboxcolor.Object.Visible = call
-        end
+        Name = 'Show target',
+        Function = function(call: bool): (bool) -> ()
+            pcall(function()
+                killauraboxcolor.Object.Visible = call;
+                killauraboxmaterial.Object.Visible = call;
+                killauraboxtransparency.Object.Visible = call
+            end);
+        end,
+        HoverText = 'Shows a box over the opponent.'
     });
     killauraboxcolor = killaura.CreateColorSlider({
-        Name = 'Color',
-        Function = function(h, s, v)
-            if kabox then
-                kabox.Color = Color3.fromHSV(h, s, v)
-            end
-        end
+        Name = 'Box Color',
+        Function = void
     });
-    killauraboxcolor.Object.Visible = false;
-end);
+    killauraboxmaterial = killaura.CreateDropdown({
+        Name = 'Material',
+        Function = void,
+        List = GetEnumItems('Material')
+    });
+    killauraboxtransparency = killaura.CreateSlider({
+        Name = 'Transparency',
+        Min = 1,
+        Max = 9,
+        Function = void,
+        Default = 6
+    });
+end)
+
 
 run(function()
     local autopickup = {}
@@ -418,7 +378,6 @@ run(function()
                 repeat
                     local weapons = store.getweapons(false)
                     for i,v in weapons do
-                        require(v.GunStates).FireRate = firerate.Value
                         require(v.GunStates).MaxAmmo = maxammo.Value
                         require(v.GunStates).Range = range.Value
                     end
@@ -437,20 +396,13 @@ run(function()
     range = gunmod.CreateSlider({
         Name = 'Range',
         Min = 0,
-        Max = 500,
+        Max = 100,
         Function = void,
-        Default = math.huge
-    })
-    firerate = gunmod.CreateSlider({
-        Name = 'FireRate',
-        Function = void,
-        Min = 0,
-        Max = 5,
-        Default = 0
+        Default = 50
     })
 end)
-
-run(function() --> awh aint rewriting this too
+--[[
+run(function()
     local autoarrest = {}
     local arresting = false
     local oldroot
@@ -505,33 +457,14 @@ run(function() --> awh aint rewriting this too
                         end
                     end
                     task.wait(0.5)
-                until (not killaura.Enabled)
+                until (not autoarrest.Enabled)
             else
                 pcall(removeclone)
             end
         end
     })
-end)
+end)]]
 
-run(function()
-    local antiarrest = {}
-    antiarrest = blatant.Api.CreateOptionsButton({
-        Name = 'AntiArrest',
-        Function = function(call)
-            if call then
-                repeat
-                    if lplr.Status.isArrested.Value then
-                        local oldcf = lplr.Character.PrimaryPart.CFrame
-                        workspace.Remote.TeamEvent:FireServer(tostring(lplr.TeamColor))
-                        task.wait(0.12)
-                        lplr.Character.PrimaryPart.CFrame = oldcf
-                    end
-                    task.wait(0.2)
-                until (not antiarrest.Enabled)
-            end
-        end
-    })
-end)
 
 run(function()
     local deathtp: vapemodule = {Enabled = false};

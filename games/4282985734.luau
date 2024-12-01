@@ -1,3 +1,4 @@
+
 --[[
 
   $$$$$$$\                            $$\                           $$\    $$\                              
@@ -12,8 +13,8 @@
                                                                                       $$ |                
                                                                                       \__|   
    A very sexy and overpowered vape mod created at Render Intents  
-   games/1240123653.luau (Zombie Attack) - MaxlaserTech          
-   https://renderintents.lol                                                                                                                                                                                                                                                                     
+   CustomModules/4282985734.luau (Combat Warrior) - MaxlaserTech
+   https://renderintents.lol                                                                                                                                                                                                                                             
 ]]
 
 type vapemain = {
@@ -99,14 +100,13 @@ type rendertarget = {
 };
 
 local gui: vapemain = shared.rendervape;
-local render: table = render or warn('❌ Failed to fetch the render main table.') or {};
-
-for i: (any), v: (...any) -> (...any) in render.utils do --> sideloads all render global utility functions from libraries/utils.lua
+for i: (any), v: (...any) -> (...any) in render.utils do 
     getfenv()[i] = v;
 end;
 
 local vape: vapemain = gui;
-local GuiLibrary: vapemain = gui;
+local rendervape: vapemain = gui;
+ 
 local cloneref = cloneref or function(data) return data end;
 local getservice = function(service)
 	return cloneref(game:FindService(service))
@@ -129,100 +129,23 @@ local lplr: Player = players.LocalPlayer;
 local vapeConnections: table = {};
 local vapeCachedAssets: table = {};
 local vapeEvents: table = setmetatable({}, {
-	__index = function(self, index)
-		self[index] = Instance.new('BindableEvent')
-		return self[index]
-	end
+	__index = function(self: table, index: string): (table, string) -> (BindableEvent)
+		self[index] = Instance.new('BindableEvent');
+		return self[index];
+	end;
 });
 local vapeTargetInfo: table = shared.VapeTargetInfo;
 local vapeInjected: boolean = true;
 
-local combat = vape.ObjectsThatCanBeSaved.CombatWindow;
-local blatant = vape.ObjectsThatCanBeSaved.BlatantWindow;
-local visual = vape.ObjectsThatCanBeSaved.RenderWindow;
-local exploit = vape.ObjectsThatCanBeSaved.ExploitWindow;
-local utility = vape.ObjectsThatCanBeSaved.UtilityWindow;
-local world = vape.ObjectsThatCanBeSaved.WorldWindow;
-local minigames = vape.objects.MinigamesWindow;
-local inventory = vape.objects.InventoryWindow;
+run(function()
+    local autoparry: vapemodule = {Enabled = false};
+    autoparry = vape.objects.BlatantWindow.Api.CreateOptionsButton({
+        Name = 'AutoParry';
+        Function = function(call: bool): (bool) -> ()
+            if call then
 
-vape.RemoveObject('Killaura');
-
-local GetTarget: () -> () = function(args: table): (table) -> (table)
-    local enemy: rendertarget = {};
-    for i: number, v: Model in workspace.enemies:GetChildren() do
-        if v.PrimaryPart then
-            local mag: number = (lplr.Character.PrimaryPart.Position - v.PrimaryPart.Position).Magnitude
-            if mag >= args.radius then
-                enemy = {
-                    Player = v,
-                    Humanoid = v.Humanoid,
-                    RootPart = v.PrimaryPart,
-                    NPC = true
-                };
-                break
             end;
         end;
-    end;
-    return enemy
-end
-
-local getSword: () -> () = function(): () -> (Tool?)
-    local tool: Tool? = nil;
-    if isAlive(lplr, true) then
-        for i: number, v: Tool? in lplr.Character:GetChildren() do
-            if v.ClassName == 'Tool' and v.Name:find('Knife') then
-                tool = v;
-                break;
-            end;
-        end;
-    end;
-    return tool;
-end;
-
-run(function()
-    local killaura: vapemodule = {Enabled = false};
-    killaura = blatant.Api.CreateOptionsButton({
-        Name = 'Killaura',
-        Function = function(call: bool): () -> ()
-            if call then
-                repeat
-                    local zombie: rendertarget = GetTarget({
-                        radius = 30
-                    });
-                    if #zombie >= 1 then
-                        replicatedstorage.forhackers:InvokeServer('hit', getSword(), zombie.RootPart);
-                    end;
-                    task.wait(0);
-                until not killaura.Enabled;
-            end;
-        end
-    })
-end)
-
-run(function()
-    local autoshoot: vapemodule = {Enabled = false};
-    autoshoot = blatant.Api.CreateOptionsButton({
-        Name = 'AutoShoot',
-        Function = function(call: bool): () -> ()
-            if call then
-                repeat
-                    local zombie: rendertarget = GetTarget({
-                        radius = 30
-                    });
-                    if #zombie >= 1 then
-                        replicatedstorage.Gun:FireServer({
-                            Normal = Vector3.zero,
-                            Direction = Vector3.zero,
-                            Name = 'Pistol',
-                            Hit = zombie.RootPart,
-                            Origin = Vector3.zero,
-                            Pos = Vector3.zero
-                        });
-                    end;                  
-                    task.wait(0);
-                until not autoshoot.Enabled;
-            end;
-        end
+        HoverText = 'Automatically block when someone tries to attack you.'
     });
 end)

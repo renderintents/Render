@@ -500,7 +500,6 @@ run(function()
                         if pathchecking(newpath, digpart.Position) then
                             for i: number, v: table in newpath:GetWaypoints() do
                                 lplr.Character.HumanoidRootPart.CFrame = CFrame.new(v.Position);
-                                task.wait(0.01);
                             end;
                         end;
                     end;
