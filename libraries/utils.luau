@@ -511,6 +511,16 @@ functions.httprequest = request or http and http.request or syn and syn.request 
     return (args.Method == nil or args.Method == 'GET') and game:HttpGet(args.Url) or {StatusCode = 404, Body = '{}', Success = false, Headers = {}} 
 end;
 
+functions.alertNotification = function(arg1, arg2, arg3)
+	shared.rendervape:notify({
+            title = arg1,
+            text = arg2,
+            icon = 'assets/AlertNotification.png',
+            duration = arg3,
+            color = Color3.fromRGB(249, 50, 56)
+        })
+end;
+
 functions.run = function(func)
 	local suc, err = pcall(func);
 	local gamemodule: string = bedwars and 'games/6872274481.luau' or isfile(`rendervape/games/{game.PlaceId}.luau`) and `games/{game.PlaceId}.luau` or 'core/universal.luau';
