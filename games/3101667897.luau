@@ -12,7 +12,7 @@
                                                                                       $$ |                
                                                                                       \__|   
    A very sexy and overpowered vape mod created at Render Intents  
-   This is a template for a custom render module.             
+   CustomModules/3101667897.luau (Legends Of Speed ⚡) - SystemXVoid/BlankedVoid 
    https://renderintents.lol                                                                                                                                                                                                                                                                     
 ]]
 

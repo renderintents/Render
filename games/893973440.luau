@@ -13,7 +13,7 @@
                                                                                       $$ |                
                                                                                       \__|   
    A very sexy and overpowered vape mod created at Render Intents  
-   This is a template for a custom render module.             
+   games/893973440.luau (Flee the facility) - MaxlaserTech & SystemXVoid/Blankedvoid
    https://renderintents.lol                                                                                                                                                                                                                                                                     
 ]]
 
@@ -359,39 +359,39 @@ run(function()
 end);
 
 
-    run(function()
-        local computeresp: vapemodule = {};
-        local computerespbackground: vapeminimodule = {};
-        local computerespfinishcheck: vapeminimodule = {};
-        local currentmap: Model?
-        local addcomputertag = function(pc: Model): ()
-            local image: ImageLabel = pc:WaitForChild('Screen', 9e9):FindFirstChildOfClass('BillboardGui'):FindFirstChildOfClass('ImageLabel');
-            image.ImageColor3 = pc.Screen.Color;
+run(function()
+    local computeresp: vapemodule = {};
+    local computerespbackground: vapeminimodule = {};
+    local computerespfinishcheck: vapeminimodule = {};
+    local currentmap: Model?
+    local addcomputertag = function(pc: Model): ()
+        local image: ImageLabel = pc:WaitForChild('Screen', 9e9):FindFirstChildOfClass('BillboardGui'):FindFirstChildOfClass('ImageLabel');
+        image.ImageColor3 = pc.Screen.Color;
+        image.Parent.Enabled = true;
+        table.insert(computeresp.Connections, image.Parent:GetPropertyChangedSignal('Enabled'):Connect(function()
             image.Parent.Enabled = true;
-            table.insert(computeresp.Connections, image.Parent:GetPropertyChangedSignal('Enabled'):Connect(function()
-                image.Parent.Enabled = true;
-            end));
-            table.insert(computeresp.Connections, pc.Screen:GetPropertyChangedSignal('Color'):Connect(function()
-                image.ImageColor3 = pc.Screen.Color;
-            end));
-        end;
-        computeresp = visual.Api.CreateOptionsButton({
-            Name = 'ComputerESP',
-            HoverText = 'Enables icons at computer locations.',
-            Function = function(calling: boolean): ()
-                if calling then 
-                    if store.map then 
-                        for _: number, v: Model? in store.map:GetChildren() do 
-                            if v.Name == 'ComputerTable' then 
-                                task.spawn(addcomputertag, v);
-                            end;
+        end));
+        table.insert(computeresp.Connections, pc.Screen:GetPropertyChangedSignal('Color'):Connect(function()
+            image.ImageColor3 = pc.Screen.Color;
+        end));
+    end;
+    computeresp = visual.Api.CreateOptionsButton({
+        Name = 'ComputerESP',
+        HoverText = 'Enables icons at computer locations.',
+        Function = function(calling: boolean): ()
+            if calling then 
+                if store.map then 
+                    for _: number, v: Model? in store.map:GetChildren() do 
+                        if v.Name == 'ComputerTable' then 
+                            task.spawn(addcomputertag, v);
                         end;
                     end;
-                    table.insert(computeresp.Connections, store.mapcreated.Event:Connect(function(): ()
-                        repeat task.wait() until store.active;
-                        computeresp:retoggle();
-                    end));
                 end;
+                table.insert(computeresp.Connections, store.mapcreated.Event:Connect(function(): ()
+                    repeat task.wait() until store.active;
+                    computeresp:retoggle();
+                end));
             end;
-        });
-    end);
+        end;
+    });
+end);

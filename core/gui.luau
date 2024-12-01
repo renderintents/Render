@@ -680,9 +680,9 @@ if shared.VapeExecuted then
 				lib.Settings[i] = {["Type"] = "Button", ["Enabled"] = v["Api"]["Enabled"], ["Keybind"] = v["Api"]["Keybind"]}
 			end
 			if (v.Type == "OptionsButton" or v.Type == "ExtrasButton") then
-				lib.Settings[i] = {["Type"] = "OptionsButton", ["Enabled"] = v["Api"]["Enabled"], ["Keybind"] = v["Api"]["Keybind"]}
+				lib.Settings[i] = {["Type"] = "OptionsButton", ["Enabled2"] = v["Api"]["hidebuttonenabled"], ["Enabled"] = v["Api"]["Enabled"], ["Keybind"] = v["Api"]["Keybind"]}
 			end
-			if v.Type == "TextList" then
+			if (v.Type == "TextList") then
 				lib.Settings[i] = {["Type"] = "TextList", ["ObjectTable"] = v["Api"]["ObjectList"]}
 			end
 			if v.Type == "TextCircleList" then
@@ -718,11 +718,14 @@ if shared.VapeExecuted then
 	end
 
 	lib.LoadSettings = function(customprofile)
-		local starttick = tick()
-		local rahh = false;
+		task.wait(0.25);
 		local success2, result2 = pcall(function()
 			return httpService:JSONDecode(readfile(`rendervape/configuration/{shared.CustomSaveVape or game.PlaceId}/profiles.json`))
 		end)
+		for i,v in lib.RemovedMiniObjects do
+			table.clear(lib.RemovedMiniObjects);
+			v:Remove();
+		end;
 		if success2 and type(result2) == "table" then
 			lib.Profiles = result2
 		end
@@ -951,10 +954,6 @@ if shared.VapeExecuted then
 				end
 			end
 		end
-		for i,v in lib.RemovedMiniObjects do
-			table.clear(lib.RemovedMiniObjects);
-			v:Remove();
-		end;
 		loadedsuccessfully = true
 	end
 
@@ -984,7 +983,7 @@ if shared.VapeExecuted then
 	end;
 
 	lib["RemoveObject"] = function(objname)
-		pcall(function()
+		if lib.ObjectsThatCanBeSaved[objname] then
 			lib.ObjectsThatCanBeSaved[objname]["Object"]:Remove()
 			if lib.ObjectsThatCanBeSaved[objname]["Object2"] then
 				lib.RemovedMiniObjects = lib.ObjectsThatCanBeSaved[objname]["Object2"]
@@ -993,7 +992,7 @@ if shared.VapeExecuted then
 				lib.ObjectsThatCanBeSaved[objname]["ChildrenObject"].Name = "RemovedChildren"
 			end
 			lib.ObjectsThatCanBeSaved[objname] = nil
-		end)
+		end
 	end
 
 	lib["CreateMainWindow"] = function()
@@ -4138,7 +4137,7 @@ if shared.VapeExecuted then
 		hidemodule.Visible = false;
 		
 		local hidemoduleimg = Instance.new('ImageLabel', hidemodule)
-		hidemoduleimg.Image = 'rbxassetid://138696018251186'
+		hidemoduleimg.Image = 'rbxassetid://140490555503930'
 		hidemoduleimg.BackgroundTransparency = 1
 		hidemoduleimg.Visible = true;
 		hidemoduleimg.Position = UDim2.new(0, 6, 0, 0)
@@ -4202,7 +4201,7 @@ if shared.VapeExecuted then
 		end;
 
 		task.spawn(function()
-			repeat task.wait() until shared.vapegamesloaded;
+			repeat task.wait() until shared.vapegamesloaded
 			local eee = false
 			if not children.Visible then
 				windowapi["ExpandToggle"]()
@@ -4229,7 +4228,7 @@ if shared.VapeExecuted then
 
 		windowapi["CreateOptionsButton"] = function(argstablemain)
 			lib.RemoveObject(`{argstablemain.Name}OptionsButton`)
-			local buttonapi = {};
+			local buttonapi = {hidebuttonenabled = false};
 			local mainbuttontext = Instance.new('TextButton', hiderscrollframe);
 			mainbuttontext.BackgroundColor3 = Color3.fromRGB(26, 25, 26)
 			mainbuttontext.Name = argstablemain.Name..'Button'
@@ -4253,7 +4252,7 @@ if shared.VapeExecuted then
 			holder.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			holder.Size = UDim2.new(0, 40, 0, 42)
 			holder.BorderSizePixel = 0
-		   holder.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+		   	holder.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 
 			local toggleboard = Instance.new('Frame', holder)
 			toggleboard.BackgroundTransparency = 1
@@ -4472,8 +4471,8 @@ if shared.VapeExecuted then
 			end;
 
 			buttonapi.Togglehidebutton = function(bool: boolean): ()
-				buttonapi.hidebuttonapi.Enabled = bool or not buttonapi.hidebuttonapi.Enabled
-				if buttonapi.hidebuttonapi.Enabled then
+				buttonapi.hidebuttonenabled = bool or not buttonapi.hidebuttonenabled
+				if buttonapi.hidebuttonenabled then
 					button.Visible = false
 					bgtext.TextColor3 = Color3.fromRGB(155, 155, 155)
 					togglestroke.Color = Color3.fromRGB(255, 255, 255)

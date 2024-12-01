@@ -1,1 +1,1 @@
-[+] Added Clone API to render (forgot to publish this, if render is broken for you reinstall)
+[=] Fixed render not loading on poop executor (salad)

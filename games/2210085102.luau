@@ -13,7 +13,7 @@
                                                                                       $$ |                
                                                                                       \__|   
    A very sexy and overpowered vape mod created at Render Intents  
-   This is a template for a custom render module.             
+   CustomModules/2210085102.luau (Naval Warfare) - SystemXVoid/BlankedVoid          
    https://renderintents.lol                                                                                                                                                                                                                                                                     
 ]]
 

@@ -159,7 +159,6 @@ local visual: table = vape.ObjectsThatCanBeSaved.RenderWindow;
 local exploit: table = vape.ObjectsThatCanBeSaved.ExploitWindow;
 local utility: table = vape.ObjectsThatCanBeSaved.UtilityWindow;
 local world: table = vape.ObjectsThatCanBeSaved.WorldWindow;
-local hudwindow: table = vape.ObjectsThatCanBeSaved.TargetHUDWindow;
 local RenderLibrary: table = RenderLibrary;
 local render: table = render;
 

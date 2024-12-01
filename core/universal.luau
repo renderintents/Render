@@ -13,7 +13,7 @@
                                                                                       \__|   
    A very sexy and overpowered vape mod created at Render Intents  
    /universal.luau - SystemXVoid/BlankedVoid and Maxlasertech            
-   https://renderintents.xyz                                                                                                                                                                                                                                                                     
+   https://renderintents.lol                                                                                                                                                                                                                                                                     
 ]]
    
 type vapeminimodule = {
@@ -201,7 +201,8 @@ local render = {
 	sessionInfo = {labelInstances = {}}, 
 	session = {},
 	clone = {},
-	utils = loadfile('rendervape/libraries/utils.luau')()
+	utils = loadfile('rendervape/libraries/utils.luau')();
+	fonts = {};
 };
 
 getgenv().render = render;
@@ -215,13 +216,6 @@ rawset(render.utils, 'renderconnections', {});
 rawset(render.utils, 'cheatenginetrash', false);
 rawset(render.utils, 'signal', loadfile('rendervape/libraries/signal.luau')());
 rawset(render.utils, 'clone', loadfile('rendervape/libraries/clone.luau')());
-
-getgenv().isEnabled = function(button, category)
-	local success, enabled = pcall(function()
-		return rendervape.ObjectsThatCanBeSaved[button..(category or 'OptionsButton')].Api.Enabled 
-	end)
-	return success and enabled
-end
 
 for i,v in render.utils do
 	getfenv()[i] = v;
@@ -293,6 +287,13 @@ local generalsettings: vapemodule = rendervape.objects['General SettingsGUIDivid
 local devsettings: vapemodule = rendervape.objects['Developer SettingsGUIDivider'];
 local guisettings: vapemodule = rendervape.objects['GUI SettingsGUIDivider'];
 
+generalsettings.Api.CreateButton2({
+	Name = 'REINJECT',
+	Function = function(): ()
+		rendervape:reboot();
+	end;
+});
+
 local guiwhitetext: vapeminimodule = guisettings.Api.CreateToggle({
 	Name = 'White Text',
 	HoverText = 'Makes module\'s text white',
@@ -305,13 +306,6 @@ local guiwhitetext: vapeminimodule = guisettings.Api.CreateToggle({
 				end);
 			end;
 		end;
-	end;
-});
-
-generalsettings.Api.CreateButton2({
-	Name = 'REINJECT',
-	Function = function(): ()
-		rendervape:reboot();
 	end;
 });
 
@@ -367,9 +361,8 @@ table.insert(renderconnections, rendervape.ModuleToggled.Event:Connect(function(
 	end;
 end));
 
-
 local networkownerswitch = tick()
-local isnetworkowner = function(part)
+local isnetworkowner = identifyexecutor() == 'Synapse Z' and isnetworkowner or function(part)
 	local suc, res = pcall(function() return gethiddenproperty(part, "NetworkOwnershipRule") end)
 	if suc and res == Enum.NetworkOwnership.Manual then
 		sethiddenproperty(part, "NetworkOwnershipRule", Enum.NetworkOwnership.Automatic)
@@ -413,21 +406,11 @@ local function downloadVapeAsset(path)
 	return vapeCachedAssets[path] or ''
 end
 
-local function warningNotification(title, text, delay)
-	local suc, res = pcall(function()
-		local frame = rendervape.CreateNotification(title, text, delay, "assets/WarningNotification.png")
-		frame.Frame.Frame.ImageColor3 = Color3.fromRGB(236, 129, 44)
-		return frame
-	end)
-	return (suc and res)
-end
 
 local function removeTags(str)
 	str = str:gsub("<br%s*/>", "\n")
 	return (str:gsub("<[^<>]->", ""))
 end
-
-local run = pcall;
 
 local function isFriend(plr, recolor)
 	if rendervape.ObjectsThatCanBeSaved["Use FriendsToggle"].Api.Enabled then
@@ -4058,12 +4041,13 @@ end)
 
 run(function()
 	local Health = {Enabled = false}
+	local HealthText;
 	Health =  rendervape.ObjectsThatCanBeSaved.RenderWindow.Api.CreateOptionsButton({
 		Name = "Health",
 		Function = function(callback)
 			if callback then
 				HealthText = Drawing.new("Text")
-				HealthText.Size = 20
+				HealthText.Size = 27
 				HealthText.Text = "100HP"
 				HealthText.Position = Vector2.new(0, 0)
 				HealthText.Color = Color3.fromRGB(0, 255, 0)
@@ -4085,85 +4069,6 @@ run(function()
 			end
 		end,
 		HoverText = "Displays your health in the center of your screen."
-	})
-end)
-
-run(function()
-	local Search = {Enabled = false}
-	local SearchTextList = {RefreshValues = function() end, ObjectList = {}}
-	local SearchColor = {Value = 0.44}
-	local SearchFolder = Instance.new("Folder")
-	SearchFolder.Name = "SearchFolder"
-	SearchFolder.Parent = rendervape.MainGui
-	local function searchFindBoxHandle(part)
-		for i,v in (SearchFolder:GetChildren()) do
-			if v.Adornee == part then
-				return v
-			end
-		end
-		return nil
-	end
-	local searchRefresh = function()
-		SearchFolder:ClearAllChildren()
-		if Search.Enabled then
-			for i,v in (workspace:GetDescendants()) do
-				if (v:IsA("BasePart") or v:IsA("Model")) and table.find(SearchTextList.ObjectList, v.Name) and searchFindBoxHandle(v) == nil then
-					local highlight = Instance.new("Highlight")
-					highlight.Name = v.Name
-					highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-					highlight.FillColor = Color3.fromHSV(SearchColor.Hue, SearchColor.Sat, SearchColor.Value)
-					highlight.Adornee = v
-					highlight.Parent = SearchFolder
-				end
-			end
-		end
-	end
-	Search = rendervape.ObjectsThatCanBeSaved.RenderWindow.Api.CreateOptionsButton({
-		Name = "Search",
-		Function = function(callback)
-			if callback then
-				searchRefresh()
-				table.insert(Search.Connections, workspace.DescendantAdded:Connect(function(v)
-					if (v:IsA("BasePart") or v:IsA("Model")) and table.find(SearchTextList.ObjectList, v.Name) and searchFindBoxHandle(v) == nil then
-						local highlight = Instance.new("Highlight")
-						highlight.Name = v.Name
-						highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-						highlight.FillColor = Color3.fromHSV(SearchColor.Hue, SearchColor.Sat, SearchColor.Value)
-						highlight.Adornee = v
-						highlight.Parent = SearchFolder
-					end
-				end))
-				table.insert(Search.Connections, workspace.DescendantRemoving:Connect(function(v)
-					if v:IsA("BasePart") or v:IsA("Model") then
-						local boxhandle = searchFindBoxHandle(v)
-						if boxhandle then
-							boxhandle:Remove()
-						end
-					end
-				end))
-			else
-				SearchFolder:ClearAllChildren()
-			end
-		end,
-		HoverText = "Draws a box around selected parts\nAdd parts in Search frame"
-	})
-	SearchColor = Search.CreateColorSlider({
-		Name = "new part color",
-		Function = function(hue, sat, val)
-			for i,v in (SearchFolder:GetChildren()) do
-				v.FillColor = Color3.fromHSV(hue, sat, val)
-			end
-		end
-	})
-	SearchTextList = Search.CreateTextList({
-		Name = "SearchList",
-		TempText = "part name",
-		AddFunction = function(user)
-			searchRefresh()
-		end,
-		RemoveFunction = function(num)
-			searchRefresh()
-		end
 	})
 end)
 
@@ -4621,7 +4526,7 @@ run(function()
 						repeat
 							if ChatSpammer.Enabled then
 								pcall(function()
-									textchat.ChatInputBarConfiguration.TargetTextChannel:SendAsync((#ChatSpammerMessages.ObjectList > 0 and ChatSpammerMessages.ObjectList[math.random(1, #ChatSpammerMessages.ObjectList)] or "start rendering today! --> renderintents.xyz"))
+									textchat.ChatInputBarConfiguration.TargetTextChannel:SendAsync((#ChatSpammerMessages.ObjectList > 0 and ChatSpammerMessages.ObjectList[math.random(1, #ChatSpammerMessages.ObjectList)] or "start rendering today! --> renderintents.lol"))
 								end)
 							end
 							if waitnum ~= 0 then
@@ -6322,6 +6227,7 @@ run(function()
 	local keystrokesframe
 	local keyconnection1
 	local keyconnection2
+	local color = Color3.fromHSV(rendervape.objects['Gui ColorSliderColor'].Api.Hue, rendervape.objects['Gui ColorSliderColor'].Api.ColorChanged.Sat, rendervape.objects['Gui ColorSliderColor'].Api.ColorChanged.Value);
 
 	local function createKeystroke(keybutton, pos, pos2)
 		local key = Instance.new("Frame")
@@ -6348,10 +6254,12 @@ run(function()
 		keys[keybutton] = {Key = key}
 		table.insert(renderconnections, rendervape.objects['Gui ColorSliderColor'].Api.ColorChanged:Connect(function(...)
 			if #({...}) > 1 then 
+				color = Color3.fromHSV(...)
 				key.BackgroundColor3 = Color3.fromHSV(...);
 			end;
 		end));
 	end
+	
 
 	Keystrokes = rendervape.CreateLegitModule({
 		Name = "Keystrokes",
@@ -6360,25 +6268,19 @@ run(function()
 				keyconnection1 = inputservice.InputBegan:Connect(function(inputType)
 					local key = keys[inputType.KeyCode]
 					if key then
-                        local color: vapecolorslider = rendervape.objects['Gui ColorSliderColor'].Api;
 						if key.Tween then key.Tween:Cancel() end
 						if key.Tween2 then key.Tween2:Cancel() end
-						key.Tween = tween:Create(key.Key, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromHSV(color.Hue, color.Sat, color.Value):Lerp(Color3.new(0.3, 0.3, 0.3), 0.3), BackgroundTransparency = 0})
+						key.Tween = tween:Create(key.Key, TweenInfo.new(0.1), {BackgroundTransparency = 0.3})
 						key.Tween:Play()
-						--key.Tween2 = tween:Create(key.Key.TextLabel, TweenInfo.new(0.1), {TextColor3 = Color3.new()})
-						--key.Tween2:Play()
 					end
 				end)
 				keyconnection2 = inputservice.InputEnded:Connect(function(inputType)
 					local key = keys[inputType.KeyCode]
 					if key then
-                        local color: vapecolorslider = rendervape.objects['Gui ColorSliderColor'].Api;
 						if key.Tween then key.Tween:Cancel() end
 						if key.Tween2 then key.Tween2:Cancel() end
-						key.Tween = tween:Create(key.Key, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromHSV(color.Hue, color.Sat, color.Value), BackgroundTransparency = 0.5})
+						key.Tween = tween:Create(key.Key, TweenInfo.new(0.1), { BackgroundTransparency = 0.5})
 						key.Tween:Play()
-						--key.Tween2 = tween:Create(key.Key.TextLabel, TweenInfo.new(0.1), {TextColor3 = Color3.new(1, 1, 1)})
-						--key.Tween2:Play()
 					end
 				end)
 			else
@@ -6559,7 +6461,7 @@ run(function()
 				songUpdateTick = tick();
 			end);
 			if success then 
-				InfoNotification('Spotify', 'Successfully paused current track', 10);
+				alertNotification('Spotify', 'Successfully paused current track', 10);
 			else
 				errorNotification('Spotify', 'Failed to pause "current" playback song.', 10);
 			end;
@@ -6604,7 +6506,7 @@ run(function()
 				return session.playback:getPlayingSong();
 			end);
 			if success then 
-				InfoNotification('Spotify', `Successfully resumbed {song.item.name:split('(')[1]}!`, 10);
+				alertNotification('Spotify', `Successfully resumbed {song.item.name:split('(')[1]}!`, 10);
 			else
 				errorNotification('Spotify', 'Failed to resume the "current" song.', 10);
 			end;
@@ -6619,7 +6521,7 @@ run(function()
 				return session.playback:getPlayingSong();
 			end);
 			if success then 
-				InfoNotification('Spotify', `Successfully replayed {song.item.name:split('(')[1]}!`, 10);
+				alertNotification('Spotify', `Successfully replayed {song.item.name:split('(')[1]}!`, 10);
 			else
 				errorNotification('Spotify', 'Failed to replay the "current" song', 10);
 			end;
@@ -6634,7 +6536,7 @@ run(function()
 				return session.playback:getPlayingSong();
 			end);
 			if success then 
-				InfoNotification('Spotify', `Successfully changed playback position of {song.item.name:split('(')[1]}!`, 10);
+				alertNotification('Spotify', `Successfully changed playback position of {song.item.name:split('(')[1]}!`, 10);
 			else
 				errorNotification('Spotify', 'Failed to replay the "current" song', 10);
 			end;
@@ -7721,33 +7623,46 @@ run(function()
 	local backtracktick: vapeslider = {Value = 1};
 	local oldtrack: number = tick();
 	local rendermove: () -> () = function(player: Model): (Player) -> ()
-		local rendered: Model = player:Clone();
-		rendered.Parent = player.Parent;
-		for i: number, v: BasePart? in rendered:GetChildren() do
-			pcall(function() v.Transparency = 0.5 end);
-		end;
-		task.delay(backtracktick / 2, function()
-			rendered:Remove();
+		local part = Instance.new('Part', player);
+		part.Anchored = true;
+		part.CanCollide = false;
+		part.CFrame = player.PrimaryPart.CFrame;
+		part.Size = Vector3.new(3, 5, 1);
+		part.Transparency = 0.5;
+
+		local destroyed: boolean;
+
+		task.delay(backtracktick.Value / 1.5, function()
+			destroyed = true;
+			part:Remove();
 		end);
+
+		repeat
+			pcall(function() part.CFrame = player.PrimaryPart.CFrame; part.Position = player.PrimaryPart.CFrame.Position + Vector3.new(player.PrimaryPart.CFrame.Position.X / (player.PrimaryPart.CFrame.Position.X - 1), 0, player.PrimaryPart.CFrame.Position.Z / (player.PrimaryPart.CFrame.Position.Z - 1)); end);
+			task.wait();
+		until destroyed;
 	end;
 	backtrack = blatant.Api.CreateOptionsButton({
 		Name = 'BackTrack',
-		HoverText = 'Renders target last move.',
+		ExtraText = function()
+			return backtrackmode.Value;
+		end,
 		Function = function(call: boolean)
 			if call then
 				table.insert(backtrack.Connections, runservice.Heartbeat:Connect(function()
 					if backtrackmode.Value == 'Freeze' then
 						for i: number, player: rendertarget in GetActiveTargets() do
 							player.RootPart.Anchored = (tick() - oldtrack) >= backtracktick.Value;
-							oldtrack = tick();
+							oldtrack = tick() - 0.2;
 						end;
-					else
+					elseif (tick() - oldtrack) >= backtracktick.Value / 1.2 then
+						oldtrack = tick() - 0.2;
 						local player: rendertarget = GetTarget({
-							radius = 50,
+							radius = 23,
 							friendly = true,
 							npc = true
 						});
-						if player.Player and player.Player.Character and backtrackrendermove.Enabled and (tick() - oldtrack) >= backtracktick.Value then
+						if player.Player and player.Player.Character then
 							rendermove(player.Player.Character);
 						end;
 					end;
@@ -9394,7 +9309,7 @@ run(function()
 						for i,v in players:GetPlayers() do
 							if isAlive(v) then
 								for i: number, v: Animation in v.Character.Humanoid:GetPlayingAnimationTracks() do
-									v:AdjustSpeed((timervalue.Value <= 0 and 0.1 or timervalue.Value * 2));
+									v:AdjustSpeed((timervalue.Value <= 0 and 0.1 or timervalue.Value * 1.2));
 								end;
 							end
 						end
@@ -9409,8 +9324,8 @@ run(function()
 		Name = 'Speed',
 		Function = void,
 		Min = 1,
-		Max = 500,
-		Default = 500
+		Max = 10,
+		Default = 2
 	});
 end);
 
@@ -9436,7 +9351,8 @@ run(function() --> working on this later
             frame.Size = UDim2.new(0, 2, 0, 23);
             frame.BorderSizePixel = 0
             frame.BackgroundColor3 = Color3.fromHSV(rendervape.ObjectsThatCanBeSaved["Gui ColorSliderColor"].Api.Hue, rendervape.ObjectsThatCanBeSaved["Gui ColorSliderColor"].Api.Sat, rendervape.ObjectsThatCanBeSaved["Gui ColorSliderColor"].Api.Value);
-        
+			table.insert(arrayframes, frame);
+
             local bgholder: Frame = Instance.new('Frame', frame);
             bgholder.BackgroundTransparency = 1;
             bgholder.Size = UDim2.new(0, 275, 0, 23);
@@ -9465,20 +9381,15 @@ run(function() --> working on this later
 					frame.BackgroundColor3 = Color3.fromHSV(...);
 				end;
 			end));
-        elseif arrayliststyle.Value == 'Packet V3' then
-            --> umm
-        else
-            --> umm
         end;
-        table.insert(arrayframes, frame);
     end;
 
     render.array.reset = function()
         for i: number, v: Frame in arrayframes do
-            v:Remove();
+			table.clear(arrayframes);
+			pcall(function() v:Remove(); end)
         end;
-        table.clear(arrayframes);
-    end;
+  end;
 
     local arrayvisible: boolean = false
 
@@ -9492,8 +9403,216 @@ run(function() --> working on this later
             return arrayliststyle.Value
         end
     });
-    arrayliststyle = arraylist.CreateDropDown({
+    arrayliststyle = arraylist.CreateDropdown({
         Name = 'Style',
-        List = {'Packet V3', 'Adjust', 'Rise 6.0'}
+        List = {'Packet V3', 'Adjust', 'Rise 6.0'},
+		Function = void
     });
 end);
+
+run(function()
+	if not isfolder('rendervape/fonts') then 
+		makefolder('rendervape/fonts'); 
+	end;
+	if not isfile('rendervape/fonts/product_sans_bold_italic.ttf') then
+		alertNotification('Render', 'Sending storage a request to fetch render fonts.', 10);
+		local getfonts: table = RenderLibrary.http:request({
+			path = 'fonts',
+			subdomain = 'storage',
+			params = {{name = 'iterate', value = 'true'}}
+		});
+		if not getfonts.ok then
+			alertNotification('Render', 'Failed to fetch render fonts', 30);
+			return error('Failed to fetch render fonts');
+		end;
+		for _: number, v: string in getfonts.json().result do
+			RenderLibrary.http:getfile(`fonts/{v}`);
+		end;
+		alertNotification('Render', 'Successfully fetched render fonts', 15);
+	end;
+	writefile('rendervape/fonts/productsans.json', getservice('HttpService'):JSONEncode({
+		name = 'ProductSans',
+		faces = {
+			{
+				name = 'Light',
+				weight = 300,
+				style = 'normal',
+				assetId = getcustomasset('rendervape/fonts/product_sans_light.ttf')
+			},
+			{
+				name = 'Regular',
+				weight = 400,
+				style = 'normal',
+				assetId = getcustomasset('rendervape/fonts/product_sans_regular.ttf')
+			},
+			{
+				name = 'Medium',
+				weight = 500,
+				style = 'normal',
+				assetId = getcustomasset('rendervape/fonts/product_sans_medium.ttf')
+			},
+		}
+	}));
+	render.fonts.productsans = {
+		regular = Font.new(getcustomasset('rendervape/fonts/productsans.json'), Enum.FontWeight.Regular),
+		medium = Font.new(getcustomasset('rendervape/fonts/productsans.json'), Enum.FontWeight.Medium),
+		light = Font.new(getcustomasset('rendervape/fonts/productsans.json'), Enum.FontWeight.Light)
+	};	
+end)
+
+run(function()
+	local sessionhud: vapemodule = {Enabled = false};
+    local sessionhudTextColor: vapecolorslider = newcolor();
+    local sessionhudColor1: vapecolorslider = newcolor();
+    local sessionhudColor2: vapecolorslider = newcolor();
+	local sessioninfo: vapecustomwindow = rendervape.CreateCustomWindow({
+		Name = 'Session HUD',
+		Icon = 'rendervape/assets/TargetIcon3.png',
+		IconSize = 16
+	});
+	local session: Frame = Instance.new('Frame', sessioninfo.GetCustomChildren())
+	session.BackgroundColor3 = Color3.fromRGB(0, 1, 0);
+	session.BackgroundTransparency = 0.4;
+	session.Size = UDim2.new(0, 183, 0, 115);
+
+	Instance.new('UICorner', session).CornerRadius = UDim.new(0, 16);
+
+	local stroke: UIStroke = Instance.new('UIStroke', session);
+	stroke.Color = Color3.fromRGB(255, 255, 255);
+	stroke.Thickness = 1;
+
+	local gradient: UIGradient = Instance.new('UIGradient', stroke)
+	gradient.Color = ColorSequence.new{
+		ColorSequenceKeypoint.new(0, Color3.fromHSV(sessionhudColor1.Hue, sessionhudColor1.Sat, sessionhudColor1.Value)),
+		ColorSequenceKeypoint.new(0.36, Color3.fromRGB(255, 255, 255)),
+		ColorSequenceKeypoint.new(0.635, Color3.fromHSV(sessionhudColor2.Hue, sessionhudColor2.Sat, sessionhudColor2.Value)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+	}
+
+	local sessionname: TextLabel = Instance.new('TextLabel', session)
+	sessionname.Text = 'Session Stats';
+	sessionname.BackgroundTransparency = 1;
+	sessionname.TextColor3 = Color3.fromRGB(255, 250, 193);
+	sessionname.Size = UDim2.new(0, 155, 0, 24);
+	sessionname.FontFace = render.fonts.productsans.regular
+	sessionname.Position = UDim2.new(0.067, 0, 0.067, 0);
+	sessionname.TextSize = 23;
+
+	local timer: TextLabel = Instance.new('TextLabel', session);
+	timer.BackgroundTransparency = 1;
+	timer.FontFace = render.fonts.productsans.regular
+	timer.Size = UDim2.new(0, 155, 0, 28);
+	timer.Position = UDim2.new(0.072, 0, 0.23, 0);
+	timer.TextSize = 16;
+	timer.TextColor3 = Color3.fromRGB(255, 255, 255);
+	timer.Text = '0 seconds';
+
+	local holder: Frame = Instance.new('Frame', session);
+	holder.Size = UDim2.new(0, 183, 0, 50);
+	holder.Position = UDim2.new(0, 0, 0.44, 0);
+	holder.BackgroundTransparency = 1
+
+	local layout: UIListLayout = Instance.new('UIListLayout', holder);
+	layout.HorizontalAlignment = 'Center';
+	layout.Padding = UDim.new(0, -8);
+	layout.VerticalAlignment = 'Top';
+
+	local sessions: {string} = {};
+
+	render.session.new = function(args: table): (table) -> ()
+		assert(args[1] and type(args[1]) == 'table' and args[1].name, `string expected, got nil`);
+		if sessions[args[1].name] then
+			sessions[args[1].name]:Remove();
+		end;
+		local label: TextLabel = Instance.new('TextLabel', holder);
+		sessions[args[1].name] = label;
+		label.BackgroundTransparency = 1;
+		label.Name = args[1].name;
+		label.FontFace = render.fonts.productsans.regular;
+		label.Size = UDim2.new(0, 155, 0, 28);
+		label.TextColor3 = Color3.fromRGB(255, 255, 255);
+		label.TextYAlignment = 'Top';
+		label.TextSize = 15;
+		label.TextColor3 = Color3.fromRGB(255, 255, 255);
+		args[1].name = `{args[1].name}: `
+		if not args[2] then
+			args[2] = {name = '', value = ''};
+		else
+			args[2].name = `       {args[2].name}: `;
+		end;
+		label.Text = `{args[1].name}{args[1].value}{args[2].name}{args[2].value}`;
+	end;
+
+	render.session.remove = function(object: string): (string) -> ()
+		if sessions[object] then
+			sessions[object]:Remove();
+			table.remove(sessions, table.find(sessions, sessions[object]))
+		end;
+	end;
+
+	local sessionvisible: boolean = false;
+	local gameTick: number = tick();
+	local seconds: number = 0;
+	local minutes: number = 0;
+	table.insert(renderconnections, runservice.RenderStepped:Connect(function()
+		if (tick() - gameTick) >= 1.2 then
+			gameTick = tick();
+			seconds += 1;
+			if seconds >= 60 then
+				seconds = 0;
+				minutes += 1;
+			end;
+			timer.Text = `{minutes} Minutes and {seconds} Seconds`;
+		end;
+	end));
+	sessionhud = visual.Api.CreateOptionsButton({
+		Name = 'Session HUD',
+		Function = function(call: bool): () -> ()
+			sessioninfo.SetVisible(call);
+			sessionvisible = call;
+			repeat
+                sessionname.TextColor3 = Color3.fromHSV(sessionhudTextColor.Hue, sessionhudTextColor.Sat, sessionhudTextColor.Value)
+                gradient.Color = ColorSequence.new{
+                    ColorSequenceKeypoint.new(0, Color3.fromHSV(sessionhudColor1.Hue, sessionhudColor1.Sat, sessionhudColor1.Value)),
+                    ColorSequenceKeypoint.new(0.36, Color3.fromRGB(255, 255, 255)),
+                    ColorSequenceKeypoint.new(0.635, Color3.fromHSV(sessionhudColor2.Hue, sessionhudColor2.Sat, sessionhudColor2.Value)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+                }
+				gradient.Rotation += 0.45
+				task.wait(0)
+			until (not sessionhud.Enabled)
+		end;
+	});
+    sessionhudTextColor = sessionhud.CreateColorSlider({
+        Name = 'TextColor',
+        Function = void
+    });
+    sessionhudColor1 = sessionhud.CreateColorSlider({
+        Name = 'Color1',
+        Fucntion = void
+    });
+    sessionhudColor2 = sessionhud.CreateColorSlider({
+        Name = 'Color2',
+        Function = void
+    });
+	table.insert(renderconnections, rendervape.MainGui.ScaledGui.ClickGui:GetPropertyChangedSignal('Visible'):Connect(function()
+		if rendervape.MainGui.ScaledGui.ClickGui.Visible and sessionvisible then 
+			session.Visible = true;
+		end;
+	end));
+end)
+task.spawn(function()
+	local suc, res;
+	repeat
+		local suc, res = pcall(function()
+			render.session.new({
+				{
+					name = 'Rank', 
+					value = RenderLibrary:getplayertag(lplr).text:split(' ')[2] or 'Unknown';
+				}
+			});
+		end);
+		if suc then break end;
+		task.wait();
+	until suc;
+end)
