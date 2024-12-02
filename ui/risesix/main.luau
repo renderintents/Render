@@ -126,11 +126,29 @@ local risecolortable: table = {
 	['Blood Red'] = {0, 1, 0.55}
 };
 
-local RenderLibrary: table = loadfile('rendervape/libraries/constructor.luau')();
-getgenv().RenderLibrary = RenderLibrary;
-local gui: table = loadstring(RenderLibrary.http:getfile('ui/risesix/gui.luau'))();
+task.spawn(function()
+    if not rendervape then
+        getgenv().RenderIntents = getgenv().RenderIntents or {};
+		getgenv().RenderIntents.YieldLoad = true;
+        loadfile('rendervape/core/boot.luau')();
+    end
+end);
+
+repeat task.wait() until getgenv().requirefile;
+
+
+local gui: table = requirefile('ui/risesix/gui.luau');
 local betterwindownames: table = {};
 local blacklistedwindows: table = {'TargetHUD', 'SessionHUD'};
+
+getgenv().RenderIntents.YieldLoad = false;
+repeat
+    rendervape = shared.rendervape;
+    if rendervape then 
+        break;
+    end;
+    task.wait();
+until false;
 
 shared.risegui = gui;
 

@@ -2,6 +2,8 @@ if not game:IsLoaded() then
 	game.Loaded:Wait()
 end;
 
+repeat task.wait() until getgenv().RenderIntents and (not getgenv().RenderIntents.YieldLoad) or (not getgenv().RenderIntents);
+
 local cloneref: (Instance) -> (Instance) = cloneref or function(instance) return instance end;
 local getservice = function(service: string): Instance 
 	return cloneref(game:FindService(service))
@@ -192,16 +194,6 @@ shared.rendervape = rendervape;
 getgenv().RenderLibrary = shared.renderconstructor;
 
 task.wait(0.25);
-
-if typeof(RenderLibrary) ~= 'table' then 
-	pcall(function()
-		local notification = GuiLibrary.CreateNotification('Render', `Failed to load core library --> {renderlib}`, 25, "assets/WarningNotification.png")
-		notification.IconLabel.ImageColor3 = Color3.new(220, 0, 0)
-		notification.Frame.Frame.ImageColor3 = Color3.new(220, 0, 0)
-	end);
-	return error(`❌ Render - Failed to load core library --> {renderlib}`)
-end;
-
 local saveSettingsLoop = coroutine.create(function()
 	repeat
 		if shared.VapeFullyLoaded then 

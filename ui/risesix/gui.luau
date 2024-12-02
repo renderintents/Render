@@ -108,6 +108,7 @@ local function loadFonts()
     for i: number, v: string in fonts do 
         RenderLibrary.http:getfile(v);
     end;
+    task.wait(0.3);
     writefile("rendervape/ui/risesix/fonts/productsans.json", game:GetService("HttpService"):JSONEncode({
         name = "ProductSans",
         faces = {
