@@ -205,7 +205,7 @@ local render = {
 	utils = loadfile('rendervape/libraries/utils.luau')();
 	fonts = {};
 };
-
+ 
 getgenv().render = render;
 render.debugserver = loadfile('rendervape/libraries/debugserver.luau')();
 render.utils:init();
