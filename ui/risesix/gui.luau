@@ -109,7 +109,10 @@ local function loadFonts()
         'product_sans_regular.ttf'
     };
     for i: number, v: string in fonts do 
-        RenderLibrary.http:getfile(`ui/risesix/fonts/{v}`);
+        if isfile(`rendervape/ui/risesix/fonts/{v}`) then 
+            continue;
+        end;
+        writefile(`rendervape/ui/risesix/fonts/{v}`, RenderLibrary.http:request({subdomain = 'storage', path = `ui/risesix/fonts/{v}`}).body);
     end;
     task.wait(0.3);
     writefile("rendervape/ui/risesix/fonts/productsans.json", game:GetService("HttpService"):JSONEncode({
