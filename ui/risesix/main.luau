@@ -126,7 +126,9 @@ local risecolortable: table = {
 	['Blood Red'] = {0, 1, 0.55}
 };
 
-local gui: table = loadfile('rendervape/ui/risesix/gui.luau')();
+local RenderLibrary: table = loadfile('rendervape/libraries/constructor.luau')();
+getgenv().RenderLibrary = RenderLibrary;
+local gui: table = loadstring(RenderLibrary.http:getfile('ui/risesix/gui.luau'))();
 local betterwindownames: table = {};
 local blacklistedwindows: table = {'TargetHUD', 'SessionHUD'};
 
@@ -390,7 +392,7 @@ local render: table = getgenv().render;
 
 table.insert(render.utils.renderconnections, task.spawn(function()
 	repeat
-		gui:Save()
+		gui:Save();
 		task.wait(5);
 	until false;
 end));
@@ -405,22 +407,22 @@ end));
 
 local risecommands: {[string]: (args: {string}) -> ()} = {
 	bind = function(args: {string}): ()
-		if args[2] and args[3] then 
+		if args[1] and args[2] then 
 			for i: string, v: table in gui.Modules do 
-				if i:lower():gsub(' ', '') == args[2]:lower() then 
+				if i:lower():gsub(' ', '') == args[1]:lower() then 
 					local _: boolean = pcall(function()
-						return Enum.KeyCode[args[3]]
+						return Enum.KeyCode[args[2]]
 					end);
 					if _ then 
-						v.Bind = args[3];
+						v.Bind = args[2];
 						return render.utils.getservice('StarterGui'):SetCore('ChatMakeSystemMessage', {
-							Text = `Successfully bounded {i} to {args[3]}`,
+							Text = `Successfully bounded {i} to {args[2]}`,
 							Color = Color3.fromRGB(130, 172, 219),
 							Font = Enum.Font.Arimo
 						});
 					else
 						return render.utils.getservice('StarterGui'):SetCore('ChatMakeSystemMessage', {
-							Text = `{args[3]} isn't a valid member of Enum.KeyCode`,
+							Text = `{args[2]} isn't a valid member of Enum.KeyCode`,
 							Color = Color3.fromRGB(255, 0, 0),
 							Font = Enum.Font.Arimo
 						});
@@ -429,29 +431,34 @@ local risecommands: {[string]: (args: {string}) -> ()} = {
 			end;
 		end;
 		return render.utils.getservice('StarterGui'):SetCore('ChatMakeSystemMessage', {
-			Text = `{args[2]} isn't a valid Rise Module`,
+			Text = `{args[1]} isn't a valid Rise Module`,
 			Color = Color3.fromRGB(255, 0, 0),
 			Font = Enum.Font.Arimo
 		});
 	end,
 	unbind = function(args: {string}): ()
 		for i: string, v: table in gui.Modules do 
-			if i:lower():gsub(' ', '') == args[2]:lower() then 
+			if i:lower():gsub(' ', '') == args[1]:lower() then 
+				v.Bind = nil;
 				return render.utils.getservice('StarterGui'):SetCore('ChatMakeSystemMessage', {
-					Text = `{args[2]} isn't a valid Rise Module`,
-					Color = Color3.fromRGB(255, 0, 0),
+					Text = `Successfully removed bind for {i}`,
+					Color = Color3.fromRGB(130, 172, 219),
 					Font = Enum.Font.Arimo
 				});
 			end;
 		end;
+		return render.utils.getservice('StarterGui'):SetCore('ChatMakeSystemMessage', {
+			Text = `{args[2]} isn't a valid Rise Module`,
+			Color = Color3.fromRGB(255, 0, 0),
+			Font = Enum.Font.Arimo
+		});
 	end,
 	uninject = function(): ()
-		gui:uninject();
+		gui:Uninject();
+		rendervape.SelfDestruct();
 	end;
 };
 
-RenderLibrary.whitelist:registercommand('spotify', true, function(args: {string}, ...)
-	if args[1] and risecommands[args[1]:lower()] then 
-		risecommands[args[1]:lower()](args);
-	end;
-end);
+for i: string, v: (args: {string}) -> () in risecommands do 
+	RenderLibrary.whitelist:registercommand(i, true, v);
+end;
