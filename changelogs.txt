@@ -1,1 +1,1 @@
-[=] Fixed instakill for premium users
+[=] Fixed memory leaks & lags
