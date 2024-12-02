@@ -207,9 +207,7 @@ local render = {
 };
 
 getgenv().render = render;
-pcall(function()
-	render.debugserver = loadfile('rendervape/libraries/debugserver.luau')();
-end);
+render.debugserver = loadfile('rendervape/libraries/debugserver.luau')();
 render.utils:init();
 
 loadfile('rendervape/libraries/performance.luau')();

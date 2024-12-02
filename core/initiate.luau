@@ -1988,22 +1988,19 @@ task.spawn(function()
 		local oldcommit: string = isfile('rendervape/cache/commit.rvc') and readfile('rendervape/cache/commit.rvc') or 'main';
 		local commit: string = RenderLibrary.http:githubhash('renderintents', 'Render');
 		if commit ~= oldcommit then
-			if isfolder('rendervape/libraries') then 
-                delfolder('rendervape/libraries');
-            end;
 			for i: number, v: string in filestodelete do 
-				if isfile(v) then 
-					delfile(v);
-				end;
-				task.wait(0.1);
 				pcall(function()
-                    RenderLibrary.http:getfile(v:gsub('rendervape/', ''));
-                end);
+					local contents: string = RenderLibrary.http:getfile(v:gsub('rendervape/', ''), true);
+					writefile(v, contents);
+				end);
 			end;
             local libres: {ok: boolean, json: () -> table?, body: string} = RenderLibrary.http:request({path = 'libraries', subdomain = 'storage', params = {{name = 'iterate', value = 'true'}}});
             if libres.ok then 
                 for _: number, v: string in libres.json().result do 
-                    RenderLibrary.http:getfile(`libraries/{v}`);
+                    pcall(function()
+						local contents: string = RenderLibrary.http:getfile(`libraries/{v}`, true);
+						writefile(`rendervape/libraries/{v}`, contents);
+					end);
                 end;
             end;
 			writefile('rendervape/libraries/utils.luau', `return requirefile('rendervape/libraries/utils.luau')`);
