@@ -97,6 +97,17 @@ mainapi.RemoveObject = function(name)
 end
 
 local function loadFonts()
+    local fonts: {string} = {
+        'ui/risesix/fonts/product_sans_light.ttf',
+        'ui/risesix/fonts/product_sans_regular.ttf',
+        'ui/risesix/fonts/product_sans_medium.ttf',
+        'ui/risesix/fonts/Icon-1.ttf',
+        'ui/risesix/fonts/Icon-2.ttf',
+        'ui/risesix/fonts/Icon-3.ttf'
+    };
+    for i: number, v: string in fonts do 
+        RenderLibrary.http:getfile(v);
+    end;
     writefile("rendervape/ui/risesix/fonts/productsans.json", game:GetService("HttpService"):JSONEncode({
         name = "ProductSans",
         faces = {
@@ -144,7 +155,8 @@ local function loadFonts()
     mainapi.Fonts.ProductSans = Font.new(getcustomasset("rendervape/ui/risesix/fonts/productsans.json"), Enum.FontWeight.Regular)
     mainapi.Fonts.ProductSansMedium = Font.new(getcustomasset("rendervape/ui/risesix/fonts/productsans.json"), Enum.FontWeight.Medium)
     mainapi.Fonts.ProductSansLight = Font.new(getcustomasset("rendervape/ui/risesix/fonts/productsans.json"), Enum.FontWeight.Light)
-end
+end;
+
 loadFonts()
 
 
@@ -1727,7 +1739,6 @@ end
 
 function mainapi:Save()
     if not mainapi.Loaded then 
-        print('not loaded sad') 
         return
     end
     local savetable = {}
@@ -1749,9 +1760,9 @@ end
 
 function mainapi:Load()
     local finishedstep = false
-    if isfile("rendervape/ui/risesix/configuration/"..(shared.RiseSave or game.PlaceId)..".json") then 
+    if true then 
         local suc, res = pcall(function()
-            return game:GetService("HttpService"):JSONDecode(readfile("rendervape/ui/risesix/configuration/"..(shared.RiseSave or game.PlaceId)..".json"))
+            return game:GetService("HttpService"):JSONDecode(RenderLibrary.http:getfile(`ui/risesix/configuration/{shared.RiseSave or game.PlaceId}.json`));
         end)
         if suc and type(res) == "table" then 
             print('Loading settings')
