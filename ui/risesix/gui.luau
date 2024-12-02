@@ -101,8 +101,8 @@ local function loadFonts()
         'ui/risesix/fonts/product_sans_light.ttf',
         'ui/risesix/fonts/product_sans_regular.ttf',
         'ui/risesix/fonts/product_sans_medium.ttf',
-        'ui/risesix/product_sans_bold.ttf',
-        'product_sans_bold_italic.ttf',
+        'ui/risesix/fonts/product_sans_bold.ttf',
+        'ui/risesix/fonts/product_sans_bold_italic.ttf',
         'ui/risesix/fonts/Icon-1.ttf',
         'ui/risesix/fonts/Icon-2.ttf',
         'ui/risesix/fonts/Icon-3.ttf'
