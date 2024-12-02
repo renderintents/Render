@@ -1,1 +1,1 @@
-[=] Fixed Rise (actually tested this time)
+[=] Fixed Rise for some executors (must be able to write font files)
