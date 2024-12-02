@@ -2982,7 +2982,7 @@ run(function()
 					entityLibrary.character.Humanoid:ChangeState(Enum.HumanoidStateType.Landed)
 					disabledproper = false
 					if isnetworkowner(oldcloneroot) then
-						warningNotification('InfiniteFly', 'Waiting 1.1s to not flag', 3)
+						warningNotification('InfiniteFly', 'Waiting 0.2s to not flag', 3)
 						task.delay(0.2, disablefunc)
 					else
 						disablefunc()
@@ -3546,7 +3546,7 @@ run(function()
 						--render.targets:updatehuds();
 						vapeTargetInfo.Targets.Killaura = nil;
 						local plrs: {rendertarget} = GetActiveTargets({
-							origin = isEnabled('AntiHit') == false and clone.cache.__currentroot and  clone.cache.__currentroot.CFrame.Position or nil,
+							origin = isEnabled('AntiHit') == false and clone.cache.__currentroot and clone.cache.__currentroot.CFrame.Position or nil,
 							sort = killaurasortmethods[killaurasortmethod.Value] or nil,
 							radius = killaurarange.Value,
 							npc = true	
@@ -12007,11 +12007,11 @@ run(function()
 					end;
 					oldroot = clone.cache.__currentroot or lplr.Character and lplr.Character.PrimaryPart or nil;
 					newroot = clone:getLocalClone('AntiHit', true);
-					if killauraNearPlayer and (antihitnonpc.Enabled and not vapeTargetInfo.Targets.Killaura.Npc or true) and oldroot then 
+					if vapeTargetInfo.Targets.Killaura and oldroot then 
 						if tick() > bouncedelay and isAlive(lplr, true) and lplr.Character.PrimaryPart == newroot then 
 							bouncedelay = tick() + 0.4;
 							for i = 1, 5 do 
-								if isEnabled('InfiniteFly') or not killauraNearPlayer then 
+								if isEnabled('InfiniteFly') or not vapeTargetInfo.Targets.Killaura then 
 									bouncedelay = tick();
 									break 
 								end;
