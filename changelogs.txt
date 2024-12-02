@@ -1,1 +1,1 @@
-[=] Fixed Rise for some executors (must be able to write font files) 
+[=] Fixed antihit not working with premium version
