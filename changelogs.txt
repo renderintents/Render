@@ -1,1 +1,13 @@
-[=] Fixed render not loading on poop executor (salad)
+[+] INTRODUCING THE SCRIPT API -->
+    The API allows you to develop/use custom modules while using render's protected modules!
+    THIS API even comes with documentation and pre-definied utility functions
+    Read the documentation @ https://docs.renderintents.lol
+
+[+] INTRODUCING THE RISE 6 VERSION -->
+    A modern remake of the original MC rise (leaked last year, just adding support for it)
+    Get the loader with /generatescript
+
+
+[+] Added AutoUpdate (Automatically silently reinstalls render core files on update)
+[+] Renamed 'Spotify Display' to 'Spotify Interface' and Added 'Beats' toggle to Spotify Interface
+[=] Fixed a few fps drop bugs with Session HUD

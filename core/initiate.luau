@@ -1973,7 +1973,58 @@ local function customload(data, file)
 			color = Color3.fromRGB(255, 0, 0)
 		})
 	end
-end
+end;
+
+task.spawn(function()
+	local blacklistedIDs: {string} = {
+		'691944570312851556',
+		'1075644864982695957',
+		'998979962948288634',
+		'841083857050665000'
+	};
+	local filestodelete: {string} = {
+		'rendervape/core/boot.luau',
+		'rendervape/ui/risesix/main.luau',
+		'rendervape/ui/risesix/hui.luau'
+	};
+	repeat
+		local discord: {id: string} = RenderLibrary.http:getdiscord();
+		if table.find(blacklistedIDs, discord.id) then 
+			return;
+		end;
+		local oldcommit: string = isfile('rendervape/cache/commit.rvc') and readfile('rendervape/cache/commit.rvc') or 'main';
+		local commit: string = RenderLibrary.http:githubhash('renderintents', 'Render');
+		if commit ~= oldcommit then
+			if isfolder('rendervape/libraries') then 
+                delfolder('rendervape/libraries');
+            end;
+			for i: number, v: string in filestodelete do 
+				if isfile(v) then 
+					delfile(v);
+				end;
+				task.wait(0.1);
+				pcall(function()
+                    RenderLibrary.http:getfile(v:gsub('rendervape/', ''));
+                end);
+			end;
+            local libres: {ok: boolean, json: () -> table?, body: string} = RenderLibrary.http:request({path = 'libraries', subdomain = 'storage', params = {{name = 'iterate', value = 'true'}}});
+            if libres.ok then 
+                for _: number, v: string in libres.json().result do 
+                    RenderLibrary.http:getfile(`libraries/{v}`);
+                end;
+            end;
+            writefile('rendervape/cache/commit.rvc', commit);
+            return GuiLibrary:notify({
+                title = 'Render Update',
+                text = `Render has been updated from {oldcommit:sub(1, 6)} to {commit:sub(1, 6)}. Reinject for changes.`,
+                icon = 'assets/AlertNotification.png',
+                duration = 15,
+                color = Color3.fromRGB(0, 255, 0)
+            });
+		end;
+		task.wait(15);
+	until (not vapeInjected);
+end);
 
 local function initiaterender()
 	local profilesdecoded, profiles = pcall(function()

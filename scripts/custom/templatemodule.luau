@@ -16,24 +16,25 @@
    https://renderintents.lol                                                                                                                                                                                                                                                                     
 ]]
 
-type vapemain = {
+
+export type vapemain = {
     ObjectsThatCanBeSaved: table,
     objects: table
 };
    
-type vapeminimodule = {
+export type vapeminimodule = {
 	Enabled: boolean,
 	Object: Instance,
 	ToggleButton: (boolean | nil, boolean | nil) -> ()
 };
 
-type vapeslider = {
+export type vapeslider = {
 	Value: number,
 	Object: Instance,
 	SetValue: (number) -> ()
 };
 
-type vapecolorslider = {
+export type vapecolorslider = {
 	Hue: number,
 	Sat: number,
 	Value: number,
@@ -42,37 +43,37 @@ type vapecolorslider = {
 	SetValue: (number, number, number) -> ()
 };
 
-type vapedropdown = {
+export type vapedropdown = {
 	Value: string,
 	Object: Instance,
 	SetValue: (table) -> ()
 };
 
-type vapetextlist = {
+export type vapetextlist = {
 	ObjectList: table,
 	Object: Instance,
 	RefreshValues: (table) -> table
 };
 
-type vapetextbox = {
+export type vapetextbox = {
 	Value: string,
 	Object: Instance,
 	SetValue: (string) -> ()
 };
 
-type vapecustomwindow = {
+export type vapecustomwindow = {
 	GetCustomChildren: (table) -> Frame,
 	SetVisible: (boolean | nil) -> ()
 };
 
-type securetable = {
+export type securetable = {
 	clear: (securetable, (any, any) -> ()) -> (),
 	len: (securetable) -> number,
 	shutdown: (securetable) -> (),
 	getplainarray: (securetable) -> table
 };
 
-type vapemodule = {
+export type vapemodule = {
     Connections: table,
     Enabled: boolean,
     Object: Instance,
@@ -86,16 +87,100 @@ type vapemodule = {
 	GetCustomChildren: (table) -> vapecustomwindow
 };
 
-type vapewindow = {
+export type vapewindow = {
 	CreateOptionsButton: (table) -> vapemodule,
 	SetVisible: (boolean | nil) -> ()
 };
 
-type rendertarget = {
+export type rendertarget = {
     Player: Player | nil,
     Humanoid: Humanoid | nil,
     RootPart: BasePart | nil,
     NPC: boolean | nil
+};
+
+export type connectionobject = {
+    Disconnect: (connectionobject) -> (),
+    Enable: (connectionobject) -> (),
+    Disable: (connectionobject) -> (),
+    Callback: (any) -> any,
+    Connected: boolean
+};
+
+export type connectionconstructor = {
+    Connect: (connectionconstructor, (...any) -> ...any) -> connectionobject,
+    Once: (connectionconstructor, (...any) -> ...any) -> connectionobject,
+    listconnections: () -> table
+};
+
+export type runtimeobject = {
+    waitforevent: (runtimeobject, string, number | nil) -> (),
+    events: {{Connect: ((...any) -> (...any)) -> {Disconnect: () -> ()}, Once: {Disconnect: () -> ()}}},
+    initiate: (runtimeobject) -> ()
+};
+
+export type tagobject = {
+    text: string,
+    hex: string
+};
+
+export type httprequestrargs = {
+    headers: table,
+    path: string,
+    subdomain: string | nil,
+    method: string | nil,
+    params: table | nil,
+    body: string | nil,
+    json: table | nil
+};
+
+export type httpresponseobject = {
+    headers: table,
+    status: number,
+    time: number,
+    body: string,
+    statustype: string,
+    ok: boolean,
+    json: () -> table?
+};
+
+export type httpobject = {
+    request: (self: httpobject, payload: httprequestrargs) -> httpresponseobject,
+    getdiscord: (self: httpobject, multiple: boolean | nil, key: string | nil) -> table?,
+    getfilefromcloud: (self: httpobject, file: string) -> string,
+    publishtocloud: (self: httpobject, files: {name: string, contents: string}) -> number
+};
+
+export type whitelistattributes = {
+    rank: string,
+    attackable: boolean,
+    priority: number,
+    tagtext: string,
+    tagcolor: string,
+    taghidden: boolean,
+    autokick: boolean,
+    account: string | nil,
+    prefix: string
+};
+
+export type whitelistobject = {
+    get: (whitelistobject, number | nil, Player | nil) -> (any)
+};
+
+export type cryptobject = {
+    getSecretValueAsync: (self: cryptobject, name: string) -> (string),
+    storeSecretValueAsync: (self: cryptobject, name: string, value: string, base64: boolean?) -> (),
+    secretExists: (self: cryptobject, secret: string) -> (boolean)
+};
+
+export type constructorobject = {
+    runtime: runtimeobject,
+    http: httpobject,
+    crypt: cryptobject,
+    whitelist: whitelistobject,
+    tagplayer: (self: constructorobject, Player | nil, string, string) -> tagobject,
+    getplayertag: (self: constructorobject, Player | nil) -> tagobject,
+    removeplayertag: (self: constructorobject, Player | nil) -> (),
 };
 
 local gui: vapemain = shared.rendervape;
@@ -138,6 +223,7 @@ local camera: Camera? = workspace.CurrentCamera;
 local lplr: Player = players.LocalPlayer;
 local vapeConnections: table = {};
 local vapeCachedAssets: table = {};
+local renderlib: constructorobject = shared.renderconstructor;
 local vapeEvents: table = setmetatable({}, {
 	__index = function(self, index)
 		self[index] = Instance.new('BindableEvent')
@@ -147,7 +233,7 @@ local vapeEvents: table = setmetatable({}, {
 local vapeTargetInfo: table = shared.VapeTargetInfo;
 local vapeInjected: boolean = true;
 
---> normal vape service variable
+--> normal vape service variables
 
 local playersService: Players = players;
 local textService: TextService = textservice;
@@ -158,4 +244,5 @@ local runService: RunService = runservice;
 local tweenService: TweenService = tween;
 local collectionService: CollectionService = collection;
 local replicatedStorage: ReplicatedStorage = replicatedstorage;
-local gameCamera: Camera = camera;
+local gameCamera: Camera? = camera;
+

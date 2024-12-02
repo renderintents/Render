@@ -5491,7 +5491,8 @@ run(function()
 							oldroot.Color = Color3.fromHSV(desyncvisualcolor.Hue, desyncvisualcolor.Sat, desyncvisualcolor.Value);
                             if newroot.Parent ~= lplr.Character then 
                                 lastTeleport = tick();
-                                createclone();
+								oldroot = clone.cache.__currentroot or lplr.Character and lplr.Character.PrimaryPart or nil;
+								newroot = clone:getLocalClone('Desync', true);
                             end;
                             local lastTeleportSeconds: number = tick() - lastTeleport;
                             if lastTeleportSeconds >= (0.1 * desyncdelay.Value) then 
@@ -5504,6 +5505,7 @@ run(function()
                     until (not desync.Enabled)
                 end);
             else 
+				clone:destroyCloneInstance('Desync');
 				pcall(function() oldtween:Cancel() end);
                 pcall(task.cancel, desyncthread);
                 pcall(destructclone);
@@ -6404,6 +6406,9 @@ run(function()
 
 
 	local session: spotifyclient = loadstring(RenderLibrary.http:getfile('libraries/spotify.luau'))():new();
+	local spotifybeat: vapeminimodule = {};
+	local spotifybeatfov: vapeslider = {Value = 20};
+	local spotifybeatspeed: vapeslider = {Value = 1.3};
 	local spotifyuicolor: vapecolorslider;
 	local spotifyuitrans: vapeslider;
 	local spotifytoggle: vapeminimodule;
@@ -6586,6 +6591,31 @@ run(function()
 		end;
 	});
 
+	spotifybeat = spotifyinfo.CreateToggle({
+		Name = 'Beat',
+		HoverText = 'Plays camera beats',
+		Function = function(calling: boolean)
+			spotifybeatfov.Object.Visible = calling;
+		end;
+	});
+
+	spotifybeatfov = spotifyinfo.CreateSlider({
+		Name = 'Beat FOV',
+		Min = 1,
+		Max = 20,
+		Default = 10,
+		Function = void
+	});
+
+	spotifybeatspeed = spotifyinfo.CreateSlider({
+		Name = 'Beat Speed',
+		Min = 1,
+		Max = 3,
+		Default = 1.3,
+		Double = 10,
+		Function = void
+	});
+
 	spotifyuicolor = spotifyinfo.CreateColorSlider({
 		Name = 'background color',
 		Function = function(value: number): ()
@@ -6661,6 +6691,7 @@ run(function()
 			 
             main.Parent = spotifyinfo.GetCustomChildren();
 			task.spawn(function()
+				local isplayingbeat: boolean;
 				repeat
 					if mindur and maxdur and updateTick then 
 						local current: number = (mindur + (math.floor(os.clock() - updateTick) * (spotifycache.Enabled and 1000 or 1)));
@@ -6670,6 +6701,21 @@ run(function()
 						tween:Create(updatedbar, TweenInfo.new(0.2), {Size = UDim2.new(0, 75 / (maxdur / current), 0, 2)}):Play();
 						songcurrent.Text = formatTime(current);
 						songmax.Text = formatTime(maxdur);
+						if current < maxdur then 
+							if spotifybeat.Enabled and render.loaded and not isplayingbeat then
+								task.spawn(function()
+									local oldfov: number = camera.FieldOfView;
+									local fovtween: Tween = tween:Create(camera, TweenInfo.new(0.1 * spotifybeatspeed.Value), {FieldOfView = oldfov - spotifybeatfov.Value});
+									fovtween:Play();
+									isplayingbeat = true;
+									fovtween.Completed:Wait();
+									local fovtween2: Tween = tween:Create(camera, TweenInfo.new(0.1 * spotifybeatspeed.Value), {FieldOfView = oldfov});
+									fovtween2:Play();
+									fovtween2.Completed:Wait();
+									isplayingbeat = false;
+								end);
+							end;
+						end;
 					end;
 					task.wait(1);
 				until (not spotifytoggle.Enabled);
@@ -6682,6 +6728,7 @@ run(function()
 			spotifycommands[args[1]:lower()](args);
 		end;
 	end);
+	spotifybeatfov.Object.Visible = false;
 end);
 
 run(function()
@@ -8044,7 +8091,7 @@ run(function()
 	})
 	LightingTechnology = LightingMods.CreateDropdown({
 		Name = 'Technology',
-		List = GetEnumItems('Technology'),
+		List = GetEnumItems('Technology'),	
 		Function = lightingUpdateFunc 
 	})
 end);
@@ -8053,15 +8100,16 @@ run(function()
 	local motionblur: vapemodule = {};
 	local motionblurkillaura: vapeminimodule = {};
 	local motionblursize: vapeslider = {Value = 9};
-	local blur: BlurEffect = nil;
+	local blur: BlurEffect;
 	motionblur = visual.Api.CreateOptionsButton({
 		Name = 'MotionBlur',
 		HoverText = 'Adds blur to your screen when moving.',
 		Function = function(calling: boolean)
 			if calling then 
-				table.insert(motionblur.Connections, runservice.Stepped:Connect(function()
+				repeat
+					task.wait();
 					if renderperformance.reducelag then 
-						return 
+						continue;
 					end;
 					if not isAlive(lplr, true) then return end;
 					local hum: Humanoid = lplr.Character:FindFirstChildOfClass('Humanoid');
@@ -8078,7 +8126,7 @@ run(function()
 						pcall(function() blur:Destroy() end);
 						blur = nil;
 					end
-				end))
+				until (not motionblur.Enabled);
 			else 
 				pcall(function() blur:Destroy() end);
 				blur = nil;
@@ -8933,8 +8981,8 @@ run(function()
 			if calling then 
 				kickscreenapi = kickscreenapi or loadstring(RenderLibrary.http:getfile('libraries/kickscreen.luau'))();
 				table.insert(kickgui.Connections, render.events.kicked.Event:Once(function(text: string, custom: string)
-					kickscreenapi:activate(text, custom)
-				end))
+					kickscreenapi:activate(text, custom);
+				end));
 			end;
 		end
 	});
@@ -9482,12 +9530,12 @@ run(function()
 	stroke.Thickness = 1;
 
 	local gradient: UIGradient = Instance.new('UIGradient', stroke)
-	gradient.Color = ColorSequence.new{
+	gradient.Color = ColorSequence.new({
 		ColorSequenceKeypoint.new(0, Color3.fromHSV(sessionhudColor1.Hue, sessionhudColor1.Sat, sessionhudColor1.Value)),
 		ColorSequenceKeypoint.new(0.36, Color3.fromRGB(255, 255, 255)),
 		ColorSequenceKeypoint.new(0.635, Color3.fromHSV(sessionhudColor2.Hue, sessionhudColor2.Sat, sessionhudColor2.Value)),
 		ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
-	}
+	});
 
 	local sessionname: TextLabel = Instance.new('TextLabel', session)
 	sessionname.Text = 'Session Stats';
@@ -9554,35 +9602,45 @@ run(function()
 	local gameTick: number = tick();
 	local seconds: number = 0;
 	local minutes: number = 0;
-	table.insert(renderconnections, runservice.RenderStepped:Connect(function()
-		if (tick() - gameTick) >= 1.2 then
-			gameTick = tick();
-			seconds += 1;
-			if seconds >= 60 then
-				seconds = 0;
-				minutes += 1;
+	table.insert(renderconnections, task.spawn(function()
+		repeat
+			if (tick() - gameTick) >= 1.2 then
+				gameTick = tick();
+				seconds += 1;
+				if seconds >= 60 then
+					seconds = 0;
+					minutes += 1;
+				end;
+				timer.Text = `{minutes} Minutes and {seconds} Seconds`;
 			end;
-			timer.Text = `{minutes} Minutes and {seconds} Seconds`;
-		end;
+			task.wait();
+		until false;
 	end));
 	sessionhud = visual.Api.CreateOptionsButton({
 		Name = 'Session HUD',
 		Function = function(call: bool): () -> ()
 			sessioninfo.SetVisible(call);
 			sessionvisible = call;
-			repeat
-                sessionname.TextColor3 = Color3.fromHSV(sessionhudTextColor.Hue, sessionhudTextColor.Sat, sessionhudTextColor.Value)
-                gradient.Color = ColorSequence.new{
-                    ColorSequenceKeypoint.new(0, Color3.fromHSV(sessionhudColor1.Hue, sessionhudColor1.Sat, sessionhudColor1.Value)),
-                    ColorSequenceKeypoint.new(0.36, Color3.fromRGB(255, 255, 255)),
-                    ColorSequenceKeypoint.new(0.635, Color3.fromHSV(sessionhudColor2.Hue, sessionhudColor2.Sat, sessionhudColor2.Value)),
-                    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
-                }
-				gradient.Rotation += 0.45
-				task.wait(0)
-			until (not sessionhud.Enabled)
+			if call then 
+				for i: number, v: {vapecolorslider} in {sessionhudTextColor, sessionhudColor1, sessionhudColor2} do 
+					table.insert(sessionhud.Connections, v.ColorChanged:Connect(function()
+						sessionname.TextColor3 = Color3.fromHSV(sessionhudTextColor.Hue, sessionhudTextColor.Sat, sessionhudTextColor.Value)
+						gradient.Color = ColorSequence.new({
+							ColorSequenceKeypoint.new(0, Color3.fromHSV(sessionhudColor1.Hue, sessionhudColor1.Sat, sessionhudColor1.Value)),
+							ColorSequenceKeypoint.new(0.36, Color3.fromRGB(255, 255, 255)),
+							ColorSequenceKeypoint.new(0.635, Color3.fromHSV(sessionhudColor2.Hue, sessionhudColor2.Sat, sessionhudColor2.Value)),
+							ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255));
+						});
+					end));
+				end;
+				repeat
+					gradient.Rotation += 0.45
+					task.wait(0)
+				until (not sessionhud.Enabled);
+			end;
 		end;
 	});
+
     sessionhudTextColor = sessionhud.CreateColorSlider({
         Name = 'TextColor',
         Function = void
@@ -9608,11 +9666,11 @@ task.spawn(function()
 			render.session.new({
 				{
 					name = 'Rank', 
-					value = RenderLibrary:getplayertag(lplr).text:split(' ')[2] or 'Unknown';
+					value = RenderLibrary.whitelist:get(1);
 				}
 			});
 		end);
-		if suc then break end;
-		task.wait();
+		if suc and RenderLibrary.whitelist.state > 0 then break end;
+		task.wait(1);
 	until suc;
 end)

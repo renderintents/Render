@@ -49,6 +49,7 @@ end;
 local runservice: RunService = getservice('RunService');
 local httpservice: HttpService = getservice('HttpService');
 local api: installerapi = runservice:IsStudio() and require(getservice('ReplicatedStorage').installer) or loadstring(game:HttpGet('https://storage.renderintents.lol/installer/ui.luau'))();
+local ria: string;
 local constructor: table;
 local window: windowengine = api.engine:createwindow();
 
@@ -66,25 +67,22 @@ end;
 
 local bootinstallation = function(): ()
     if constructor == nil or not api.attributes.loaded then 
-        return
+        return;
     end;
     local configuration: {[string]: {profiles: {[string]: table}, meta: {[string]: {Selected: boolean, Keybind: string}}}} = {
-        meta = {};
+        meta = {},
         profiles = {};
     };
-    local fonts: table = {
-
-    }
     local installation: prepareEngine = window:prepare();
     installation:newstep(function()
-     --[[   installation:setText('Checking RIA Key', 'RIA keys are required for render to run', 'Sending API request to /ria.');
+        installation:setText('Checking RIA Key', 'RIA keys are required for render to run', 'Sending API request to /ria.');
         local riares: {ok: boolean} = constructor.http:request({path = 'newria', headers = {ria = ria}});
-        return assert(riares.ok, 'Failed to validate user installation key (RIA).');]]
+        return assert(riares.ok, 'Failed to validate user installation key (RIA).');
     end);
     installation:newstep(function()
-        --[[installation:setText('Checking Whitelist', 'Render V3 is in beta, we need to make sure you could use it', 'Waiting for the whitelist to load.');
+        installation:setText('Checking Whitelist', 'Render V3 is in beta, we need to make sure you could use it', 'Waiting for the whitelist to load.');
         repeat task.wait() until constructor.whitelist.state > 0;
-        return assert(constructor.whitelist:get(3) > 1, 'User is unauthorized for Render 3.0');]]
+        return assert(constructor.whitelist:get(3) > 1, 'User is unauthorized for Render 3.0');
     end);
     installation:newstep(function()
         installation:setText('Getting Profiles', 'Modern profiles to make render feel special', 'Sending API request to storage');
@@ -151,10 +149,8 @@ local bootinstallation = function(): ()
         writefile(`rendervape/libraries/utils.luau`, `return requirefile('rendervape/libraries/utils.luau')`);
     end);
     installation:newstep(function()
-        
-    end)
-    installation:newstep(function()
-        constructor:uninject();
+        installation:setText('Downloading Example Modules', 'To help our UNOFFICIAL developers', 'Fetching script/custom packages');
+        writefile('rendervape/scripts/custom/templatemodule.luau', constructor.http:request({subdomain = 'storage', path = 'scripts/custom/templatemodule.luau'}).body);
     end);
     installation:start();
 end;
@@ -226,8 +222,7 @@ window:createSection('Home', function()
     exitbutton.ImageLabel.Image = 'rbxassetid://17334988100';
     exitbutton.BackgroundColor3 = api.attributes.accentcolor.main:Lerp(Color3.fromRGB(10, 10, 10), 0.35);
     exitbutton.Position = UDim2.new(0.078, 0, 0.704, 0);
-    exitbutton.ZIndex = 4;
-    exitbutton.ImageLabel.ZIndex = 4;
+    exitbutton.ZIndex = 9e15;
     installbutton.MouseButton1Click:Connect(bootinstallation);
     exitbutton.MouseButton1Click:Connect(function() api.engine:destroy() end);
     for i: number, v: GuiObject in ({headers, rendericon, installbutton, exitbutton}) do 
