@@ -2659,11 +2659,10 @@ run(function()
 		Name = "Phase",
 		Function = function(callback)
 			if callback then
-				RunLoops:BindToStepped("Phase", function() -- has to be ran on stepped idk why
-					if entityLibrary.isAlive then
-						PhaseFunctions[PhaseMode.Value]()
-					end
-				end)
+				repeat
+					PhaseFunctions[PhaseMode.Value]()
+					task.wait(0);
+				until not Phase.Enabled
 			else
 				RunLoops:UnbindFromStepped("Phase")
 				for i,v in (PhaseModifiedParts) do if i then i.CanCollide = true end end
@@ -3013,12 +3012,13 @@ run(function()
 		Name = "SpinBot",
 		Function = function(callback)
 			if callback then
-				RunLoops:BindToHeartbeat("SpinBot", function()
+				repeat
 					if entityLibrary.isAlive then
 						local originalRotVelocity = entityLibrary.character.HumanoidRootPart.RotVelocity
 						entityLibrary.character.HumanoidRootPart.RotVelocity = Vector3.new(SpinBotX.Enabled and SpinBotSpeed.Value or originalRotVelocity.X, SpinBotY.Enabled and SpinBotSpeed.Value or originalRotVelocity.Y, SpinBotZ.Enabled and SpinBotSpeed.Value or originalRotVelocity.Z)
 					end
-				end)
+					task.wait()
+				until not SpinBot.Enabled
 			else
 				RunLoops:UnbindFromHeartbeat("SpinBot")
 			end
@@ -3154,8 +3154,11 @@ run(function()
 				table.insert(Arrows.Connections, rendervape.ObjectsThatCanBeSaved.FriendsListTextCircleList.Api.FriendColorRefresh.Event:Connect(function()
                     arrowColorFunction(ESPColor.Hue, ESPColor.Sat, ESPColor.Value)
                 end))
-				RunLoops:BindToRenderStep("Arrows", arrowLoopFunction)
-            else
+				repeat
+					arrowLoopFunction();
+					task.wait()
+				until (not Arrows.Enabled)
+    else
                 RunLoops:UnbindFromRenderStep("Arrows")
 				for i,v in (ArrowsFolderTable) do
                     arrowRemoveFunction(i)
@@ -3840,7 +3843,10 @@ run(function()
 					end))
 				end
 				if esploop[methodused] then
-					RunLoops:BindToRenderStep("ESP", esploop[methodused])
+					repeat
+						esploop[methodused]()
+						task.wait()
+					until not ESP.Enabled
 				end
 			else
 				RunLoops:UnbindFromRenderStep("ESP")
@@ -4800,34 +4806,49 @@ run(function()
 		Name = "ChinaHat",
 		Function = function(callback)
 			if callback then
-				RunLoops:BindToHeartbeat("ChinaHat", function()
-					if entityLibrary.isAlive then
-						if chinahattrail == nil or chinahattrail.Parent == nil then
-							chinahattrail = Instance.new("Part")
-							chinahattrail.CFrame = entityLibrary.character.Head.CFrame * CFrame.new(0, 1.1, 0)
-							chinahattrail.Size = Vector3.new(3, 0.7, 3)
-							chinahattrail.Name = "ChinaHat"
-							chinahattrail.Material = Enum.Material.Neon
-							chinahattrail.Color = Color3.fromHSV(ChinaHatColor.Hue, ChinaHatColor.Sat, ChinaHatColor.Value)
-							chinahattrail.CanCollide = false
-							chinahattrail.Transparency = 0.3
-							local chinahatmesh = Instance.new("SpecialMesh")
-							chinahatmesh.Parent = chinahattrail
-							chinahatmesh.MeshType = "FileMesh"
-							chinahatmesh.MeshId = "http://www.roblox.com/asset/?id=1778999"
-							chinahatmesh.Scale = Vector3.new(3, 0.6, 3)
-							chinahattrail.Parent = workspace.Camera
-						end
+				chinahattrail = Instance.new("Part")
+				chinahattrail.CFrame = entityLibrary.character.Head.CFrame * CFrame.new(0, 1.1, 0)
+				chinahattrail.Size = Vector3.new(3, 0.7, 3)
+				chinahattrail.Name = "ChinaHat"
+				chinahattrail.Material = Enum.Material.Neon
+				chinahattrail.Color = Color3.fromHSV(ChinaHatColor.Hue, ChinaHatColor.Sat, ChinaHatColor.Value)
+				chinahattrail.CanCollide = false
+				chinahattrail.Anchored = true
+				chinahattrail.Transparency = 0.3
+				local chinahatmesh = Instance.new("SpecialMesh")
+				chinahatmesh.Parent = chinahattrail
+				chinahatmesh.MeshType = "FileMesh"
+				chinahatmesh.MeshId = "http://www.roblox.com/asset/?id=1778999"
+				chinahatmesh.Scale = Vector3.new(3, 0.6, 3)
+				chinahattrail.Parent = workspace.Camera
+				table.insert(ChinaHat.Connections, lplr.CharacterAdded:Connect(function()
+					chinahattrail:Remove()
+					chinahattrail = nils
+					chinahattrail = Instance.new("Part")
+					chinahattrail.CFrame = entityLibrary.character.Head.CFrame * CFrame.new(0, 1.1, 0)
+					chinahattrail.Size = Vector3.new(3, 0.7, 3)
+					chinahattrail.Name = "ChinaHat"
+					chinahattrail.Anchored = true;
+					chinahattrail.Material = Enum.Material.Neon
+					chinahattrail.Color = Color3.fromHSV(ChinaHatColor.Hue, ChinaHatColor.Sat, ChinaHatColor.Value)
+					chinahattrail.CanCollide = false
+					chinahattrail.Transparency = 0.3
+					local chinahatmesh = Instance.new("SpecialMesh")
+					chinahatmesh.Parent = chinahattrail
+					chinahatmesh.MeshType = "FileMesh"
+					chinahatmesh.MeshId = "http://www.roblox.com/asset/?id=1778999"
+					chinahatmesh.Scale = Vector3.new(3, 0.6, 3)
+					chinahattrail.Parent = workspace.Camera
+				end))
+				repeat
+					task.wait()
+					if not isAlive() then continue end
+					if (lplr.Character.Humanoid.MoveDirection ~= Vector3.zero or lplr.Character.Humanoid:GetState() == Enum.HumanoidStateType.Freefall) and chinahattrail then
 						chinahattrail.CFrame = entityLibrary.character.Head.CFrame * CFrame.new(0, 1.1, 0)
 						chinahattrail.Velocity = Vector3.zero
 						chinahattrail.LocalTransparencyModifier = ((camera.CFrame.Position - camera.Focus.Position).Magnitude <= 0.6 and 1 or 0)
-					else
-						if chinahattrail then
-							chinahattrail:Destroy()
-							chinahattrail = nil
-						end
-					end
-				end)
+					end;
+				until not ChinaHat.Enabled
 			else
 				RunLoops:UnbindFromHeartbeat("ChinaHat")
 				if chinahattrail then
@@ -5440,44 +5461,6 @@ run(function()
     local oldroot: BasePart = {};
 	local oldtween: Tween;
     local desyncthread;
-    local createclone = function()
-		repeat task.wait() until isAlive(lplr, true) or desync.Enabled == false;
-		task.wait(0.1);
-		if not desync.Enabled then return end;
-		lplr.Character.Parent = game;
-		oldroot = lplr.Character.PrimaryPart; 
-		newroot = oldroot:Clone();
-		newroot.Parent = lplr.Character;
-		lplr.Character.PrimaryPart = newroot;
-		oldroot.Parent = workspace;
-		lplr.Character.Parent = workspace;
-		oldroot.Transparency = 1;
-		entityLibrary.character.HumanoidRootPart = newroot;
-		render.clone = setmetatable({
-			old = oldroot,
-			new = newroot
-		}, {
-			__index = function(self: table, index: string)
-				local root: BasePart | nil = rawget(self, index);
-				if root and root.Parent ~= nil then 
-					return root;
-				end;
-			end
-		});
-	end;
-	local destructclone = function()
-		lplr.Character.Parent = game;
-		oldroot.Transparency = 1;
-		oldroot.Parent = lplr.Character;
-        lplr.Character.PrimaryPart = oldroot;
-		newroot.Parent = workspace;
-		lplr.Character.Parent = workspace;
-		entityLibrary.character.HumanoidRootPart = oldroot;
-		newroot:Destroy();
-		newroot = {}; 
-		oldroot = {};
-		render.clone = {}
-	end;
     desync = blatant.Api.CreateOptionsButton({
         Name = 'Desync',
         HoverText = 'Delays serverside movement.',
@@ -5509,7 +5492,6 @@ run(function()
 				clone:destroyCloneInstance('Desync');
 				pcall(function() oldtween:Cancel() end);
                 pcall(task.cancel, desyncthread);
-                pcall(destructclone);
             end
         end
     });
@@ -8121,7 +8103,7 @@ run(function()
 					if hum.MoveDirection ~= Vector3.zero then 
 						if blur == nil and (vapeTargetInfo.Targets.Killaura or not motionblurkillaura.Enabled) then
 							blur = Instance.new('BlurEffect', lighting);
-							blur.Size = motionblursize.Value;
+			blur.Size = motionblursize.Value;
 						end;
 					else
 						pcall(function() blur:Destroy() end);
