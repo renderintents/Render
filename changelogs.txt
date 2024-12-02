@@ -1,1 +1,1 @@
-[=] Fixed antihit not working with premium version
+[=] Fixed instakill for premium users
