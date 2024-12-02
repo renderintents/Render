@@ -130,6 +130,7 @@ local vapeEvents = setmetatable({}, {
 local vapeTargetInfo = shared.VapeTargetInfo;
 local vapeInjected = true;
 
+local RenderLibrary: table = shared.renderconstructor;
 local render = getgenv().render;
 local renderperformance = shared.renderperformance;
 local bedwars = {};

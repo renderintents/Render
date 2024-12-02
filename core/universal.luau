@@ -173,6 +173,7 @@ local lplr = setmetatable({}, {
 	end
 });
 
+local RenderLibrary: table = shared.renderconstructor;
 local vapeConnections = {};
 local vapeCachedAssets = {}
 local vapeTargetInfo = shared.VapeTargetInfo;

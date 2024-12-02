@@ -184,6 +184,7 @@ for i,v in pairs({baseDirectory:gsub("/", ""), "vape", "rendervape/libraries", "
 	if not isfolder(v) then makefolder(v) end
 end
 
+local RenderLibrary: table = shared.renderconstructor;
 getgenv().rendervapeload = {file = 'GuiLibrary.luau', step = 2};
 GuiLibrary = loadfile('rendervape/core/gui.luau')();
 rendervape = GuiLibrary
