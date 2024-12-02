@@ -1623,7 +1623,7 @@ GuiLibrary.UpdateUI = function(h, s, val, bypass)
 		end
 		VapeText.Text = newTextGUIText
 
-		if (not GuiLibrary.MainGui.ScaledGui.ClickGui.Visible) and (not GuiLibrary.MainGui.ScaledGui.LegitGui.Visible) and (not bypass) then return end
+		if not GuiLibrary.MainGui.ScaledGui.ClickGui.Visible then return end
 		GuiLibrary.MainGui.ScaledGui.ClickGui.SearchBar.LegitMode.ImageColor3 = Color3.fromHSV(h, mainRainbowSaturation, rainbowGUICheck and 1 or val)
 		local buttonColorIndex = 0
 		for i, v in pairs(GuiLibrary.ObjectsThatCanBeSaved) do
@@ -1697,6 +1697,12 @@ GuiLibrary.UpdateUI = function(h, s, val, bypass)
 		end
 	end)
 end
+
+GuiLibrary.MainGui.ScaledGui.ClickGui:GetPropertyChangedSignal('Visible'):Connect(function()
+	if GuiLibrary.MainGui.ScaledGui.ClickGui.Visible then
+		GuiLibrary.UpdateUI(GUIColorSlider.Hue, GUIColorSlider.Sat, GUIColorSlider.Value)	
+	end;
+end);
 
 GUISettings.CreateToggle({
 	Name = "Blur Background", 
