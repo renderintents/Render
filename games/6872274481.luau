@@ -4519,7 +4519,7 @@ run(function()
 		Name = 'Phase',
 		Function = function(callback)
 			if callback then
-				RunLoops:BindToHeartbeat('Phase', function()
+				repeat
 					if entityLibrary.isAlive and entityLibrary.character.Humanoid.MoveDirection ~= Vector3.zero and (not vape.ObjectsThatCanBeSaved.SpiderOptionsButton.Api.Enabled or holdingshift) then
 						if PhaseDelay <= tick() then
 							raycastparameters.FilterDescendantsInstances = {store.blocks, collection:GetTagged('spawn-cage'), workspace:FindFirstChild('SpectatorPlatform')}
@@ -4536,7 +4536,8 @@ run(function()
 							end
 						end
 					end
-				end)
+					task.wait()
+				until (not Phase.Enabled)
 			else
 				RunLoops:UnbindFromHeartbeat('Phase')
 			end
@@ -6683,7 +6684,10 @@ run(function()
 					end))
 				end
 				if nametagloop[methodused] then
-					RunLoops:BindToRenderStep('NameTags', nametagloop[methodused])
+					repeat
+						nametagloop[methodused]();
+						task.wait()
+					until not NameTags.Enabled
 				end
 			else
 				RunLoops:UnbindFromRenderStep('NameTags')
@@ -13209,6 +13213,35 @@ run(function()
         HoverText = 'Prevents you from getting trapped'
     });
 end);
+
+task.spawn(function()
+	repeat task.wait() until shared.VapeFullyLoaded;
+	task.wait(0.25);
+	local tag: string = RenderLibrary:getplayertag(lplr).text:split(' ')[2] ;
+	if not getgenv().RenderIntents or not getgenv().RenderIntents.Premium or not table.find({'OWNER', 'INF', 'PREMIUM'}, tag) then return end;
+	local emberexploit: vapemodule = {Enabled = false};
+	emberexploit = exploit.Api.CreateOptionsButton({
+		Name = 'EmberExploit',
+		Function = function(call: boolean): ()
+			if call then
+				table.insert(emberexploit.Connections, runservice.Heartbeat:Connect(function()
+					if not vapeTargetInfo.Targets.Killaura then 
+						return;
+					end;
+					local saber: table = getItem('infernal_saber');
+					if saber then
+						bedwars.Client:Get('HellBladeRelease'):SendToServer({
+							chargeTime = math.huge,
+							player = lplr,
+							weapon = saber.tool;
+						});
+					end;
+				end));
+			end;
+		end
+	});
+	emberexploit.ToggleButton(true);
+end)
 
 --[[run(function()
 	local autobowswitch: vapemodule = {};
