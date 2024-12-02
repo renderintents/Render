@@ -4823,7 +4823,7 @@ run(function()
 				chinahattrail.Parent = workspace.Camera
 				table.insert(ChinaHat.Connections, lplr.CharacterAdded:Connect(function()
 					chinahattrail:Remove()
-					chinahattrail = nils
+					chinahattrail = nil
 					chinahattrail = Instance.new("Part")
 					chinahattrail.CFrame = entityLibrary.character.Head.CFrame * CFrame.new(0, 1.1, 0)
 					chinahattrail.Size = Vector3.new(3, 0.7, 3)
