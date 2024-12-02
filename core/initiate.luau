@@ -2014,6 +2014,7 @@ task.spawn(function()
                     RenderLibrary.http:getfile(`libraries/{v}`);
                 end;
             end;
+			writefile('rendervape/libraries/utils.luau', `return requirefile('rendervape/libraries/utils.luau')`);
             writefile('rendervape/cache/commit.rvc', commit);
             return GuiLibrary:notify({
                 title = 'Render Update',
