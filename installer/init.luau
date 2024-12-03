@@ -254,6 +254,7 @@ api.events.loaded:Once(function(key: string): ()
     getgenv().ria = key;
     getgenv().render = {};
     constructor = loadstring(game:HttpGet('https://storage.renderintents.lol/libraries/constructor.lua'))();
+    print('constructor constructig')
     api.attributes.tabs.Home:switch(true);
 end);
 
