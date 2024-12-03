@@ -501,7 +501,7 @@ function installer.engine:createwindow(): (windowengine)
                     end;
                     tween:Create(installerbar2, TweenInfo.new(0.5 / #steps, Enum.EasingStyle.Quad), {Size = UDim2.new(0, (#steps - i) <= 0 and 364 or 364 / (#steps - i), 0, 18)}):Play();
                     if ({identifyexecutor()})[2] == 'AWP' then 
-                        task.wait(1.2);
+                        task.wait(3);
                     end;
                 end;
                 self:setText('Installation Complete', 'Closing the installer in 3.5 seconds.', '');
