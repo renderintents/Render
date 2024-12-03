@@ -500,7 +500,7 @@ function installer.engine:createwindow(): (windowengine)
                         return installer.engine:destroy();
                     end;
                     tween:Create(installerbar2, TweenInfo.new(0.5 / #steps, Enum.EasingStyle.Quad), {Size = UDim2.new(0, (#steps - i) <= 0 and 364 or 364 / (#steps - i), 0, 18)}):Play();
-                    if ({identifyexecutor()}) == 'AWP' then 
+                    if ({identifyexecutor()})[2] == 'AWP' then 
                         task.wait(1.2);
                     end;
                 end;
