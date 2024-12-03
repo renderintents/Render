@@ -1,1 +1,1 @@
-[=] Fixed Installer (untested)
+[+] Added WAY more rise themes (credits to seven (@sevenv1))
