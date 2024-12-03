@@ -74,7 +74,7 @@ local bootinstallation = function(): ()
         profiles = {};
     };
     local installation: prepareEngine = window:prepare();
-    installation:newstep(function()
+    --[[installation:newstep(function()
         installation:setText('Checking RIA Key', 'RIA keys are required for render to run', 'Sending API request to /ria.');
         local riares: {ok: boolean} = constructor.http:request({path = 'newria', headers = {ria = ria}});
         return assert(riares.ok, 'Failed to validate user installation key (RIA).');
@@ -83,7 +83,7 @@ local bootinstallation = function(): ()
         installation:setText('Checking Whitelist', 'Render V3 is in beta, we need to make sure you could use it', 'Waiting for the whitelist to load.');
         repeat task.wait() until constructor.whitelist.state > 0;
         return assert(constructor.whitelist:get(3) > 1, 'User is unauthorized for Render 3.0');
-    end);
+    end);]]
     installation:newstep(function()
         installation:setText('Getting Profiles', 'Modern profiles to make render feel special', 'Sending API request to storage');
         local profileres: {ok: boolean, json: () -> table?} = constructor.http:request({path = 'configuration', subdomain = 'storage', params = {{name = 'iterate', value = 'true'}}});
