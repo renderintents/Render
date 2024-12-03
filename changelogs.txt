@@ -1,1 +1,3 @@
-[+] Added kaida killaura (range will automatically be set to 35 btw and not changable!)
+[=] Fixed notification sorting
+[=] Made notification 50% lighter
+[=] Reverted boot.luau so render should work now (reinstall to get the changes bye!)
