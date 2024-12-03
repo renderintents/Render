@@ -7338,10 +7338,17 @@ if shared.VapeExecuted then
 			frame:Remove()
 		end)
 	end
-
+	
+	local queue: number = 0
 	notificationwindow.ChildRemoved:Connect(function()
+		local currentqueue: number = queue + 1;
+		queue += 1;
+		if queue > 0 then
+			repeat task.wait() until queue >= currentqueue
+		end;
+		print('fr')
 		for i,v in pairs(notificationwindow:GetChildren()) do
-			bettertween(v, UDim2.new(1, v.Position.X.Offset, 1, -(150 + 80 * (i - 1))), Enum.EasingDirection.In, Enum.EasingStyle.Sine, 0.15, true)
+			bettertween(v, UDim2.new(1, v.Position.X.Offset, 1, -(150 + 80 * (i - 1))), Enum.EasingDirection.In, Enum.EasingStyle.Quad, 0.18, true)
 		end
 	end)
 
@@ -7350,7 +7357,11 @@ if shared.VapeExecuted then
         return (str:gsub("<[^<>]->", ""))
     end
 
+	local notificationcreating: boolean = false
+	local notifyqueues = 0
 	lib["CreateNotification"] = function(top, bottom, duration, customicon)
+		task.wait(0.02 * notifyqueues);
+		notifyqueues += 1
 		if syn_toast_notification and RenderIntents and (RenderIntents.Toast or type(RenderIntents.Toast) == 'boolean' and RenderIntents.Toast) then
 			return syn.toast_notification({
 				Title = top,
@@ -7369,6 +7380,9 @@ if shared.VapeExecuted then
 			frame.BorderSizePixel = 0
 			frame.Parent = notificationwindow
 			frame.Visible = lib["Notifications"]
+
+			notificationcreating = false;
+			
 			frame.ClipsDescendants = false
 			local image = Instance.new("ImageLabel")
 			image.SliceCenter = Rect.new(67, 59, 323, 120)
@@ -7377,6 +7391,7 @@ if shared.VapeExecuted then
 			image.Name = "Frame"
 			image.ScaleType = Enum.ScaleType.Slice
 			image.Image = downloadVapeAsset("rendervape/assets/NotificationBackground.png")
+			image.ImageTransparency = 0.23
 			image.Size = UDim2.new(1, 61, 0, 159)
 			image.Parent = frame
 			local uicorner = Instance.new("UICorner")
@@ -7396,12 +7411,14 @@ if shared.VapeExecuted then
 			frame2.ZIndex = 2
 			frame2.Image = downloadVapeAsset("rendervape/assets/NotificationBar.png")
 			frame2.BorderSizePixel = 0
+			frame2.ImageTransparency = 0.23
 			frame2.Parent = image
 			local icon = Instance.new("ImageLabel")
 			icon.Name = "IconLabel"
 			icon.Image = downloadVapeAsset(customicon and `rendervape/{customicon}` or 'rendervape/assets/InfoNotification.png')
 			icon.BackgroundTransparency = 1
 			icon.Position = UDim2.new(0, -6, 0, -6)
+			icon.ImageTransparency = 0.3;
 			icon.Size = UDim2.new(0, 60, 0, 60)
 			icon.Parent = frame
 			local icon2 = icon:Clone()
@@ -7414,7 +7431,7 @@ if shared.VapeExecuted then
 			textlabel1.Font = Enum.Font.Arial
 			textlabel1.TextSize = 14
 			textlabel1.RichText = true
-			textlabel1.TextTransparency = 0.1
+			textlabel1.TextTransparency = 0.33
 			textlabel1.TextColor3 = Color3.new(1, 1, 1)
 			textlabel1.BackgroundTransparency = 1
 			textlabel1.Position = UDim2.new(0, 46, 0, 17)
@@ -7425,22 +7442,24 @@ if shared.VapeExecuted then
 			local textlabel2 = textlabel1:Clone()
 			textlabel2.Position = UDim2.new(0, 46, 0, 44)
 			textlabel2.Font = Enum.Font.Arial
-			textlabel2.TextTransparency = 0
+			textlabel2.TextTransparency = 0.1
 			textlabel2.TextColor3 = Color3.fromRGB(170, 170, 170)
 			textlabel2.RichText = true
 			textlabel2.Text = bottom
 			textlabel2.Parent = frame
+			notifyqueues -= 1
 			task.spawn(function()
 				pcall(function()
 					frame:TweenPosition(UDim2.new(1.015, -(size - 4), 1, -(150 + 80 * offset)), Enum.EasingDirection.Out, Enum.EasingStyle.Sine, 0.13, false)
 					task.wait(0.11)
 					frame:TweenPosition(UDim2.new(1, -(size - 4), 1, -(150 + 80 * offset)), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.17, true)
-					frame2:TweenSize(UDim2.new(0, 0, 0, 2), Enum.EasingDirection.In, Enum.EasingStyle.Sine, duration / 1, true)
-					task.wait(duration / 1)
+					frame2:TweenSize(UDim2.new(0, 0, 0, 2), Enum.EasingDirection.In, Enum.EasingStyle.Sine, duration / 1.2, true)
+					task.wait(duration / 1.2)
 					frame:TweenPosition(UDim2.new(0.956, 0, 1, frame.Position.Y.Offset), Enum.EasingDirection.Out, Enum.EasingStyle.Sine, 0.13, true)
 					task.wait(0.07)
 					frame:TweenPosition(UDim2.new(1, 0, 1, frame.Position.Y.Offset), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
 					task.wait(0.2)
+					queue -= 1
 					frame:Destroy()
 				end)
 			end)
