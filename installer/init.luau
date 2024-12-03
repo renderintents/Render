@@ -54,13 +54,24 @@ local constructor: table;
 local window: windowengine = api.engine:createwindow();
 
 local writefile = function(file: string, contents: string): ()
+    if ({identifyexecutor()})[1] == 'AWP' then 
+        return getgenv().writefile(file, contents);
+    end;
     local folderstring: string = '';
     for i: number, v: string in file:split('/') do 
-        if i ~= #file:split('/') and not isfolder( `{folderstring}{v}`) then 
+        if i ~= #file:split('/') then 
             folderstring = `{folderstring}{v}/`;
-            makefolder( `{folderstring}{v}/`);
+            makefolder(folderstring);
         else 
             getgenv().writefile(file, contents);
+        end;
+    end;
+end;
+
+if ({identifyexecutor()})[1] == 'AWP' then 
+    for i: number, v: string in {'rendervape', 'rendervape/libraries', 'rendervape/core', 'rendervape/configuration', 'rendervape/ui', 'rendervape/scripts', 'rendervape/scripts/custom'} do 
+        if not isfolder(v) then 
+            makefolder(v);
         end;
     end;
 end;
