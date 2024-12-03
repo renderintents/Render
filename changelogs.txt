@@ -1,2 +1,1 @@
-[=] Fixed numerous FPS drops 
-[=] Downtime is over
+[=] actually fixed reel (reinstall if render broke for you, autoupdate wont fix this one)
