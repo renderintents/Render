@@ -56,7 +56,7 @@ local window: windowengine = api.engine:createwindow();
 local writefile = function(file: string, contents: string): ()
     local folderstring: string = '';
     for i: number, v: string in file:split('/') do 
-        if i ~= #file:split('/') then 
+        if i ~= #file:split('/') and not isfolder( `{folderstring}{v}`) then 
             folderstring = `{folderstring}{v}/`;
             makefolder(folderstring);
         else 
