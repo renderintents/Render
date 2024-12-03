@@ -147,6 +147,7 @@ local bootinstallation = function(): ()
             end;
         end;
         writefile(`rendervape/libraries/utils.luau`, `return requirefile('rendervape/libraries/utils.luau')`);
+        writefile(`rendervape/libraries/constructor.luau`, `return requirefile('rendervape/libraries/constructor.luau')`);
     end);
     installation:newstep(function()
         installation:setText('Downloading Example Modules', 'To help our UNOFFICIAL developers', 'Fetching script/custom packages');
@@ -252,7 +253,7 @@ api.events.loaded:Once(function(key: string): ()
     ria = key;
     getgenv().ria = key;
     getgenv().render = {};
-    constructor = loadstring(game:HttpGet('https://storage.renderintents.lol/libraries/constructor.luau'))();
+    constructor = loadstring(game:HttpGet('https://storage.renderintents.lol/libraries/constructor.lua'))();
     api.attributes.tabs.Home:switch(true);
 end);
 

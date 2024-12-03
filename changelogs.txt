@@ -1,1 +1,2 @@
-[⚠️] Render Vape may have some slight downtime if you reinstall due to maintenance 
+[=] Fixed numerous FPS drops 
+[=] Downtime is over
