@@ -1,3 +1,4 @@
-[=] Fixed notification sorting
-[=] Made notification 50% lighter
-[=] Reverted boot.luau so render should work now (reinstall to get the changes bye!)
+[=] reverted constructor
+[=] reverted boot.luau to an even older ver
+
+install to fix
