@@ -1,4 +1,1 @@
-[=] reverted constructor
-[=] reverted boot.luau to an even older ver
-
-install to fix
+[+] Added kaida killaura (range will automatically be set to 35 btw and not changable!)
