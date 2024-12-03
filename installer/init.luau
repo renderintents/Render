@@ -262,7 +262,7 @@ window:createSection('Profiles', function() end);
 
 api.events.loaded:Once(function(key: string): ()
     ria = key;
-    getgenv().ria = key;;
+    getgenv().ria = key;
     constructor = loadstring(game:HttpGet('https://storage.renderintents.lol/libraries/constructor.lua'))();
     api.attributes.tabs.Home:switch(true);
 end);
