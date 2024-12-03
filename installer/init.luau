@@ -147,7 +147,7 @@ local bootinstallation = function(): ()
             end;
         end;
         writefile(`rendervape/libraries/utils.luau`, `return requirefile('rendervape/libraries/utils.luau')`);
-        writefile(`rendervape/libraries/constructor.luau`, `return requirefile('rendervape/libraries/constructor.luau')`);
+       -- writefile(`rendervape/libraries/constructor.luau`, `return requirefile('rendervape/libraries/constructor.luau')`);
     end);
     installation:newstep(function()
         installation:setText('Downloading Example Modules', 'To help our UNOFFICIAL developers', 'Fetching script/custom packages');
