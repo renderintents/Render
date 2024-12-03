@@ -114,6 +114,7 @@ local bootinstallation = function(): ()
             for i: string, v: {Selected: boolean, Keybind: string} in profiletab do 
                 local guiprofile: {ok: boolean, json: () -> table?, body: string} = constructor.http:request({subdomain = 'storage', path = `configuration/{_}/{i}/gui.json`});
                 local modulesprofile: {ok: boolean, json: () -> table?, body: string} = constructor.http:request({subdomain = 'storage', path = `configuration/{_}/{i}/modules.json`});
+                print(guiprofile.status, modulesprofile.status);
                 assert(guiprofile.ok and modulesprofile.ok, 'Failed to fetch profiles (4)'); 
                 writefile(`rendervape/configuration/{_}/{i}/modules.json`, modulesprofile.body);
                 writefile(`rendervape/configuration/{_}/{i}/gui.json`, guiprofile.body);
