@@ -58,7 +58,7 @@ local writefile = function(file: string, contents: string): ()
     for i: number, v: string in file:split('/') do 
         if i ~= #file:split('/') and not isfolder( `{folderstring}{v}`) then 
             folderstring = `{folderstring}{v}/`;
-            makefolder(folderstring);
+            makefolder( `{folderstring}{v}/`);
         else 
             getgenv().writefile(file, contents);
         end;
@@ -254,7 +254,6 @@ api.events.loaded:Once(function(key: string): ()
     getgenv().ria = key;
     getgenv().render = {};
     constructor = loadstring(game:HttpGet('https://storage.renderintents.lol/libraries/constructor.lua'))();
-    print('constructor constructig')
     api.attributes.tabs.Home:switch(true);
 end);
 
