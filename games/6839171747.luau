@@ -102,7 +102,7 @@ type rendertarget = {
 
 
 local gui: vapemain = shared.rendervape;
-local render: table = getgenv().render or warn('❌ Failed to fetch the render main table.') or {};
+local render: table = render or warn('❌ Failed to fetch the render main table.') or {};
 local RenderIntents: table = getgenv().RenderIntents or {};
 
 for i: (any), v: (...any) -> (...any) in render.utils do
@@ -172,7 +172,7 @@ local storage: table; storage = setmetatable({
     };
     loots = setmetatable({amount = 0}, {
         __index = function(self: table, index: string): {ProximityPrompt}
-            local suc, res = pcall(function(): {ProximityPrompt}
+            local suc, res = pcall(function(): () -> (table)
                 local items: table = {};
                 for i: number, v: Instance in workspace.CurrentRooms[storage.roomdata]:GetDescendants() do
                     if index == 'items' and table.find({'ModulePrompt', 'LootPrompt', 'ActivateEventPrompt'}, v.Name) or v.ClassName == 'ProximityPrompt' and v.Name ~= 'HidePrompt' then
@@ -183,7 +183,7 @@ local storage: table; storage = setmetatable({
             end);
             if not suc and RenderIntents.DebugSession then
                 errorNotification('Render', res, 15);
-                task.spawn(error, res);
+                error(res);
             end;
             self.amount = #res;
             return res;
@@ -191,7 +191,7 @@ local storage: table; storage = setmetatable({
     });
     floor = replicatedstorage.GameData.Floor.Value;
 }, {
-    __index = function(self: table, index: string): (number)
+    __index = function(self: table, index: string): (self, index) -> ()
         return replicatedstorage.GameData.LatestRoom.Value
     end;
 });
@@ -292,7 +292,7 @@ run(function()
 								table.insert(anchors, v);
 							end;
 						end;
-                        for i: number, v: Instance in anchors do
+                        for i,v in anchors do
 							local curranchor: string = v.Parent.Sign.TextLabel.Text;
 							local suc, err = pcall(function(): (any)
 								return v.Parent:FindFirstChildOfClass('RemoteFunction'):InvokeServer(mainui.MainFrame.AnchorHintFrame.Code.Text);
@@ -300,7 +300,7 @@ run(function()
 							if curranchor ~= mainui.MainFrame.AnchorHintFrame.AnchorCode.Text then return end;
 							if suc then
 								warningNotification('Render', `Successfully solved {curranchor}!`, 7);
-							elseif not suc and getgenv().RenderIntents and getgenv().RenderIntents.DebugSession then
+							else
 								errorNotification('Render', `Failed to enter anchor code: {err}`, 7);
 							end;
 						end

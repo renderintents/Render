@@ -139,13 +139,13 @@ type rendertag = {
     hex: string
 };
 
-for i,v in getgenv().render.utils do 
+for i,v in render.utils do 
     getfenv()[i] = v 
 end;
 
 local run: (() -> any) -> () = run;
 local renderconnections: table = renderconnections;
-local RenderLibrary: table = getgenv().RenderLibrary;
+local RenderLibrary: table = RenderLibrary;
 
 local rendervape: vapegui = shared.rendervape;
 local render: rendertable = render;

@@ -146,7 +146,7 @@ type jailbreakinvitem = {
     onAttempSelect: (...any) -> any
 };
 
-for i,v in getgenv().render.utils do 
+for i,v in render.utils do 
     getfenv()[i] = v 
 end;
 

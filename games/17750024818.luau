@@ -16,6 +16,10 @@
    https://renderintents.lol                                                                                                                                                                                                                                                                     
 ]]
 
+for i,v in render.utils do 
+    getfenv()[i] = v; 
+end;
+
 type vapeobjectsapi = {
     Api: table
 };
@@ -155,12 +159,8 @@ local visual: table = vape.ObjectsThatCanBeSaved.RenderWindow;
 local exploit: table = vape.ObjectsThatCanBeSaved.ExploitWindow;
 local utility: table = vape.ObjectsThatCanBeSaved.UtilityWindow;
 local world: table = vape.ObjectsThatCanBeSaved.WorldWindow;
-local RenderLibrary: table = getgenv().RenderLibrary;
-local render: table = getgenv().render;
-
-for i,v in render.utils do 
-    getfenv()[i] = v; 
-end;
+local RenderLibrary: table = RenderLibrary;
+local render: table = render;
 
 local replicatedstorage: ReplicatedStorage = getservice('ReplicatedStorage');
 local httpservice: HttpService = getservice('HttpService');
