@@ -18,13 +18,22 @@ local clone: cloneapi = setmetatable({}, {
     end;
 });
 
+local getroot = function(char: Model): (BasePart?)
+    for i: number, v: Model in char:GetChildren() do 
+        if v.Name == 'HumanoidRootPart' and v.ClassName == 'BasePart' then 
+            return v;
+        end;
+    end;
+    return char.PrimaryPart;
+end;
+
 local refreshclonedata: () -> () = function()
     clone:destroyCloneInstance(nil, true);
     local char: Model = lplr.Character or lplr.CharacterAdded:Wait();
     if not char.PrimaryPart then 
         char:GetPropertyChangedSignal('PrimaryPart'):Wait();
     end;
-    local root: BasePart = char.PrimaryPart;
+    local root: BasePart = getroot(char);
     if clone.cache.__currentclone ~= root then 
         clone.cache.__currentroot = root;
     end;
@@ -55,10 +64,6 @@ function clone:destroyCloneInstance(shard: string?, bypassShards: boolean?): ()
         if v.Connected then 
             v:Disconnect();
         end;
-    end;
-    if shard and deathconnections[shard] then
-        deathconnections[shard]:Disconnect();
-        deathconnections[shard] = nil;
     end;
     table.clear(self.cache.__cloneconnections);
     if self.cache.__currentclone and self.cache.__currentroot and self.cache.__currentroot.Parent then 
@@ -93,7 +98,7 @@ function clone:createCloneInstance(shard: any): (BasePart)
         clone:destroyCloneInstance();
     end;
     lplr.Character.Parent = game;
-    local oldroot: BasePart = lplr.Character.PrimaryPart; 
+    local oldroot: BasePart = getroot(char); 
     local newroot: BasePart = oldroot:Clone();
     newroot.Parent = lplr.Character;
     lplr.Character.PrimaryPart = newroot;
@@ -108,15 +113,6 @@ function clone:createCloneInstance(shard: any): (BasePart)
     if shard and table.find(self.cache.__shards, shard) == nil then 
         table.insert(self.cache.__shards, shard);
     end;
-    deathconnections[shard] = char.Humanoid:GetPropertyChangedSignal('Health'):Connect(function()
-        if not render.utils.isAlive(lplr, true) then
-            render.utils.alertNotification('Render', 'works', 10)
-            clone:destroyCloneInstance(nil, true);
-            repeat task.wait() until render.utils.isAlive(lplr, true);
-            task.wait(0.25);
-            clone:createCloneInstance(shard);
-        end;
-    end);
     return newroot;
 end;
 
