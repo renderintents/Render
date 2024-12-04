@@ -6661,10 +6661,12 @@ run(function()
 								end;
 								if songtitle.Text ~= currentsong then
 									updateTick = os.clock();
-									writefile('rendervape/assets/songcover.png', game:HttpGet(info.item.album.images[2].url));
+									local randomfile: string = `rendervape/cache/song_cover_{Random.new():NextInteger(1, 100)}.png`;
+									writefile(randomfile, game:HttpGet(info.item.album.images[2].url));
 									task.wait();
-									songcover.Image = getcustomasset('rendervape/assets/songcover.png');
+									songcover.Image = getcustomasset(randomfile);
 									currentsong = songtitle.Text;
+									delfile(randomfile);
 								end;
 							end;
 						end);
@@ -9642,6 +9644,7 @@ run(function()
 		end;
 	end));
 end)
+
 task.spawn(function()
 	local suc, res;
 	repeat

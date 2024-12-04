@@ -3022,6 +3022,9 @@ local killauraNearPlayer;
 run(function()
 	local Killaura: vapemodule = {};
 	local killauraboxes: table = Performance.new();
+    local killauraAttacked: securetable = Performance.new({
+        maxdir = 0.2;
+    });
 	local killauratargetframe = {Players = {Enabled = false}}
 	local killaurasortmethod = {Value = 'Distance'}
 	local killaurarealremote = bedwars.Client:Get(bedwars.AttackRemote).instance
@@ -3064,7 +3067,8 @@ run(function()
 	local killauraplaying = false
 	local oldViewmodelAnimation = void
 	local oldPlaySound = void
-	local originalArmC0 = nil
+	local originalArmC0 = nil;
+    killauraAttacked:setcleanermode(3);
 	local killauracurrentanim
 	local animationdelay = tick()
 
@@ -3419,7 +3423,8 @@ run(function()
 		local distance: number = (entityLibrary.LocalPosition - root.CFrame.Position).Magnitude;
 		local rootpos: Vector3 = root.CFrame.Position;
 		if distance > 0 then 
-			return ((rootpos + (root.Parent:FindFirstChildOfClass('Humanoid').MoveDirection)));
+			local vec: Vector3 = ((rootpos + (root.Parent:FindFirstChildOfClass('Humanoid').MoveDirection)));
+			return vec + Vector3.new(math.random(0, 3), 0, 0);
 		end;
 		return rootpos;
 	end;
@@ -3475,8 +3480,8 @@ run(function()
 					until Killaura.Enabled == false
 				end)
 
-				oldViewmodelAnimation = oldViewmodelAnimation or bedwars.ViewmodelController.playAnimation;
-				oldPlaySound = oldPlaySound or bedwars.SoundManager.playSound;
+				oldViewmodelAnimation = bedwars.ViewmodelController.playAnimation;
+				oldPlaySound = bedwars.SoundManager.playSound;
 				bedwars.SoundManager.playSound = function(tab, soundid, ...)
 					if (soundid == bedwars.SoundList.SWORD_SWING_1 or soundid == bedwars.SoundList.SWORD_SWING_2) and Killaura.Enabled and killaurasound.Enabled and killauraNearPlayer then
 						return nil
@@ -3498,8 +3503,13 @@ run(function()
 				RunLoops:BindToHeartbeat('Killaura', function()
 					if entityLibrary.isAlive then
 						if killauraaimcirclepart then
-							killauraaimcirclepart.Position = targetedPlayer and closestpos(targetedPlayer.RootPart, entityLibrary.character.HumanoidRootPart.Position) or Vector3.new(99999, 99999, 99999)
-						end
+							pcall(function()
+								if not killauraNearPlayer then 
+									return;
+								end;
+								tween:Create(killauraaimcirclepart, TweenInfo.new(0.2), {Position = getbestprediction(targetedPlayer.RootPart)}):Play();
+							end);
+						end;
 						if killauraparticlepart then
 							killauraparticlepart.Position = targetedPlayer and targetedPlayer.RootPart.Position or Vector3.new(99999, 99999, 99999)
 						end
@@ -3542,7 +3552,7 @@ run(function()
 				task.spawn(function()
 					repeat
 						task.wait()
-						if not Killaura.Enabled then break end
+						if not Killaura.Enabled then break end;
 						--render.targets:updatehuds();
 						vapeTargetInfo.Targets.Killaura = nil;
 						local plrs: {rendertarget} = GetActiveTargets({
@@ -3572,8 +3582,14 @@ run(function()
 										if not bedwars.SwordController:canSee({player = plr.Player, getInstance = function() return plr.Character end}) then continue end
 									end
 									if killauranovape.Enabled and store.whitelist.clientUsers[plr.Player.Name] then
-										continue
+										continue;
 									end;
+                                    if killauraAttacked:len() == #plrs then 
+                                        killauraAttacked:clear();
+                                    end;
+                                    if killauraAttacked[root] and killaurasortmethod.Value == 'Switch' and #plrs > 1 then 
+                                        continue;
+                                    end;
 									for i,v in killauraboxes do 
 										if i ~= root then 
 											tween:Create(v, TweenInfo.new(0.15), {Transparency = 1}):Play()
@@ -3582,14 +3598,14 @@ run(function()
 									end;
 									if killauratarget.Enabled and not renderperformance.reducelag then 
 										local box: Part = killauraboxes[root] or Instance.new('Part', workspace);
-										box.Transparency = 0.1 * killauraboxtransparency.Value;
-										box.Material = Enum.Material[killauraboxmaterial.Value];
-										box.Color = Color3.fromHSV(killauracolor.Hue, killauracolor.Sat, killauracolor.Value);
 										box.Size = root.Size + Vector3.new(3, 5, 3);
 										box.Position = root.Position;
 										box.Anchored = true;
 										box.CanCollide = false;
 										if killauraboxes[root] == nil then 
+                                            box.Transparency = 0.1 * killauraboxtransparency.Value;
+                                            box.Material = Enum.Material[killauraboxmaterial.Value];
+                                            box.Color = Color3.fromHSV(killauracolor.Hue, killauracolor.Sat, killauracolor.Value);
 											box.Size = Vector3.zero;
 											tween:Create(box, TweenInfo.new(0.35), {Size = root.Size + Vector3.new(3, 5, 3)}):Play();
 										end;
@@ -3599,7 +3615,7 @@ run(function()
 										firstPlayerNear = true
 										killauraNearPlayer = true
 										targetedPlayer = plr
-										vapeTargetInfo.Targets.Killaura = {
+										vapeTargetInfo.Targets.Main = {
 											Npc = plr.Human,
 											RootPart = root,
 											Humanoid = {
@@ -3622,10 +3638,11 @@ run(function()
 									if (workspace:GetServerTimeNow() - bedwars.SwordController.lastAttack) < 0.02 then
 										break
 									end
-									local selfpos = selfrootpos + (killaurarange.Value > 14 and (selfrootpos - root.Position).magnitude > 14.4 and (CFrame.lookAt(selfrootpos, root.Position).lookVector * ((selfrootpos - root.Position).magnitude - 12)) or Vector3.zero)
+									local selfpos = selfrootpos + (killaurarange.Value > 14 and (selfrootpos - root.Position).magnitude > 14.4 and (CFrame.lookAt(selfrootpos, root.Position).lookVector * ((selfrootpos - root.Position).magnitude - 8)) or Vector3.zero)
 									bedwars.SwordController.lastAttack = workspace:GetServerTimeNow()
 									store.attackReach = math.floor((selfrootpos - root.Position).magnitude * 100) / 100
-									store.attackReachUpdate = tick() + 1
+									store.attackReachUpdate = tick() + 1;
+                                    killauraAttacked[root] = true;
 									killaurarealremote:FireServer({
 										weapon = sword.tool,
 										chargedAttack = {chargeRatio = swordmeta.sword.chargedAttack and store.queueType ~= 'bridge_duel' and not swordmeta.sword.chargedAttack.disableOnGrounded and 0.999 or 0},
@@ -3639,7 +3656,9 @@ run(function()
 											selfPosition = attackValue(selfpos)
 										}
 									})
-									break
+									if killaurasortmethod.Value ~= 'Switch' then 
+                                        break;
+                                    end;
 								end
 							end
 						else 
@@ -3920,7 +3939,7 @@ run(function()
 		end
 	})
 	killauraaimcircle = Killaura.CreateToggle({
-		Name = 'Aim Visualizer',
+		Name = 'Prediction Visualizer',
 		Function = function(callback)
 			if callback then
 				killauraaimcirclepart = Instance.new('Part')
@@ -9905,6 +9924,15 @@ run(function()
 					Humanoid = damagedata.entityInstance:FindFirstChildOfClass('Humanoid'),
 					RootPart = damagedata.entityInstance.PrimaryPart;
 				});
+				vapeTargetInfo.Targets.Killaura = {
+					Npc = player.UserId == 1,
+					RootPart = damagedata.entityInstance.PrimaryPart,
+					Humanoid = {
+						Health = (player.Character:GetAttribute('Health') or player.Character:FindFirstChildOfClass('Humanoid').Health) + getShieldAttribute(player.Character),
+						MaxHealth = player.Character:GetAttribute('MaxHealth') or player.Character:FindFirstChildOfClass('Humanoid').MaxHealth
+					},
+					Player = player
+				};
 				lastTargetUpdate = tick() + 1.5;
 			end;
 		end;
@@ -9913,6 +9941,7 @@ run(function()
 		repeat
 			if tick() > lastTargetUpdate and render.targets.currentTarget then 
 				render.targets:updatehuds();
+				vapeTargetInfo.Targets.Killaura = nil;
 			end;
 			task.wait();
 		until false;
@@ -9922,7 +9951,7 @@ end);
 pcall(function()
 	local oldentity: (Player?) -> (table) = bedwars.EntityUtil.getEntity;
 	bedwars.EntityUtil.getEntity = function(self: table, plr: Player?, ...)
-		local res: {getInstance: (table) -> (Model?)} = oldentity(self, plr, ...);
+		local res: {getInstance: (table) -> (Model?)} = oldentity(self, plr, ...);	
 		if res then 
 			res.getInstance = res.getInstance or function(self: table): (Model?)
 				return plr.Character;
@@ -12015,7 +12044,7 @@ run(function()
 						if tick() > bouncedelay and isAlive(lplr, true) and lplr.Character.PrimaryPart == newroot then 
 							bouncedelay = tick() + 0.4;
 							for i = 1, 5 do 
-								if isEnabled('InfiniteFly') or not vapeTargetInfo.Targets.Killaura then 
+								if isEnabled('InfiniteFly') or not vapeTargetInfo.Targets.main then 
 									bouncedelay = tick();
 									break 
 								end;
@@ -12743,9 +12772,9 @@ run(function()
 				pcall(queuecardfunc);
 				table.insert(queuecardvisuals.Connections, lplr.PlayerGui.ChildAdded:Connect(queuecardfunc));
 			else
-				queuecardobjects:clear(game.Destroy)
-			end
-		end
+				queuecardobjects:clear(game.Destroy);
+			end;
+		end;
 	});
 	queucardvisualsgradientoption = queuecardvisuals.CreateToggle({
 		Name = 'Gradient',
@@ -13213,35 +13242,6 @@ run(function()
         HoverText = 'Prevents you from getting trapped'
     });
 end);
-
-task.spawn(function()
-	repeat task.wait() until shared.VapeFullyLoaded;
-	task.wait(0.25);
-	local tag: string = RenderLibrary:getplayertag(lplr).text:split(' ')[2] ;
-	if not getgenv().RenderIntents or not getgenv().RenderIntents.Premium or not table.find({'OWNER', 'INF', 'PREMIUM'}, tag) then return end;
-	local emberexploit: vapemodule = {Enabled = false};
-	emberexploit = exploit.Api.CreateOptionsButton({
-		Name = 'EmberExploit',
-		Function = function(call: boolean): ()
-			if call then
-				table.insert(emberexploit.Connections, runservice.Heartbeat:Connect(function()
-					if not vapeTargetInfo.Targets.Killaura then 
-						return;
-					end;
-					local saber: table = getItem('infernal_saber');
-					if saber then
-						bedwars.Client:Get('HellBladeRelease'):SendToServer({
-							chargeTime = math.huge,
-							player = lplr,
-							weapon = saber.tool;
-						});
-					end;
-				end));
-			end;
-		end
-	});
-	emberexploit.ToggleButton(true);
-end)
 
 --[[run(function()
 	local autobowswitch: vapemodule = {};
