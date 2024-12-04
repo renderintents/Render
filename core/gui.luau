@@ -558,7 +558,7 @@ if shared.VapeExecuted then
 	lib["MainRescale"]:GetPropertyChangedSignal("Scale"):Connect(function()
 		vertext.Position = UDim2.new(1 / lib["MainRescale"].Scale, -(vertextsize.X) - 20, 1 / lib["MainRescale"].Scale, -25)
 	end)
-
+	
 	local function dragGUI(gui, mod)
 		task.spawn(function()
 			local dragging
@@ -1375,7 +1375,7 @@ if shared.VapeExecuted then
 		end
 
 		windowapi["CreateCustomToggle"] = function(argstable)
-			local buttonapi = {}
+			local buttonapi = {Connections = {}}
 			if #overlayschildren:GetChildren() == 1 then
 				local divider = Instance.new("Frame")
 				divider.BackgroundColor3 = Color3.fromRGB(40, 39, 40)
@@ -1448,6 +1448,11 @@ if shared.VapeExecuted then
 				--	toggleframe1.BackgroundColor3 = Color3.fromHSV(lib.ObjectsThatCanBeSaved["Gui ColorSliderColor"]["Api"]["Hue"], lib.ObjectsThatCanBeSaved["Gui ColorSliderColor"]["Api"]["Sat"], lib.ObjectsThatCanBeSaved["Gui ColorSliderColor"]["Api"]["Value"])
 					toggleframe2:TweenPosition(UDim2.new(0, 12, 0, 2), Enum.EasingDirection.InOut, Enum.EasingStyle.Linear, 0.1, true)
 				else
+					for i,v in buttonapi.Connections do
+						if type(v) == 'thread' then pcall(task.cancel, v) end
+						if v.Disconnect then pcall(function() v:Disconnect() end) continue end
+						if v.disconnect then pcall(function() v:disconnect() end) continue end
+					end
 					if not first then
 						tweenService:Create(toggleframe1, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {BackgroundColor3 = Color3.fromRGB(60, 60, 60)}):Play()
 					else
@@ -4447,6 +4452,7 @@ if shared.VapeExecuted then
 					bindimg.ImageColor3 = Color3.fromRGB(45, 45, 45)
 				else
 					for i, v in pairs(buttonapi.Connections) do
+						if type(v) == 'thread' then pcall(task.cancel, v) end
 						if v.Disconnect then pcall(function() v:Disconnect() end) continue end
 						if v.disconnect then pcall(function() v:disconnect() end) continue end
 					end
@@ -6280,6 +6286,7 @@ if shared.VapeExecuted then
 						toggleframe2:TweenPosition(UDim2.new(0, 12, 0, 2), Enum.EasingDirection.InOut, Enum.EasingStyle.Linear, 0.1, true)
 					else
 						for i, v in pairs(buttonapi.Connections) do
+							if type(v) == 'thread' then pcall(task.cancel, v) end
 							if v.Disconnect then pcall(function() v:Disconnect() end) continue end
 							if v.disconnect then pcall(function() v:disconnect() end) continue end
 						end
@@ -7218,7 +7225,7 @@ if shared.VapeExecuted then
 	end
 
 	lib["CreateLegitModule"] = function(legittable)
-		local legitapi = {Connections = {}}
+		local legitapi = {Enabled = false, Connections = {}}
 		local customlegit = Instance.new("Frame")
 		customlegit.Size = UDim2.new(0, 40, 0, 40)
 		customlegit.BackgroundTransparency = 1
@@ -7266,7 +7273,9 @@ if shared.VapeExecuted then
 		local uicorner2 = Instance.new("UICorner")
 		uicorner2.CornerRadius = UDim.new(0, 16)
 		uicorner2.Parent = toggleframe2
-		dragGUI(customlegit, true)
+		legitgui:GetPropertyChangedSignal('Visible'):Connect(function()
+			dragGUI(customlegit, legitgui.Visible)
+		end)
 		legitapi.Enabled = false
 
 		legitapi.ToggleButton = function(first)
@@ -7282,6 +7291,11 @@ if shared.VapeExecuted then
 				end
 				toggleframe2:TweenPosition(UDim2.new(0, 12, 0, 2), Enum.EasingDirection.InOut, Enum.EasingStyle.Linear, 0.1, true)
 			else
+				for i,v in legitapi.Connections do
+					if type(v) == 'thread' then pcall(task.cancel, v) end
+					if v.Disconnect then pcall(function() v:Disconnect() end) continue end
+					if v.disconnect then pcall(function() v:disconnect() end) continue end
+				end
 				legitframe.BackgroundColor3 = Color3.fromRGB(31, 30, 31)
 				legitframetext.TextColor3 = Color3.fromRGB(160, 160, 160)
 				if not first then
@@ -7291,7 +7305,7 @@ if shared.VapeExecuted then
 				end
 				toggleframe2:TweenPosition(UDim2.new(0, 2, 0, 2), Enum.EasingDirection.InOut, Enum.EasingStyle.Linear, 0.1, true)
 			end
-			legittable.Function(legitapi.Enabled)
+			rendersafecall(legittable.Function, legittable.Name, legitapi.Enabled);
 		end
 		legitframe.MouseButton1Click:Connect(function() legitapi["ToggleButton"](not legitapi["Enabled"], false) end)
 
@@ -7344,11 +7358,10 @@ if shared.VapeExecuted then
 		local currentqueue: number = queue + 1;
 		queue += 1;
 		if queue > 0 then
-			repeat task.wait() until queue >= currentqueue
+			repeat task.wait() until queue > currentqueue or queue == 0
 		end;
-		print('fr')
 		for i,v in pairs(notificationwindow:GetChildren()) do
-			bettertween(v, UDim2.new(1, v.Position.X.Offset, 1, -(150 + 80 * (i - 1))), Enum.EasingDirection.In, Enum.EasingStyle.Quad, 0.18, true)
+			bettertween(v, UDim2.new(1, v.Position.X.Offset, 1, -(150 + 80 * (i - 1))), Enum.EasingDirection.In, Enum.EasingStyle.Quad, 0.12, true)
 		end
 	end)
 
@@ -7391,7 +7404,7 @@ if shared.VapeExecuted then
 			image.Name = "Frame"
 			image.ScaleType = Enum.ScaleType.Slice
 			image.Image = downloadVapeAsset("rendervape/assets/NotificationBackground.png")
-			image.ImageTransparency = 0.23
+			image.ImageTransparency = 0.05
 			image.Size = UDim2.new(1, 61, 0, 159)
 			image.Parent = frame
 			local uicorner = Instance.new("UICorner")
@@ -7418,20 +7431,20 @@ if shared.VapeExecuted then
 			icon.Image = downloadVapeAsset(customicon and `rendervape/{customicon}` or 'rendervape/assets/InfoNotification.png')
 			icon.BackgroundTransparency = 1
 			icon.Position = UDim2.new(0, -6, 0, -6)
-			icon.ImageTransparency = 0.3;
+			icon.ImageTransparency = 0;
 			icon.Size = UDim2.new(0, 60, 0, 60)
 			icon.Parent = frame
 			local icon2 = icon:Clone()
 			icon2.ImageColor3 = Color3.new(0, 0, 0)
 			icon2.ZIndex = -1
 			icon2.Position = UDim2.new(0, 1, 0, 1)
-			icon2.ImageTransparency = 0.5
+			icon2.ImageTransparency = 0.1
 			icon2.Parent = icon
 			local textlabel1 = Instance.new("TextLabel")
 			textlabel1.Font = Enum.Font.Arial
 			textlabel1.TextSize = 14
 			textlabel1.RichText = true
-			textlabel1.TextTransparency = 0.33
+			textlabel1.TextTransparency = 0
 			textlabel1.TextColor3 = Color3.new(1, 1, 1)
 			textlabel1.BackgroundTransparency = 1
 			textlabel1.Position = UDim2.new(0, 46, 0, 17)
@@ -7450,14 +7463,14 @@ if shared.VapeExecuted then
 			notifyqueues -= 1
 			task.spawn(function()
 				pcall(function()
-					frame:TweenPosition(UDim2.new(1.015, -(size - 4), 1, -(150 + 80 * offset)), Enum.EasingDirection.Out, Enum.EasingStyle.Sine, 0.13, false)
+					bettertween2(frame, UDim2.new(1.015, -(size - 4), 1, -(150 + 80 * offset)), Enum.EasingDirection.Out, Enum.EasingStyle.Sine, 0.13, false);
 					task.wait(0.11)
-					frame:TweenPosition(UDim2.new(1, -(size - 4), 1, -(150 + 80 * offset)), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.17, true)
+					bettertween2(frame, UDim2.new(1, -(size - 4), 1, -(150 + 80 * offset)), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.17, true);
 					frame2:TweenSize(UDim2.new(0, 0, 0, 2), Enum.EasingDirection.In, Enum.EasingStyle.Sine, duration / 1.2, true)
 					task.wait(duration / 1.2)
-					frame:TweenPosition(UDim2.new(0.956, 0, 1, frame.Position.Y.Offset), Enum.EasingDirection.Out, Enum.EasingStyle.Sine, 0.13, true)
+					bettertween2(frame, UDim2.new(0.956, 0, 1, frame.Position.Y.Offset), Enum.EasingDirection.Out, Enum.EasingStyle.Sine, 0.13, true);
 					task.wait(0.07)
-					frame:TweenPosition(UDim2.new(1, 0, 1, frame.Position.Y.Offset), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
+					bettertween2(frame, UDim2.new(1, 0, 1, frame.Position.Y.Offset), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true);
 					task.wait(0.2)
 					queue -= 1
 					frame:Destroy()

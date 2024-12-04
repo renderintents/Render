@@ -100,7 +100,7 @@ type rendertarget = {
 };
 
 local gui: vapemain = shared.rendervape;
-local render: table = render or warn('❌ Failed to fetch the render main table.') or {};
+local render: table = getgenv().render or warn('❌ Failed to fetch the render main table.') or {};
 
 for i: (any), v: (...any) -> (...any) in render.utils do
     getfenv()[i] = v;

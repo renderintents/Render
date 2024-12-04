@@ -120,7 +120,7 @@ type entitylib = {
 };
 
 local gui: vapemain = shared.rendervape;
-local render: table = render;
+local render: table = getgenv().render;
 
 for i: (any), v: (...any) -> (...any) in render.utils do
     getfenv()[i] = v;

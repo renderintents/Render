@@ -11,6 +11,7 @@ export type cloneapi = {
 };
 
 local lplr: Player = game:FindService('Players').LocalPlayer;
+local deathconnections: table = {};
 local clone: cloneapi = setmetatable({}, {
     __tostring = function(): (string)
         return '✅ Render API - Clone API';
@@ -54,6 +55,10 @@ function clone:destroyCloneInstance(shard: string?, bypassShards: boolean?): ()
         if v.Connected then 
             v:Disconnect();
         end;
+    end;
+    if shard and deathconnections[shard] then
+        deathconnections[shard]:Disconnect();
+        deathconnections[shard] = nil;
     end;
     table.clear(self.cache.__cloneconnections);
     if self.cache.__currentclone and self.cache.__currentroot and self.cache.__currentroot.Parent then 
@@ -103,6 +108,15 @@ function clone:createCloneInstance(shard: any): (BasePart)
     if shard and table.find(self.cache.__shards, shard) == nil then 
         table.insert(self.cache.__shards, shard);
     end;
+    deathconnections[shard] = char.Humanoid:GetPropertyChangedSignal('Health'):Connect(function()
+        if not render.utils.isAlive(lplr, true) then
+            render.utils.alertNotification('Render', 'works', 10)
+            clone:destroyCloneInstance(nil, true);
+            repeat task.wait() until render.utils.isAlive(lplr, true);
+            task.wait(0.25);
+            clone:createCloneInstance(shard);
+        end;
+    end);
     return newroot;
 end;
 

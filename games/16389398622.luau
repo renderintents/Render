@@ -99,7 +99,7 @@ type rendertarget = {
 };
 
 local gui: vapemain = shared.rendervape;
-local render: table = render or warn('❌ Failed to fetch the render main table.') or {};
+local render: table = getgenv().render or warn('❌ Failed to fetch the render main table.') or {};
 
 for i: (any), v: (...any) -> (...any) in render.utils do 
     getfenv()[i] = v;
@@ -146,7 +146,7 @@ local minigames: table = vape.ObjectsThatCanBeSaved.MinigamesWindow;
 local store: table = setmetatable({}, {
     __index = function(self: table, index: string)
         self[index] = Performance.new();
-        return rawget(self, index);
+        return self[index]
     end
 });
 
@@ -162,18 +162,18 @@ run(function()
         end;
         return child;
     end;
-    store.functions.getvalue = function(instance: Instance): (Instance) -> (boolean?)
+    store.functions.getvalue = function(instance: Instance): (boolean?)
         assert(typeof(instance) == 'string' or typeof(instance) ~= nil);
         return instance.Value or instance:FindFirstChild('Value').Value;
     end;
-    store.functions.getchildren = function(instance: Instance): (Instance) -> {Instance}
+    store.functions.getchildren = function(instance: Instance): {Instance}
         local instances: {Instance} = {};
         for i,v in instance:GetChildren() do
             table.insert(instances, v);
         end;
         return instances;
     end
-    store.functions.getcurrentcar = function(): () -> (Model?) 
+    store.functions.getcurrentcar = function(): (Model?) 
         local car: Model? = nil;
         for i: number, v: Instance in store.blocks do
             if v.Name:find('Car') then
@@ -186,13 +186,13 @@ run(function()
         end;
         return car
     end;
-    table.insert(vapeConnections, workspace.DescendantAdded:Connect(function(v: Instance): () -> ()
-        table.insert(store.blocks, v)
+    table.insert(vapeConnections, workspace.DescendantAdded:Connect(function(v: Instance): ()
+        table.insert(store.blocks, v);
     end));
 
     for i: number, v: Instance in workspace:GetDescendants() do
-        table.insert(store.blocks, v)
-    end
+        table.insert(store.blocks, v);
+    end;
 
     vape.RemoveObject('CombatWindow');
     vape.RemoveObject('MinigamesWindow');

@@ -368,15 +368,6 @@ functions.GetActiveTargets = function(args: getrendertargetsargs?): {rendertarge
     return newtargets;
 end;
 
-functions.errorNotification = function(title: string, text: string, delay: number): Frame
-	local success, frame = pcall(function()
-		local notification = shared.rendervape.CreateNotification(title, text, delay or 6.5, 'assets/WarningNotification.png')
-		notification.IconLabel.ImageColor3 = Color3.new(220, 0, 0)
-		notification.Frame.Frame.ImageColor3 = Color3.new(220, 0, 0)
-	end)
-	return success and frame
-end
-
 functions.deepclone = function(data: table): table
     local newtab = {};
     for i,v in next, data do
@@ -513,13 +504,24 @@ end;
 
 functions.alertNotification = function(arg1, arg2, arg3)
 	shared.rendervape:notify({
-            title = arg1,
-            text = arg2,
-            icon = 'assets/AlertNotification.png',
-            duration = arg3,
-            color = Color3.fromRGB(249, 50, 56)
-        })
+        title = arg1,
+        text = arg2,
+        icon = 'assets/AlertNotification.png',
+        duration = arg3,
+        color = Color3.fromRGB(249, 50, 56)
+    })
 end;
+
+--[[functions.errorNotification = function(title: string, text: string, delay: number): Frame
+	local success, frame = pcall(function()
+		local notification = shared.rendervape.CreateNotification(title, text, delay or 6.5, 'assets/WarningNotification.png')
+		notification.IconLabel.ImageColor3 = Color3.new(220, 0, 0)
+		notification.Frame.Frame.ImageColor3 = Color3.new(220, 0, 0)
+	end)
+	return success and frame
+end]]
+
+functions.errorNotification = functions.alertNotification
 
 functions.run = function(func)
 	local suc, err = pcall(func);

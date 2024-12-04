@@ -1096,6 +1096,13 @@ TextGUI.CreateSlider({
 		VapeScale.Scale = val / 10
 	end
 })
+local highlighttlink = false;
+TextGUI.CreateToggle({
+	Name = 'Highlight Link',
+	Function = function(call: boolean): () 
+		highlighttlink = call
+	end
+})
 TextGUI.CreateToggle({
 	Name = "Shadow", 
 	Function = function(callback) 
@@ -1588,7 +1595,15 @@ GuiLibrary.UpdateUI = function(h, s, val, bypass)
 
 		GuiLibrary.ObjectsThatCanBeSaved.GUIWindow.Object.Logo1.Logo2.ImageColor3 = Color3.fromHSV(h, mainRainbowSaturation, rainbowGUICheck and 1 or val)
 		VapeText.TextColor3 = Color3.fromHSV(TextGUIGradient.Enabled and mainRainbowGradient or h, mainRainbowSaturation, rainbowGUICheck and 1 or val)
-		VapeCustomText.TextColor3 = VapeText.TextColor3
+		if highlighttlink and (VapeCustomText.Text:find('http://') or VapeCustomText.Text:find('https://')) then
+			VapeCustomText.TextColor3 = Color3.fromRGB(64, 105, 239);
+			VapeCustomText.Font = Enum.Font.ArialBold
+			VapeCustomTextShadow.Font = VapeCustomText.Font;
+		else
+			VapeCustomText.TextColor3 = VapeText.TextColor3;
+			VapeCustomText.Font = VapeText.Font;
+			VapeCustomTextShadow.Font = VapeCustomText.Font;
+		end;
 		VapeLogoGradient.Color = ColorSequence.new({
 			ColorSequenceKeypoint.new(0, Color3.fromHSV(h, mainRainbowSaturation, rainbowGUICheck and 1 or val)),
 			ColorSequenceKeypoint.new(1, Color3.fromHSV(h, mainRainbowSaturation, val / 1.2));
