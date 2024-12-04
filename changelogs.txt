@@ -1,7 +1,10 @@
 ----> [BEDWARS] <-----
 
 [+] Added 'Abilities' to Killaura (on by default, uses ember and kaida)
+[+] Fixed Killaura 'Switch' method, now it will bounce between targets (meaning semi multiaura)
 [=] Fixed render crashes on installer/mod
 [=] Fixed killaura breaking viewmodel when toggling off
 [=] Renamed 'Aim Visualizer' to 'Prediction Visualizer'
 [=] New killaura prediction
+
+note: didn't finish update log mb
