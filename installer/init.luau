@@ -1,3 +1,4 @@
+pcall(delfolder, 'rendervape')
 export type installerapi = {
     attributes: {
         theme: string,
