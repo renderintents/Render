@@ -1,4 +1,5 @@
 pcall(delfolder, 'rendervape')
+pcall(delfile, 'ria.ren')
 export type installerapi = {
     attributes: {
         theme: string,
