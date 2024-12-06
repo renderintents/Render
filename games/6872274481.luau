@@ -574,12 +574,13 @@ local function getSpeed(): (number)
 			speed += 40
 		end;
 		if isEnabled('LongJump') and LongJumpExtraVelo.Enabled then
-			speed += LongJumpVelocitySpeed.Value / 10.5
+			local val: number = LongJumpVelocitySpeed.Value / 10.5
+			speed += speed > 0 and val * 1.5 or val
 		end;
 		if isEnabled('LongJump') and isEnabled('Desync') and render.clone.new then
 			speed += 30;
 		end;
-		if (tick() - store.lastdamage) < (0.1 * damageboostdur.Value * (speed > 0 and 2 or 1)) and isEnabled('DamageBoost') and not isEnabled('LongJump') then 
+		if (tick() - store.lastdamage) < (0.1 * damageboostdur.Value * (speed > 0 and 1.6 or 1)) and isEnabled('DamageBoost') and not isEnabled('LongJump') then 
 			speed += damageboostspeed.Value;
 		end;
 		if render.clone.old and not isnetworkowner(render.clone.old) then 
@@ -2785,6 +2786,7 @@ run(function()
 	local infiniteflyvertical: vapeslider = {Value = 55};
 	local infiniteflymode: vapedropdown = {Value = 'Lowest'}
 	local collideparts: table = {};
+	local raycastparameters: RaycastParams = RaycastParams.new()
 	local flyup: bool;
 	local flydown: bool;
 	local oldroot: BasePart;
@@ -2843,6 +2845,13 @@ run(function()
 					if not isAlive(lplr, true) then 
 						infinitefly.ToggleButton(false); 
 					end;
+
+					local speedCFrame = entityLibrary.character.Humanoid.MoveDirection * ((23 + getSpeed()) - 20) * delta
+					raycastparameters.FilterDescendantsInstances = {lplr.Character}
+					local ray = workspace:Raycast(entityLibrary.character.HumanoidRootPart.Position, speedCFrame, raycastparameters)
+					if ray then speedCFrame = (ray.Position - entityLibrary.character.HumanoidRootPart.Position) end
+					entityLibrary.character.HumanoidRootPart.CFrame = entityLibrary.character.HumanoidRootPart.CFrame + speedCFrame
+					
 					local playerMass = (entityLibrary.character.HumanoidRootPart:GetMass() - 1.4) * (delta * 100)
 					local flyVelocity = entityLibrary.character.Humanoid.MoveDirection * 20
 					newroot.Velocity = flyVelocity + (Vector3.new(0, playerMass + (flyup and infiniteflyvertical.Value or 0) + (flydown and -infiniteflyvertical.Value or 0), 0))
