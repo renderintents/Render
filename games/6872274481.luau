@@ -2945,7 +2945,8 @@ run(function()
 								isflagged = true;
 								alertNotification('InfiniteFly', 'You Flagged, your character position will be spoofed until this is resolved', 12);
 							end;
-							clone.CFrame = CFrame.new(oldcloneroot.CFrame.X, clone.CFrame.Y, oldcloneroot.CFrame.Z)
+							local ylevel = clone.CFrame.Y;
+							clone.CFrame = CFrame.new(oldcloneroot.CFrame.X, ylevel, oldcloneroot.CFrame.Z)
 						end
 					end
 				end)
@@ -13022,9 +13023,13 @@ run(function()
 			task.wait();
 			if flagnotification == nil and (isEnabled('AntiHit') or isEnabled('Desync')) and clone.cache.__currentroot and (not isnetworkowner(clone.cache.__currentroot) or not isnetworkowner(lplr.Character.PrimaryPart)) then 
 				flagnotification = true;
+				lplr.Character.PrimaryPart.CFrame = clone.cache.__currentroot.CFrame
 				alertNotification('Clone', 'Network ownership disowned, slowing down speed for possibly 8 seconds.', 12);
-				repeat clone.cache.__currentclone.CFrame = clone.cache.__currentroot.CFrame task.wait() until (clone.cache.__currentroot == nil or isnetworkowner(clone.cache.__currentroot) or isAlive() and isnetworkowner(lplr.Character.PrimaryPart) or not isEnabled('AntiHit') or not isEnabled('Desync'));
-			elseif flagnotification and (isnetworkowner(clone.cache.__currentroot) or isAlive() and isnetworkowner(lplr.Character.PrimaryPart)) then
+				repeat 
+					lplr.Character.PrimaryPart.CFrame = clone.cache.__currentroot.CFrame
+					task.wait() 
+				until (clone.cache.__currentroot == nil or isnetworkowner(clone.cache.__currentroot) or not isEnabled('AntiHit') or not isEnabled('Desync'));
+			elseif flagnotification and (isnetworkowner(clone.cache.__currentroot) or isnetworkowner(lplr.Character.PrimaryPart)) then
 				flagnotification = nil;
 				alertNotification('Clone', 'Resolved', 13)
 			end;
