@@ -1,4 +1,6 @@
 ----> [UNIVERSAL] <-----
 
-[=] Render should load now (forgot to push changes again)
-[REINSTALL 💖]
+[=] Fixed render (the api was slowing down due to aids code sorry)
+[+] Downtime compensated
+
+[NO REINSTALLATION NEEDED FOR SOME OF YOU WHO INSTALLED LAST UPDATE]
