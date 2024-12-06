@@ -1,7 +1,18 @@
 [ Bedwars ] --> {
-    [=] Fixed InfiniteFly flagging with antihit/desync
-    [=] Fixed nuker
-}
-[ Universal ] --> {
-    grh is gay
+    [=] InfiniteFly Improvement --> {
+        [-] Disable time 0.2s -> 0.7s
+        [+] Added Options for disabling (Mode) --> {
+            [ Highest ] --> tps you to the highest ground
+            [ Lowest ] --> Tps you to the nearest ground
+            [ Normal ] --> Tps to your rootpart
+        }
+        [+] Adding CanCollide
+    }
+    [=] Longjump --> {
+        [+] Added Velocity Speed option (speed is faster depends on your setting)
+    }
+    [=] DamageBoost --> {
+        [=] Damageboost will be longer when you have any sort of speed boost available
+    }
+    [=] Fixed nuker not working properly and breaking when shield is found on the bed (should be faster now too)
 }
