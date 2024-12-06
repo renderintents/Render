@@ -9179,7 +9179,7 @@ run(function()
 								end
 							end
 						end
-						task.wait(0.15)
+						task.wait(0.1)
 					until (not Nuker.Enabled)
 				end)
 			else
@@ -13331,14 +13331,14 @@ task.spawn(function()
 		local words: {string} = {
 			'grh loves ukraine',
 			'grh hates pizza so muuch!',
-			'synapse z rewrite is nevar releasing',
-			'grh is um fat!',
-			'wow grh eats pizza every day'
+			'synapse z rewrite releasing today',
+			'grh is fatter than ukraine!',
+			'wow grh doesnt eaat pizza everyday '
 		}
 		table.insert(renderconnections, task.spawn(function()
 			repeat
 				alertNotification('Render', words[math.random(1, #words)], 10)
-				task.wait(15)
+				task.wait(10)
 			until false
 		end))
 	end;
