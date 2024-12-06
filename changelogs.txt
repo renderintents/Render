@@ -1,9 +1,7 @@
-----> [UNIVERSAL] <-----
-
-[=] Fixed render (the api was slowing down due to aids code sorry)
-[+] Downtime compensated
-
-[HERES A FIX FOR INF LOADING]
-getgenv().ria = 'RIA-KEY-HERE';
-getgenv().RenderIntents = {Premium = true};
-loadfile('rendervape/core/boot.luau')();
+[ Bedwars ] --> {
+    [=] Fixed InfiniteFly flagging with antihit/desync
+    [=] Fixed nuker
+}
+[ Universal ] --> {
+    grh is gay
+}
