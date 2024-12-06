@@ -1,6 +1,4 @@
 ----> [UNIVERSAL] <-----
 
-[+] New vault encryption algorithm
-[=] Downtime over, All licenses have been compensated.
-
-(all changes require reinstall)
+[=] Render should load now (forgot to push changes again)
+[REINSTALL 💖]
