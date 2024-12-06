@@ -2782,6 +2782,7 @@ run(function()
 	})
 end)
 
+local InfiniteFlyLanded: boolean;
 run(function()
 	local InfiniteFly = {Enabled = false}
 	local InfiniteFlyMode = {Value = 'CFrame'}
@@ -2830,12 +2831,12 @@ run(function()
 		if clone then
 			clone = nil
 		end
-		lplr.Character.Humanoid.HipHeight = hip or 2
-		task.delay(0.4, function()
+task.delay(0.25, function()
 			local origcf = {oldcloneroot.CFrame:GetComponents()}
 			origcf[2] = oldclonepos
 			oldcloneroot.CFrame = CFrame.new(unpack(origcf))
 			oldcloneroot = nil
+			InfiniteFlyLanded = true;
 			warningNotification('InfiniteFly', 'Landed!', 3)
 		end)
 	end
@@ -2844,6 +2845,7 @@ run(function()
 		Name = 'InfiniteFly',
 		Function = function(callback)
 			if callback then
+				InfiniteFlyLanded = false;
 				if not entityLibrary.isAlive then
 					disabledproper = true
 				end
@@ -12043,7 +12045,7 @@ run(function()
 					end;
 					oldroot = clone.cache.__currentroot or lplr.Character and lplr.Character.PrimaryPart or nil;
 					newroot = clone:getLocalClone('AntiHit', true);
-					if vapeTargetInfo.Targets.Killaura and oldroot and not isEnabled('InfiniteFly') and isnetworkowner(oldroot) then 
+					if vapeTargetInfo.Targets.Killaura and oldroot and InfiniteFlyLanded and isnetworkowner(oldroot) then 
 						if tick() > bouncedelay and isAlive(lplr, true) and lplr.Character.PrimaryPart == newroot then 
 							bouncedelay = tick() + 0.4;
 							for i = 1, 5 do 
@@ -12914,7 +12916,7 @@ run(function()
                             continue;
                         end;
                         if isAlive(lplr, true) then
-							if isEnabled('InfiniteFly') then
+							if not InfiniteFlyLanded then
 								continue
 							end;
                             oldroot.Velocity = Vector3.zero;
@@ -13323,26 +13325,6 @@ end);
 		end;
 	});
 end);]]
-
-
-task.spawn(function()
-	local discord: {global_name: string?, username: string} = RenderLibrary.http:getdiscord();
-	if discord.username == 'aldena6433768' then
-		local words: {string} = {
-			'grh loves ukraine',
-			'grh hates pizza so muuch!',
-			'synapse z rewrite releasing today',
-			'grh is fatter than ukraine!',
-			'wow grh doesnt eaat pizza everyday '
-		}
-		table.insert(renderconnections, task.spawn(function()
-			repeat
-				alertNotification('Render', words[math.random(1, #words)], 10)
-				task.wait(10)
-			until false
-		end))
-	end;
-end)
 
 table.insert(renderconnections, task.spawn(function()
 	repeat
