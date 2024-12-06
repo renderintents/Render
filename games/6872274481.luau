@@ -215,8 +215,7 @@ local isfile = isfile or function(file)
 end;
 
 local networkownerswitch = tick()
---ME WHEN THE MOBILE EXPLOITS ADD A DISFUNCTIONAL ISNETWORKOWNER (its for compatability I swear!!)
-local isnetworkowner = identifyexecutor() == 'Synapse Z' and isnetworkowner or function(part)
+local isnetworkowner = table.find({'Nihon', 'Synapse Z'}, identifyexecutor(), nil) and isnetworkowner or function(part)
 	local suc, res = pcall(function() return gethiddenproperty(part, 'NetworkOwnershipRule') end)
 	if suc and res == Enum.NetworkOwnership.Manual then
 		sethiddenproperty(part, 'NetworkOwnershipRule', Enum.NetworkOwnership.Automatic)
@@ -417,6 +416,9 @@ end
 vape.SelfDestructEvent.Event:Once(function()
 	vapeInjected = false
 	for i, v in (vapeConnections) do
+		if type(v) == 'thread' then
+			pcall(task.cancel, v);
+		end;
 		if v.Disconnect then pcall(function() v:Disconnect() end) continue end
 		if v.disconnect then pcall(function() v:disconnect() end) continue end
 	end
@@ -542,12 +544,14 @@ end;
 local damageboostspeed: vapeslider = {Value = 33};
 local damageboostdur: vapeslider = {Value = 6.5};
 
+local LongJumpExtraVelo: vapeminimodule = {Enabled = true};
+local LongJumpVelocitySpeed: vapeslider = {Value = 0};
 local function getSpeed(): (number)
 	local speed = 0
 	if lplr.Character then
 		local SpeedDamageBoost = lplr.Character:GetAttribute('SpeedBoost')
 		if SpeedDamageBoost and SpeedDamageBoost > 1 then
-			speed += (22 * (SpeedDamageBoost - 1))
+			speed += (15 * (SpeedDamageBoost - 1))
 		end
 		if store.grapple > tick() then
 			speed += 90
@@ -569,11 +573,14 @@ local function getSpeed(): (number)
 		if store.beastmode then 
 			speed += 40
 		end;
-		if (tick() - store.lastdamage) < (0.1 * damageboostdur.Value) and isEnabled('DamageBoost') and not isEnabled('LongJump') then 
-			speed += damageboostspeed.Value;
+		if isEnabled('LongJump') and LongJumpExtraVelo.Enabled then
+			speed += LongJumpVelocitySpeed.Value / 10.5
 		end;
 		if isEnabled('LongJump') and isEnabled('Desync') and render.clone.new then
 			speed += 30;
+		end;
+		if (tick() - store.lastdamage) < (0.1 * damageboostdur.Value * (speed > 0 and 2 or 1)) and isEnabled('DamageBoost') and not isEnabled('LongJump') then 
+			speed += damageboostspeed.Value;
 		end;
 		if render.clone.old and not isnetworkowner(render.clone.old) then 
 			speed = 0;
@@ -1508,11 +1515,7 @@ run(function()
 		breakingBlockPosition = Vector3.zero
 	}
 
-	local failedBreak = 0
 	bedwars.breakBlock = function(pos, effects, normal, bypass, anim)
-		if lplr:GetAttribute('DenyBlockBreak') then
-			return
-		end
 		local block, blockpos = nil, nil
 		if not bypass then block, blockpos = getLastCovered(pos, normal) end
 		if not block then block, blockpos = getPlacedBlock(pos) end
@@ -1528,47 +1531,42 @@ run(function()
 				blockhealthbarpos = {
 					blockPosition = blockpos
 				}
-				task.spawn(function()
-					bedwars.ClientDamageBlock:Get('DamageBlock'):CallServerAsync({
-						blockRef = blockhealthbarpos,
-						hitPosition = blockpos * 3,
-						hitNormal = Vector3.FromNormalId(normal)
-					}):andThen(function(result)
-						if result ~= 'failed' then
-							failedBreak = 0
-							if healthbarblocktable.blockHealth == -1 or blockhealthbarpos.blockPosition ~= healthbarblocktable.breakingBlockPosition then
-								local blockdata = bedwars.BlockController:getStore():getBlockData(blockhealthbarpos.blockPosition)
-								local blockhealth = blockdata and (blockdata:GetAttribute('Health') or blockdata:GetAttribute('1') or blockdata:GetAttribute(lplr.Name .. '_Health')) or block:GetAttribute('Health') or block:GetAttribute('1');
-								healthbarblocktable.blockHealth = blockhealth
-								healthbarblocktable.breakingBlockPosition = blockhealthbarpos.blockPosition
-							end
-							healthbarblocktable.blockHealth = result == 'destroyed' and 0 or healthbarblocktable.blockHealth
-							blockdmg = bedwars.BlockController:calculateBlockDamage(lplr, blockhealthbarpos)
-							healthbarblocktable.blockHealth = math.max(healthbarblocktable.blockHealth - blockdmg, 0)
-							if effects then
-								bedwars.BlockBreaker:updateHealthbar(blockhealthbarpos, healthbarblocktable.blockHealth, block:GetAttribute('MaxHealth'), blockdmg, block)
-								if healthbarblocktable.blockHealth <= 0 then
-									bedwars.BlockBreaker.breakEffect:playBreak(block.Name, blockhealthbarpos.blockPosition, lplr)
-									bedwars.BlockBreaker.healthbarMaid:DoCleaning()
-									healthbarblocktable.breakingBlockPosition = Vector3.zero
-								else
-									bedwars.BlockBreaker.breakEffect:playHit(block.Name, blockhealthbarpos.blockPosition, lplr)
-								end
-							end
-							local animation
-							if anim then
-								animation = bedwars.AnimationUtil:playAnimation(lplr, bedwars.BlockController:getAnimationController():getAssetId(1))
-								bedwars.ViewmodelController:playAnimation(15)
-							end
-							task.wait(0.3)
-							if animation ~= nil then
-								animation:Stop()
-								animation:Destroy()
-							end
-						else
-							failedBreak = failedBreak + 1
+				bedwars.ClientDamageBlock:Get('DamageBlock'):CallServerAsync({
+					blockRef = blockhealthbarpos,
+					hitPosition = blockpos * 3,
+					hitNormal = Vector3.FromNormalId(normal)
+				}):andThen(function(result)
+					if result ~= 'failed' then
+						if healthbarblocktable.blockHealth == -1 or blockhealthbarpos.blockPosition ~= healthbarblocktable.breakingBlockPosition then
+							local blockdata = bedwars.BlockController:getStore():getBlockData(blockhealthbarpos.blockPosition)
+							local blockhealth = blockdata and (blockdata:GetAttribute('Health') or blockdata:GetAttribute('1') or blockdata:GetAttribute(lplr.Name .. '_Health')) or block:GetAttribute('Health') or block:GetAttribute('1');
+							healthbarblocktable.blockHealth = blockhealth
+							healthbarblocktable.breakingBlockPosition = blockhealthbarpos.blockPosition
 						end
-					end)
+						healthbarblocktable.blockHealth = result == 'destroyed' and 0 or healthbarblocktable.blockHealth
+						blockdmg = bedwars.BlockController:calculateBlockDamage(lplr, blockhealthbarpos)
+						healthbarblocktable.blockHealth = math.max(healthbarblocktable.blockHealth - blockdmg, 0)
+						if effects then
+							bedwars.BlockBreaker:updateHealthbar(blockhealthbarpos, healthbarblocktable.blockHealth, block:GetAttribute('MaxHealth'), blockdmg, block)
+							if healthbarblocktable.blockHealth <= 0 then
+								bedwars.BlockBreaker.breakEffect:playBreak(block.Name, blockhealthbarpos.blockPosition, lplr)
+								bedwars.BlockBreaker.healthbarMaid:DoCleaning()
+								healthbarblocktable.breakingBlockPosition = Vector3.zero
+							else
+								bedwars.BlockBreaker.breakEffect:playHit(block.Name, blockhealthbarpos.blockPosition, lplr)
+							end
+						end
+						local animation
+						if anim then
+							animation = bedwars.AnimationUtil:playAnimation(lplr, bedwars.BlockController:getAnimationController():getAssetId(1))
+							bedwars.ViewmodelController:playAnimation(15)
+						end
+						task.wait(0.3)
+						if animation ~= nil then
+							animation:Stop()
+							animation:Destroy()
+						end
+					end
 				end)
 				task.wait(physicsUpdate)
 			end
@@ -2803,8 +2801,8 @@ run(function()
 
 	local function disablefunc()
 		if bodyvelo then bodyvelo:Destroy() end
-		task.wait(0.05);
 		RunLoops:UnbindFromHeartbeat('InfiniteFlyOff')
+		task.wait(0.1);
 		render.utils.clone:destroyCloneInstance('InfiniteFly');
 		disabledproper = true
 		if not oldcloneroot or not oldcloneroot.Parent then return end
@@ -2828,14 +2826,14 @@ run(function()
 		if clone then
 			clone = nil
 		end
-		task.delay(0.25, function()
+		if InfiniteFlyMode.Value ~= 'Lowest' then
 			local origcf = {oldcloneroot.CFrame:GetComponents()}
 			origcf[2] = oldclonepos
 			oldcloneroot.CFrame = CFrame.new(unpack(origcf))
 			oldcloneroot = nil
 			InfiniteFlyLanded = true;
-			warningNotification('InfiniteFly', 'Landed!', 3)
-		end)
+		end
+		warningNotification('InfiniteFly', 'Landed!', 3)
 	end
 
 	InfiniteFly = blatant.Api.CreateOptionsButton({
@@ -2917,19 +2915,20 @@ run(function()
 				end
 				local isflagged = false;
 				local goneup = false
+				warningNotification('InfiniteFly', 'Teleported Up', 3)
 				RunLoops:BindToHeartbeat('InfiniteFly', function(delta)
 					if vape.ObjectsThatCanBeSaved['Lobby CheckToggle'].Api.Enabled then
 						if store.matchState == 0 then return end
 					end
 					if entityLibrary.isAlive then
 						if isnetworkowner(oldcloneroot) then
+							if isflagged then
+								isflagged = false;
+								alertNotification('InfiniteFly', 'The issue has been resolved.', 12);
+							end;
 							local playerMass = (entityLibrary.character.HumanoidRootPart:GetMass() - 1.4) * (delta * 100)
-
-							local flyVelocity = entityLibrary.character.Humanoid.MoveDirection * (InfiniteFlyMode.Value == 'Normal' and InfiniteFlySpeed.Value or 20)
+							local flyVelocity = entityLibrary.character.Humanoid.MoveDirection * 20
 							entityLibrary.character.HumanoidRootPart.Velocity = flyVelocity + (Vector3.new(0, playerMass + (InfiniteFlyUp and InfiniteFlyVerticalSpeed.Value or 0) + (InfiniteFlyDown and -InfiniteFlyVerticalSpeed.Value or 0), 0))
-							if InfiniteFlyMode.Value ~= 'Normal' then
-								entityLibrary.character.HumanoidRootPart.CFrame = entityLibrary.character.HumanoidRootPart.CFrame + (entityLibrary.character.Humanoid.MoveDirection * ((InfiniteFlySpeed.Value + getSpeed()) - 20)) * delta
-							end
 
 							local speedCFrame = {oldcloneroot.CFrame:GetComponents()}
 							speedCFrame[1] = clone.CFrame.X
@@ -2941,12 +2940,11 @@ run(function()
 							oldcloneroot.CFrame = CFrame.new(unpack(speedCFrame))
 							oldcloneroot.Velocity = Vector3.new(clone.Velocity.X, oldcloneroot.Velocity.Y, clone.Velocity.Z)
 						else
+							lplr.Character.PrimaryPart.CFrame = CFrame.new(oldcloneroot.CFrame.X, lplr.Character.PrimaryPart.CFrame.Y, oldcloneroot.CFrame.Z);
 							if not isflagged then
 								isflagged = true;
-								alertNotification('InfiniteFly', 'You Flagged, your character position will be spoofed until this is resolved', 12);
+								alertNotification('InfiniteFly', 'You Flagged, InfiniteFly has been disabled for possibly 5 seconds.', 12);
 							end;
-							local ylevel = clone.CFrame.Y;
-							clone.CFrame = CFrame.new(oldcloneroot.CFrame.X, ylevel, oldcloneroot.CFrame.Z)
 						end
 					end
 				end)
@@ -2989,7 +2987,6 @@ run(function()
 					oldcloneroot.CFrame = CFrame.new(unpack(origcf))
 					entityLibrary.character.Humanoid:ChangeState(Enum.HumanoidStateType.Landed)
 					disabledproper = false
-					warningNotification('InfiniteFly', 'Waiting 0.5 to not flag', 3)
 					disablefunc()
 				end
 				InfiniteFlyUp = false
@@ -3000,6 +2997,11 @@ run(function()
 		ExtraText = function()
 			return 'Heatseeker'
 		end
+	})
+	InfiniteFlyMode = InfiniteFly.CreateDropdown({
+		Name = 'Mode',
+		List = {'CFrame', 'Lowest'},
+		Function = void
 	})
 	InfiniteFlySpeed = InfiniteFly.CreateSlider({
 		Name = 'Speed',
@@ -4149,7 +4151,6 @@ run(function()
 	local damagetimertick = 0
 	local directionvec
 	local LongJumpSpeed = {Value = 1.5};
-	local LongJumpExtraVelo: vapeminimodule = {Enabled = true};
 	local projectileRemote = bedwars.Client:Get(bedwars.ProjectileRemote)
 
 	local function calculatepos(vec)
@@ -4395,7 +4396,7 @@ run(function()
 									newvelo = Vector3.zero
 								end
 
-								entityLibrary.character.HumanoidRootPart.Velocity = (newvelo + Vector3.new(0, LongJumpExtraVelo.Enabled and (LongJumpSpeed.Value / 3) or 0, 0))
+								entityLibrary.character.HumanoidRootPart.Velocity = (newvelo + Vector3.new(0, LongJumpExtraVelo.Enabled and (LongJumpVelocitySpeed.Value > 0 and LongJumpVelocitySpeed.Value / 2 or LongJumpSpeed.Value / 3) or 0, 0))
 								entityLibrary.character.HumanoidRootPart.CFrame = entityLibrary.character.HumanoidRootPart.CFrame + (longJumpCFrame)
 							else
 								LongJumpacprogressbartext.Text = '2.5s'
@@ -4436,8 +4437,20 @@ run(function()
 	LongJumpExtraVelo = LongJump.CreateToggle({
 		Name = 'Velocity',
 		HoverText = 'Makes you fly while longjumping',
+		Function = function(call: bool): ()
+			pcall(function()
+				LongJumpVelocitySpeed.Object.Visible = call;
+			end);
+		end;
+	});
+	LongJumpVelocitySpeed = LongJump.CreateSlider({
+		Name = 'Velocity Speed',
+		Min = 1,
+		Max = 100,
+		Default = 80,
 		Function = void
 	});
+	LongJumpVelocitySpeed.Object.Visible = false
 end);	
 
 run(function()
@@ -9140,14 +9153,16 @@ run(function()
 					end
 				end))
 				task.spawn(function()
+					local broke = false;
 					repeat
 						if (not nukernofly.Enabled or not vape.ObjectsThatCanBeSaved.FlyOptionsButton.Api.Enabled) then
-							local broke = not entityLibrary.isAlive
+							broke = false;
+							task.wait(0.05)
 							local tool = (not nukerlegit.Enabled) and {Name = 'wood_axe'} or store.localHand.tool
 							if nukerbeds.Enabled then
 								for i, obj in (collection:GetTagged('bed')) do
 									if broke then break end
-									if typeof(obj) == 'Instance' and obj.Parent ~= nil then
+									if typeof(obj) == 'Instance' and obj.Parent ~= nil and not obj:GetAttribute('BedShieldEndTime') then
 										if ((entityLibrary.LocalPosition or entityLibrary.character.HumanoidRootPart.Position) - obj.Position).magnitude <= nukerrange.Value then
 											task.spawn(function()
 												if tool and bedwars.ItemTable[tool.Name].breakBlock and bedwars.BlockController:isBlockBreakable({blockPosition = obj.Position / 3}, lplr) then
@@ -9157,7 +9172,6 @@ run(function()
 													bedwars.breakBlock((amount < amount2 and obj.Position or obj.Position + Vector3.new(0, 0, 3)), nukereffects.Enabled, (amount < amount2 and res or res2), false, nukeranimation.Enabled)
 												end
 											end)
-											break
 										end
 									end
 								end
@@ -9178,13 +9192,11 @@ run(function()
 													bedwars.breakBlock(obj.Position, nukereffects.Enabled, getBestBreakSide(obj.Position), true, nukeranimation.Enabled)
 												end
 											end)
-											break
 										end
 									end
 								end
 							end
 						end
-						task.wait(0.1)
 					until (not Nuker.Enabled)
 				end)
 			else
@@ -13023,15 +13035,15 @@ run(function()
 			task.wait();
 			if flagnotification == nil and (isEnabled('AntiHit') or isEnabled('Desync')) and clone.cache.__currentroot and (not isnetworkowner(clone.cache.__currentroot) or not isnetworkowner(lplr.Character.PrimaryPart)) then 
 				flagnotification = true;
-				lplr.Character.PrimaryPart.CFrame = clone.cache.__currentroot.CFrame
+				clone.cache.__currentclone.CFrame = clone.cache.__currentroot.CFrame
 				alertNotification('Clone', 'Network ownership disowned, slowing down speed for possibly 8 seconds.', 12);
 				repeat 
-					lplr.Character.PrimaryPart.CFrame = clone.cache.__currentroot.CFrame
+					clone.cache.__currentclone.CFrame = clone.cache.__currentroot.CFrame
 					task.wait() 
 				until (clone.cache.__currentroot == nil or isnetworkowner(clone.cache.__currentroot) or not isEnabled('AntiHit') or not isEnabled('Desync'));
-			elseif flagnotification and (isnetworkowner(clone.cache.__currentroot) or isnetworkowner(lplr.Character.PrimaryPart)) then
+			elseif flagnotification and (clone.cache.__currentroot and isnetworkowner(clone.cache.__currentroot) or isnetworkowner(lplr.Character.PrimaryPart)) then
 				flagnotification = nil;
-				alertNotification('Clone', 'Resolved', 13)
+				alertNotification('Clone', 'The issue has been resolved', 13)
 			end;
 		until false;
 	end));
