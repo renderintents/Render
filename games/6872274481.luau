@@ -12043,7 +12043,7 @@ run(function()
 					end;
 					oldroot = clone.cache.__currentroot or lplr.Character and lplr.Character.PrimaryPart or nil;
 					newroot = clone:getLocalClone('AntiHit', true);
-					if vapeTargetInfo.Targets.Killaura and oldroot then 
+					if vapeTargetInfo.Targets.Killaura and oldroot and not isEnabled('InfiniteFly') then 
 						if tick() > bouncedelay and isAlive(lplr, true) and lplr.Character.PrimaryPart == newroot then 
 							bouncedelay = tick() + 0.4;
 							for i = 1, 5 do 
@@ -12914,6 +12914,9 @@ run(function()
                             continue;
                         end;
                         if isAlive(lplr, true) then
+							if isEnabled('InfiniteFly') then
+								continue
+							end;
                             oldroot.Velocity = Vector3.zero;
 							oldroot.Transparency = desyncvisual.Enabled and 0.5 or 1;
 							oldroot.Color = Color3.fromHSV(desyncvisualcolor.Hue, desyncvisualcolor.Sat, desyncvisualcolor.Value);
