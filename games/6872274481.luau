@@ -547,10 +547,7 @@ local function getSpeed(): (number)
 	if lplr.Character then
 		local SpeedDamageBoost = lplr.Character:GetAttribute('SpeedBoost')
 		if SpeedDamageBoost and SpeedDamageBoost > 1 then
-			speed += (14 * (SpeedDamageBoost - 1))
-			if isEnabled('Desync') and render.clone.new then 
-				speed += 14;
-			end;
+			speed += (22 * (SpeedDamageBoost - 1))
 		end
 		if store.grapple > tick() then
 			speed += 90
