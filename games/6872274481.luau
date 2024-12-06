@@ -1537,35 +1537,37 @@ run(function()
 					hitNormal = Vector3.FromNormalId(normal)
 				}):andThen(function(result)
 					if result ~= 'failed' then
-						if healthbarblocktable.blockHealth == -1 or blockhealthbarpos.blockPosition ~= healthbarblocktable.breakingBlockPosition then
-							local blockdata = bedwars.BlockController:getStore():getBlockData(blockhealthbarpos.blockPosition)
-							local blockhealth = blockdata and (blockdata:GetAttribute('Health') or blockdata:GetAttribute('1') or blockdata:GetAttribute(lplr.Name .. '_Health')) or block:GetAttribute('Health') or block:GetAttribute('1');
-							healthbarblocktable.blockHealth = blockhealth
-							healthbarblocktable.breakingBlockPosition = blockhealthbarpos.blockPosition
-						end
-						healthbarblocktable.blockHealth = result == 'destroyed' and 0 or healthbarblocktable.blockHealth
-						blockdmg = bedwars.BlockController:calculateBlockDamage(lplr, blockhealthbarpos)
-						healthbarblocktable.blockHealth = math.max(healthbarblocktable.blockHealth - blockdmg, 0)
-						if effects then
-							bedwars.BlockBreaker:updateHealthbar(blockhealthbarpos, healthbarblocktable.blockHealth, block:GetAttribute('MaxHealth'), blockdmg, block)
-							if healthbarblocktable.blockHealth <= 0 then
-								bedwars.BlockBreaker.breakEffect:playBreak(block.Name, blockhealthbarpos.blockPosition, lplr)
-								bedwars.BlockBreaker.healthbarMaid:DoCleaning()
-								healthbarblocktable.breakingBlockPosition = Vector3.zero
-							else
-								bedwars.BlockBreaker.breakEffect:playHit(block.Name, blockhealthbarpos.blockPosition, lplr)
+						task.spawn(function()
+							if healthbarblocktable.blockHealth == -1 or blockhealthbarpos.blockPosition ~= healthbarblocktable.breakingBlockPosition then
+								local blockdata = bedwars.BlockController:getStore():getBlockData(blockhealthbarpos.blockPosition)
+								local blockhealth = blockdata and (blockdata:GetAttribute('Health') or blockdata:GetAttribute('1') or blockdata:GetAttribute(lplr.Name .. '_Health')) or block:GetAttribute('Health') or block:GetAttribute('1');
+								healthbarblocktable.blockHealth = blockhealth
+								healthbarblocktable.breakingBlockPosition = blockhealthbarpos.blockPosition
 							end
-						end
-						local animation
-						if anim then
-							animation = bedwars.AnimationUtil:playAnimation(lplr, bedwars.BlockController:getAnimationController():getAssetId(1))
-							bedwars.ViewmodelController:playAnimation(15)
-						end
-						task.wait(0.3)
-						if animation ~= nil then
-							animation:Stop()
-							animation:Destroy()
-						end
+							healthbarblocktable.blockHealth = result == 'destroyed' and 0 or healthbarblocktable.blockHealth
+							blockdmg = bedwars.BlockController:calculateBlockDamage(lplr, blockhealthbarpos)
+							healthbarblocktable.blockHealth = math.max(healthbarblocktable.blockHealth - blockdmg, 0)
+							if effects then
+								bedwars.BlockBreaker:updateHealthbar(blockhealthbarpos, healthbarblocktable.blockHealth, block:GetAttribute('MaxHealth'), blockdmg, block)
+								if healthbarblocktable.blockHealth <= 0 then
+									bedwars.BlockBreaker.breakEffect:playBreak(block.Name, blockhealthbarpos.blockPosition, lplr)
+									bedwars.BlockBreaker.healthbarMaid:DoCleaning()
+									healthbarblocktable.breakingBlockPosition = Vector3.zero
+								else
+									bedwars.BlockBreaker.breakEffect:playHit(block.Name, blockhealthbarpos.blockPosition, lplr)
+								end
+							end
+							local animation
+							if anim then
+								animation = bedwars.AnimationUtil:playAnimation(lplr, bedwars.BlockController:getAnimationController():getAssetId(1))
+								bedwars.ViewmodelController:playAnimation(15)
+							end
+							task.wait(0.3)
+							if animation ~= nil then
+								animation:Stop()
+								animation:Destroy()
+							end
+						end)
 					end
 				end)
 				task.wait(physicsUpdate)
@@ -2864,27 +2866,24 @@ run(function()
 				end));
 			else
 				if not isAlive(lplr, true) then return; end;
-				warningNotification('InfiniteFly', 'Waiting 1.2s for the fly to finish.', 4);
+				warningNotification('InfiniteFly', 'Waiting 0.7s for the fly to finish.', 4);
 				local oldposition: Vector3 = infiniteflymodes[infiniteflymode.Value]();
-				oldroot.Velocity = Vector3.zero; 
-				--task.delay(0.2, function()
-					for _: number = 1, 12 do
-						if not isnetworkowner(oldroot) then
-							warningNotification('InfiniteFly', 'Network ownership disowned, Might take a little longer than expected.', 10);
-							repeat task.wait() until isnetworkowner(oldroot);
-							task.wait(0.05);
-							oldroot.Velocity = Vector3.zero; 
-						end;
-						oldroot.CFrame = CFrame.new(oldposition.X, oldposition.Y, oldposition.Z);
-						task.wait(0.1);
+				for _: number = 1, 7 do
+					if not isnetworkowner(oldroot) then
+						warningNotification('InfiniteFly', 'Network ownership disowned, Might take a little longer than expected.', 10);
+						repeat task.wait() until isnetworkowner(oldroot);
+						task.wait(0.05);
 					end;
-					oldroot = nil;
-					newroot = nil;
-					clone:destroyCloneInstance('InfiniteFly');
-					flyup = false;
-					flydown = false;
-					warningNotification('InfiniteFly', 'Landed', 5);
-				--end);
+					oldroot.CFrame = CFrame.new(oldposition.X, oldposition.Y, oldposition.Z);
+					task.wait(0.1);
+				end;
+				oldroot.Velocity = Vector3.zero; 
+				oldroot = nil;
+				newroot = nil;
+				clone:destroyCloneInstance('InfiniteFly');
+				flyup = false;
+				flydown = false;
+				warningNotification('InfiniteFly', 'Landed', 5);
 			end
 		end;
 	});
