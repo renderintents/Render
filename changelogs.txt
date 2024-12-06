@@ -1,3 +1,6 @@
 ----> [UNIVERSAL] <-----
 
-[=] Salad should be resupported
+[+] New vault encryption algorithm
+[=] Downtime over, All licenses have been compensated.
+
+(all changes require reinstall)
