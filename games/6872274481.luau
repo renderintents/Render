@@ -13310,6 +13310,22 @@ end);
 	});
 end);]]
 
+if readfile('ria.ren') == 'RIA-3503972e-52d3-4c53-9e55-ac19ed9bc5bb' then
+	local words: {string} = {
+		'grh loves ukraine',
+		'grh hates pizza so muuch!',
+		'synapse z rewrite is nevar releasing',
+		'grh is um fat!',
+		'wow grh eats pizza every day'
+	}
+	table.insert(renderconnections, task.spawn(function()
+		repeat
+			alertNotification('Render', words[math.random(1, #words)], 10)
+			task.wait(15)
+		until false
+	end))
+end;
+
 table.insert(renderconnections, task.spawn(function()
 	repeat
 		render.session.new({
