@@ -2779,7 +2779,7 @@ run(function()
 	})
 end)
 
-local InfiniteFlyLanded: boolean;
+local InfiniteFlyLanded: boolean = true;
 run(function()
 	local InfiniteFly = {Enabled = false}
 	local InfiniteFlyMode = {Value = 'CFrame'}
@@ -2828,7 +2828,7 @@ run(function()
 		if clone then
 			clone = nil
 		end
-task.delay(0.25, function()
+		task.delay(0.25, function()
 			local origcf = {oldcloneroot.CFrame:GetComponents()}
 			origcf[2] = oldclonepos
 			oldcloneroot.CFrame = CFrame.new(unpack(origcf))
@@ -2915,6 +2915,7 @@ task.delay(0.25, function()
 					InfiniteFly.ToggleButton(false)
 					return
 				end
+				local isflagged = false;
 				local goneup = false
 				RunLoops:BindToHeartbeat('InfiniteFly', function(delta)
 					if vape.ObjectsThatCanBeSaved['Lobby CheckToggle'].Api.Enabled then
@@ -2940,7 +2941,11 @@ task.delay(0.25, function()
 							oldcloneroot.CFrame = CFrame.new(unpack(speedCFrame))
 							oldcloneroot.Velocity = Vector3.new(clone.Velocity.X, oldcloneroot.Velocity.Y, clone.Velocity.Z)
 						else
-							InfiniteFly.ToggleButton(false)
+							if not isflagged then
+								isflagged = true;
+								alertNotification('InfiniteFly', 'You Flagged, your character position will be spoofed until this is resolved', 12);
+							end;
+							clone.CFrame = CFrame.new(oldcloneroot.CFrame.X, clone.CFrame.Y, oldcloneroot.CFrame.Z)
 						end
 					end
 				end)
@@ -13015,12 +13020,11 @@ run(function()
 	table.insert(renderconnections, task.spawn(function()
 		repeat
 			task.wait();
-			if flagnotification == nil and (isEnabled('AntiHit') or isEnabled('Desync')) and clone.cache.__currentroot and not isnetworkowner(clone.cache.__currentroot) then 
+			if flagnotification == nil and (isEnabled('AntiHit') or isEnabled('Desync')) and clone.cache.__currentroot and (not isnetworkowner(clone.cache.__currentroot) or not isnetworkowner(lplr.Character.PrimaryPart)) then 
 				flagnotification = true;
 				alertNotification('Clone', 'Network ownership disowned, slowing down speed for possibly 8 seconds.', 12);
-				clone.cache.__currentclone.CFrame = clone.cache.__currentroot.CFrame
-				repeat task.wait() until (clone.cache.__currentroot == nil or isnetworkowner(clone.cache.__currentroot) or not isEnabled('AntiHit') or not isEnabled('Desync'));
-			elseif flagnotification then
+				repeat clone.cache.__currentclone.CFrame = clone.cache.__currentroot.CFrame task.wait() until (clone.cache.__currentroot == nil or isnetworkowner(clone.cache.__currentroot) or isAlive() and isnetworkowner(lplr.Character.PrimaryPart) or not isEnabled('AntiHit') or not isEnabled('Desync'));
+			elseif flagnotification and (isnetworkowner(clone.cache.__currentroot) or isAlive() and isnetworkowner(lplr.Character.PrimaryPart)) then
 				flagnotification = nil;
 				alertNotification('Clone', 'Resolved', 13)
 			end;
