@@ -2780,6 +2780,8 @@ run(function()
 	})
 end)
 
+local SpeedValue: vapeslider = {Value = 1}
+local InfiniteFlyLanded: boolean = true;
 run(function()
 	local infinitefly: vapemodule = {Enabled = false};
 	local infiniteflycollide: vapeminimodule = {Enabled = false};
@@ -2811,6 +2813,7 @@ run(function()
 				if store.matchState == 0 then 
 					return infinitefly.ToggleButton();
 				end;
+				InfiniteFlyLanded = false;
 				table.insert(infinitefly.Connections, inputservice.InputBegan:Connect(function(input1)
 					if inputservice:GetFocusedTextBox() == nil then
 						if input1.KeyCode == Enum.KeyCode.Space or input1.KeyCode == Enum.KeyCode.ButtonA then
@@ -2846,7 +2849,7 @@ run(function()
 						infinitefly.ToggleButton(false); 
 					end;
 
-					local speedCFrame = entityLibrary.character.Humanoid.MoveDirection * ((23 + getSpeed()) - 20) * delta
+					local speedCFrame = entityLibrary.character.Humanoid.MoveDirection * ((SpeedValue.Value + getSpeed()) - 20) * delta
 					raycastparameters.FilterDescendantsInstances = {lplr.Character}
 					local ray = workspace:Raycast(entityLibrary.character.HumanoidRootPart.Position, speedCFrame, raycastparameters)
 					if ray then speedCFrame = (ray.Position - entityLibrary.character.HumanoidRootPart.Position) end
@@ -2854,7 +2857,7 @@ run(function()
 					
 					local playerMass = (entityLibrary.character.HumanoidRootPart:GetMass() - 1.4) * (delta * 100)
 					local flyVelocity = entityLibrary.character.Humanoid.MoveDirection * 20
-					newroot.Velocity = flyVelocity + (Vector3.new(0, playerMass + (flyup and infiniteflyvertical.Value or 0) + (flydown and -infiniteflyvertical.Value or 0), 0))
+					entityLibrary.character.HumanoidRootPart.Velocity = flyVelocity + (Vector3.new(0, playerMass + (flyup and infiniteflyvertical.Value or 0) + (flydown and -infiniteflyvertical.Value or 0), 0))
 					if isnetworkowner(oldroot) then
 						if disowned then
 							disowned = false;
@@ -2892,19 +2895,16 @@ run(function()
 				clone:destroyCloneInstance('InfiniteFly');
 				flyup = false;
 				flydown = false;
+				InfiniteFlyLanded = true;
 				warningNotification('InfiniteFly', 'Landed', 5);
 			end
 		end;
 	});
-	local list: {string} = {};
-	for i: string, v: {() -> ()} in infiniteflymodes do
-		table.insert(list, i);
-	end;
 	infiniteflymode = infinitefly.CreateDropdown({
 		Name = 'Mode',
 		Function = void,
-		List = list,
-		Default = list[2]
+		List = dumplist(infiniteflymodes),
+		Default = 'Lowest'
 	});
 	infiniteflycollide = infinitefly.CreateToggle({
 		Name = 'CanCollide',
@@ -4853,7 +4853,6 @@ local antivoidvelo
 run(function()
 	local Speed = {Enabled = false}
 	local SpeedMode = {Value = 'CFrame'}
-	local SpeedValue = {Value = 1}
 	local SpeedValueLarge = {Value = 1}
 	local SpeedJump = {Enabled = false}
 	local SpeedJumpHeight = {Value = 20}
