@@ -2795,7 +2795,7 @@ run(function()
 			return ray and ray.Position or newroot.Position;
 		end,
 		Lowest = function(): (Vector3)
-			local ray: Raycast = workspace:Raycast(newroot.Position, Vector3.new(0, -60, 0), store.raycast)
+			local ray: Raycast = workspace:Raycast(newroot.Position, Vector3.new(0, -230, 0), store.raycast)
 			return ray and ray.Position or newroot.Position;
 		end,
 		Normal = function(): (Vector3)
@@ -2866,9 +2866,9 @@ run(function()
 				end));
 			else
 				if not isAlive(lplr, true) then return; end;
-				warningNotification('InfiniteFly', 'Waiting 0.7s for the fly to finish.', 4);
+				warningNotification('InfiniteFly', 'Waiting 1.2s for the fly to finish.', 4);
 				local oldposition: Vector3 = infiniteflymodes[infiniteflymode.Value]();
-				for _: number = 1, 7 do
+				for _: number = 1, 12 do
 					if not isnetworkowner(oldroot) then
 						warningNotification('InfiniteFly', 'Network ownership disowned, Might take a little longer than expected.', 10);
 						repeat task.wait() until isnetworkowner(oldroot);
@@ -2895,19 +2895,19 @@ run(function()
 		Name = 'Mode',
 		Function = void,
 		List = list,
-		Default = 'Lowest'
+		Default = list[2]
 	});
 	infiniteflycollide = infinitefly.CreateToggle({
 		Name = 'CanCollide',
 		Function = void
-	})
+	});
 	infiniteflyvertical = infinitefly.CreateSlider({
 		Name = 'Vertical Speed',
 		Min = 1,
 		Max = 100,
 		Default = 77,
 		Function = void
-	})
+	});
 end);
 
 local killauraNearPlayer;
