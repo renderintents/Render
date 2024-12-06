@@ -2867,7 +2867,7 @@ run(function()
 				warningNotification('InfiniteFly', 'Waiting 1.2s for the fly to finish.', 4);
 				local oldposition: Vector3 = infiniteflymodes[infiniteflymode.Value]();
 				oldroot.Velocity = Vector3.zero; 
-				task.delay(0.2, function()
+				--task.delay(0.2, function()
 					for _: number = 1, 12 do
 						if not isnetworkowner(oldroot) then
 							warningNotification('InfiniteFly', 'Network ownership disowned, Might take a little longer than expected.', 10);
@@ -2884,7 +2884,7 @@ run(function()
 					flyup = false;
 					flydown = false;
 					warningNotification('InfiniteFly', 'Landed', 5);
-				end);
+				--end);
 			end
 		end;
 	});
