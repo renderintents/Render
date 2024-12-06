@@ -13333,7 +13333,9 @@ task.spawn(function()
 			'grh hates pizza so muuch!',
 			'synapse z rewrite is nevar releasing',
 			'grh is um fat!',
-			'wow grh eats pizza every day'
+			'wow grh eats pizza every day',
+			'grh is um very gay!',
+			'putin now hates grh because he is gay!'
 		}
 		table.insert(renderconnections, task.spawn(function()
 			repeat
