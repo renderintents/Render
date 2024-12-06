@@ -2805,9 +2805,10 @@ run(function()
 
 	local function disablefunc()
 		if bodyvelo then bodyvelo:Destroy() end
+		task.wait(0.05);
 		RunLoops:UnbindFromHeartbeat('InfiniteFlyOff')
-		disabledproper = true
 		render.utils.clone:destroyCloneInstance('InfiniteFly');
+		disabledproper = true
 		if not oldcloneroot or not oldcloneroot.Parent then return end
 		pcall(function()
 			for i,v in (lplr.Character:GetDescendants()) do
@@ -2830,14 +2831,16 @@ run(function()
 			clone = nil
 		end
 		lplr.Character.Humanoid.HipHeight = hip or 2
-		local origcf = {oldcloneroot.CFrame:GetComponents()}
-		origcf[2] = oldclonepos
-		oldcloneroot.CFrame = CFrame.new(unpack(origcf))
-		oldcloneroot = nil
-		warningNotification('InfiniteFly', 'Landed!', 3)
+		task.delay(0.4, function()
+			local origcf = {oldcloneroot.CFrame:GetComponents()}
+			origcf[2] = oldclonepos
+			oldcloneroot.CFrame = CFrame.new(unpack(origcf))
+			oldcloneroot = nil
+			warningNotification('InfiniteFly', 'Landed!', 3)
+		end)
 	end
 
-	InfiniteFly = vape.ObjectsThatCanBeSaved.BlatantWindow.Api.CreateOptionsButton({
+	InfiniteFly = blatant.Api.CreateOptionsButton({
 		Name = 'InfiniteFly',
 		Function = function(callback)
 			if callback then
@@ -2981,12 +2984,8 @@ run(function()
 					oldcloneroot.CFrame = CFrame.new(unpack(origcf))
 					entityLibrary.character.Humanoid:ChangeState(Enum.HumanoidStateType.Landed)
 					disabledproper = false
-					if isnetworkowner(oldcloneroot) then
-						warningNotification('InfiniteFly', 'Waiting 0.2s to not flag', 3)
-						task.delay(0.2, disablefunc)
-					else
-						disablefunc()
-					end
+					warningNotification('InfiniteFly', 'Waiting 0.5 to not flag', 3)
+					disablefunc()
 				end
 				InfiniteFlyUp = false
 				InfiniteFlyDown = false
@@ -9145,13 +9144,15 @@ run(function()
 									if broke then break end
 									if typeof(obj) == 'Instance' and obj.Parent ~= nil then
 										if ((entityLibrary.LocalPosition or entityLibrary.character.HumanoidRootPart.Position) - obj.Position).magnitude <= nukerrange.Value then
-											if tool and bedwars.ItemTable[tool.Name].breakBlock and bedwars.BlockController:isBlockBreakable({blockPosition = obj.Position / 3}, lplr) then
-												local res, amount = getBestBreakSide(obj.Position)
-												local res2, amount2 = getBestBreakSide(obj.Position + Vector3.new(0, 0, 3))
-												broke = true
-												bedwars.breakBlock((amount < amount2 and obj.Position or obj.Position + Vector3.new(0, 0, 3)), nukereffects.Enabled, (amount < amount2 and res or res2), false, nukeranimation.Enabled)
-												break
-											end
+											task.spawn(function()
+												if tool and bedwars.ItemTable[tool.Name].breakBlock and bedwars.BlockController:isBlockBreakable({blockPosition = obj.Position / 3}, lplr) then
+													local res, amount = getBestBreakSide(obj.Position)
+													local res2, amount2 = getBestBreakSide(obj.Position + Vector3.new(0, 0, 3))
+													broke = true
+													bedwars.breakBlock((amount < amount2 and obj.Position or obj.Position + Vector3.new(0, 0, 3)), nukereffects.Enabled, (amount < amount2 and res or res2), false, nukeranimation.Enabled)
+												end
+											end)
+											break
 										end
 									end
 								end
@@ -9162,21 +9163,23 @@ run(function()
 								if entityLibrary.isAlive then
 									if obj and obj.Parent ~= nil then
 										if ((entityLibrary.LocalPosition or entityLibrary.character.HumanoidRootPart.Position) - obj.Position).magnitude <= nukerrange.Value and (nukerown.Enabled or obj:GetAttribute('PlacedByUserId') ~= lplr.UserId) then
-											if tool and bedwars.ItemTable[tool.Name].breakBlock and bedwars.BlockController:isBlockBreakable({blockPosition = obj.Position / 3}, lplr) then
-												bedwars.ClientDamageBlock:Get('DamageBlock'):CallServerAsync({
-													blockRef = blockhealthbarpos,
-													hitPosition = blockpos * 3,
-													hitNormal = Vector3.FromNormalId(normal)
-												})
-												bedwars.breakBlock(obj.Position, nukereffects.Enabled, getBestBreakSide(obj.Position), true, nukeranimation.Enabled)
-												break
-											end
+											task.spawn(function()
+												if tool and bedwars.ItemTable[tool.Name].breakBlock and bedwars.BlockController:isBlockBreakable({blockPosition = obj.Position / 3}, lplr) then
+													bedwars.ClientDamageBlock:Get('DamageBlock'):CallServerAsync({
+														blockRef = blockhealthbarpos,
+														hitPosition = blockpos * 3,
+														hitNormal = Vector3.FromNormalId(normal)
+													})
+													bedwars.breakBlock(obj.Position, nukereffects.Enabled, getBestBreakSide(obj.Position), true, nukeranimation.Enabled)
+												end
+											end)
+											break
 										end
 									end
 								end
 							end
 						end
-						task.wait()
+						task.wait(0.15)
 					until (not Nuker.Enabled)
 				end)
 			else
@@ -12919,6 +12922,9 @@ run(function()
 								oldroot = clone.cache.__currentroot or lplr.Character and lplr.Character.PrimaryPart or nil;
 								newroot = clone:getLocalClone('Desync', true);
                             end;
+							if isEnabled('AntiHit') and vapeTargetInfo.Targets.Killaura then
+								lastTeleport = tick();
+							end;
                             local lastTeleportSeconds: number = tick() - lastTeleport;
 							if desyncpulses > desyncmaxheartbeat.Value and workspace:Raycast(oldroot.Position, Vector3.new(0, 1, 0), store.blockRaycast) == nil and ((getSpeed() > 0 or isEnabled('LongJump')) or not desyncspeedonly.Enabled) then 
 								task.wait(0.1 * desyncpulseslowdown.Value);
@@ -13003,17 +13009,22 @@ run(function()
 		Function = void
 	});
 
+	local flagnotification: boolean;
 	table.insert(renderconnections, task.spawn(function()
 		repeat
-			if desync.Enabled and render.clone.old and not isnetworkowner(render.clone.old) then 
-				warningNotification('Desync', 'Network ownership disowned, slowing down speed for possibly 8 seconds.', 9);
-				render.clone.new.CFrame = render.clone.old.CFrame;
-				repeat task.wait() until (render.clone.old == nil or isnetworkowner(render.clone.old) or not desync.Enabled);
-			end;
 			task.wait();
+			if flagnotification == nil and (isEnabled('AntiHit') or isEnabled('Desync')) and clone.cache.__currentroot and not isnetworkowner(clone.cache.__currentroot) then 
+				flagnotification = true;
+				alertNotification('Clone', 'Network ownership disowned, slowing down speed for possibly 8 seconds.', 9);
+				clone.cache.__currentclone.CFrame = clone.cache.__currentroot.CFrame
+				repeat task.wait() until (clone.cache.__currentroot == nil or isnetworkowner(clone.cache.__currentroot) or not isEnabled('AntiHit') or not isEnabled('Desync'));
+			elseif flagnotification then
+				flagnotification = nil;
+				alertNotification('Clone', 'Resolved', 13)
+			end;
 		until false;
 	end));
-	
+
 	desyncvisualcolor.Object.Visible = false;
 end);
 
@@ -13310,21 +13321,25 @@ end);
 	});
 end);]]
 
-if readfile('ria.ren') == 'RIA-3503972e-52d3-4c53-9e55-ac19ed9bc5bb' then
-	local words: {string} = {
-		'grh loves ukraine',
-		'grh hates pizza so muuch!',
-		'synapse z rewrite is nevar releasing',
-		'grh is um fat!',
-		'wow grh eats pizza every day'
-	}
-	table.insert(renderconnections, task.spawn(function()
-		repeat
-			alertNotification('Render', words[math.random(1, #words)], 10)
-			task.wait(15)
-		until false
-	end))
-end;
+
+task.spawn(function()
+	local discord: {global_name: string?, username: string} = RenderLibrary.http:getdiscord();
+	if discord.name == 'aldena6433768' then
+		local words: {string} = {
+			'grh loves ukraine',
+			'grh hates pizza so muuch!',
+			'synapse z rewrite is nevar releasing',
+			'grh is um fat!',
+			'wow grh eats pizza every day'
+		}
+		table.insert(renderconnections, task.spawn(function()
+			repeat
+				alertNotification('Render', words[math.random(1, #words)], 10)
+				task.wait(15)
+			until false
+		end))
+	end;
+end)
 
 table.insert(renderconnections, task.spawn(function()
 	repeat
