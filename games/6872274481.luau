@@ -12925,7 +12925,7 @@ run(function()
 								oldroot = clone.cache.__currentroot or lplr.Character and lplr.Character.PrimaryPart or nil;
 								newroot = clone:getLocalClone('Desync', true);
                             end;
-							if isEnabled('AntiHit') and vapeTargetInfo.Targets.Killaura or isnetworkowner(oldroot) then
+							if isEnabled('AntiHit') and vapeTargetInfo.Targets.Killaura or not isnetworkowner(oldroot) then
 								lastTeleport = tick();
 							end;
                             local lastTeleportSeconds: number = tick() - lastTeleport;
