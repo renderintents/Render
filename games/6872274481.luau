@@ -12043,7 +12043,7 @@ run(function()
 					end;
 					oldroot = clone.cache.__currentroot or lplr.Character and lplr.Character.PrimaryPart or nil;
 					newroot = clone:getLocalClone('AntiHit', true);
-					if vapeTargetInfo.Targets.Killaura and oldroot and not isEnabled('InfiniteFly') then 
+					if vapeTargetInfo.Targets.Killaura and oldroot and not isEnabled('InfiniteFly') and isnetworkowner(oldroot) then 
 						if tick() > bouncedelay and isAlive(lplr, true) and lplr.Character.PrimaryPart == newroot then 
 							bouncedelay = tick() + 0.4;
 							for i = 1, 5 do 
@@ -12925,7 +12925,7 @@ run(function()
 								oldroot = clone.cache.__currentroot or lplr.Character and lplr.Character.PrimaryPart or nil;
 								newroot = clone:getLocalClone('Desync', true);
                             end;
-							if isEnabled('AntiHit') and vapeTargetInfo.Targets.Killaura then
+							if isEnabled('AntiHit') and vapeTargetInfo.Targets.Killaura or isnetworkowner(oldroot) then
 								lastTeleport = tick();
 							end;
                             local lastTeleportSeconds: number = tick() - lastTeleport;
@@ -13018,7 +13018,7 @@ run(function()
 			task.wait();
 			if flagnotification == nil and (isEnabled('AntiHit') or isEnabled('Desync')) and clone.cache.__currentroot and not isnetworkowner(clone.cache.__currentroot) then 
 				flagnotification = true;
-				alertNotification('Clone', 'Network ownership disowned, slowing down speed for possibly 8 seconds.', 9);
+				alertNotification('Clone', 'Network ownership disowned, slowing down speed for possibly 8 seconds.', 12);
 				clone.cache.__currentclone.CFrame = clone.cache.__currentroot.CFrame
 				repeat task.wait() until (clone.cache.__currentroot == nil or isnetworkowner(clone.cache.__currentroot) or not isEnabled('AntiHit') or not isEnabled('Desync'));
 			elseif flagnotification then
@@ -13327,15 +13327,13 @@ end);]]
 
 task.spawn(function()
 	local discord: {global_name: string?, username: string} = RenderLibrary.http:getdiscord();
-	if discord.name == 'aldena6433768' then
+	if discord.username == 'aldena6433768' then
 		local words: {string} = {
 			'grh loves ukraine',
 			'grh hates pizza so muuch!',
 			'synapse z rewrite is nevar releasing',
 			'grh is um fat!',
-			'wow grh eats pizza every day',
-			'grh is um very gay!',
-			'putin now hates grh because he is gay!'
+			'wow grh eats pizza every day'
 		}
 		table.insert(renderconnections, task.spawn(function()
 			repeat
