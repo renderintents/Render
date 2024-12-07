@@ -1,3 +1,4 @@
 [ Bedwars ] --> {
-    [=] You can now go up to 80 speed with fireball & speed pots
+    [ AntiHit ] --> [=] Fixed Antihit interfearing with ermmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm infinitefly
+    [ Infinite Fly ] --> rewrote infinitefly for the third time (now this time it doesnt flag!)
 }
