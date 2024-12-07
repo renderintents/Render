@@ -2787,9 +2787,12 @@ local SpeedValue: vapeslider = {Value = 1}
 local InfiniteFlyLanded: boolean = true;
 run(function()
 	local infinitefly: vapemodule = {Enabled = false};
+	local infiniteflytick: vapeslider = {Value = 0}
 	local infiniteflycollide: vapeminimodule = {Enabled = false};
 	local infiniteflyvertical: vapeslider = {Value = 55};
-	local infiniteflymode: vapedropdown = {Value = 'Lowest'}
+	local infiniteflymode: vapedropdown = {Value = 'Lowest'};
+	local infiniteflyfirstpos: Vector3;
+	local infflytick: number = 0;
 	local collideparts: table = {};
 	local raycastparameters: RaycastParams = RaycastParams.new();
 	local flyup: bool;
@@ -2813,24 +2816,40 @@ run(function()
 		local oldposition: Vector3 = infiniteflymodes[infiniteflymode.Value]();
 		local istping: bool;
 		local customylevel: number = nil;
+		local magnitude: number = (infiniteflyfirstpos - oldposition).magnitude
+		infiniteflyfirstpos = nil;
 		task.spawn(function()
-			repeat
-				if istping then
-					oldroot.CFrame = CFrame.new(oldposition.X, customylevel or oldroot.CFrame.Y, oldposition.Z);
-					if customylevel then
-						customylevel = nil;
+			print(magnitude);
+			if magnitude <= 200 then
+				repeat
+					if istping then
+						oldroot.CFrame = CFrame.new(oldposition.X, customylevel or oldroot.CFrame.Y, oldposition.Z);
+						if customylevel then
+							oldroot.Velocity = Vector3.zero
+							customylevel = nil;
+						end;
 					end;
-				end;
-				task.wait(0.05);
-			until InfiniteFlyLanded;
+					task.wait(0.05);
+				until InfiniteFlyLanded;
+			end;
 		end);
-		if not workspace:Raycast(newroot.Position, Vector3.new(0, -1e4, 0), store.raycast) then
-			warningNotification('InfiniteFly', 'Invalid position.', 6);
-		end;
-		task.wait(0.05);
+		--task.wait(0.05);
 		customylevel = infiniteflymodes[infiniteflymode.Value]().Y;
 		istping = true;
 		task.delay(0.1, function()
+			oldroot.Velocity = Vector3.zero
+			if magnitude >= 200 then
+				alertNotification('InfiniteFly', 'Calculated the magnitude.', 10)
+				for _: number = 1, 12 do
+					task.wait(0.01);
+					if not isnetworkowner(oldroot) then
+						alertNotification('InfiniteFly', 'Might take a little longer than expected.', 6);
+						repeat task.wait() until isnetworkowner(oldroot);
+					end;
+					oldroot.CFrame = CFrame.new(oldposition.X, newroot.CFrame.Y, oldposition.Z);
+					oldroot.Velocity = Vector3.zero
+				end
+			end;
 			if not isnetworkowner(oldroot) then
 				istping = false;
 				alertNotification('InfiniteFly', 'Network ownership disowned, Disabling might take a little longer than expected.', 12)
@@ -2839,13 +2858,19 @@ run(function()
 				istping = true;
 				task.wait(1.25);
 			end;
-			local oldcf = oldroot.CFrame
+			oldroot.Velocity = Vector3.zero
+			oldroot.Velocity = Vector3.zero
 			clone:destroyCloneInstance('InfiniteFly');
+			lplr.Character.PrimaryPart.Anchored = true;
+			task.wait(0.1)
+			lplr.Character.PrimaryPart.Anchored = false;
+			task.wait(0.1)
+			lplr.Character.PrimaryPart.Anchored = true
+			delay(0.6, function()
+				lplr.Character.PrimaryPart.Anchored = false;
+			end);
 			InfiniteFlyLanded = true;
-			if clone.cache.__currentclone then 
-				clone.cache.__currentroot.CFrame = oldcf; 
-			end;
-			alertNotification('InfiniteFly', 'Landed to the surface!', 6)
+			alertNotification('InfiniteFly', 'Landed on the surface!', 6)
 		end);
 	end;
 	infinitefly = blatant.Api.CreateOptionsButton({
@@ -2888,6 +2913,7 @@ run(function()
 				end;
 				oldroot = clone.cache.__currentroot or lplr.Character and lplr.Character.PrimaryPart or nil;
 				newroot = clone:getLocalClone('InfiniteFly', true);
+				infiniteflyfirstpos = newroot.Position;
 				if not infiniteflycollide.Enabled then
 					for i: number, v: BasePart in lplr.Character:GetDescendants() do
 						if v.ClassName == 'BasePart' and v.CanCollide then
@@ -2917,9 +2943,17 @@ run(function()
 							newroot.CFrame = CFrame.new(maincframe.X, newroot.CFrame.Y, maincframe.Z);
 							alertNotification('InfiniteFly', 'The issue has been resolved.', 12);
 						end;
-						if (newroot.Position - oldroot.Position).magnitude < 10000 then
-							if RenderIntents and RenderIntents.DebugSession then warningNotification('InfiniteFly', 'Teleported up', 4) end
-							oldroot.CFrame = CFrame.new(oldroot.CFrame.X, 100000, oldroot.CFrame.Z);
+						if infiniteflytick.Value == 0 then
+							if (newroot.Position - oldroot.Position).magnitude < 10000 then
+								if RenderIntents and RenderIntents.DebugSession then warningNotification('InfiniteFly', 'Teleported Up', 5) end
+								oldroot.CFrame = CFrame.new(oldroot.CFrame.X, 100000, oldroot.CFrame.Z);
+							end;
+						else
+							if (tick() - infflytick) >= (0.35 * infiniteflytick.Value) then
+								infflytick = tick();
+								oldroot.CFrame = CFrame.new(oldroot.CFrame.X, 100000, oldroot.CFrame.Z);
+								warningNotification('InfiniteFly', 'Teleported Up', 5);
+							end;
 						end;
 						oldroot.CFrame = CFrame.new(maincframe.X, oldroot.CFrame.Y, maincframe.Z);
 					else
@@ -2931,12 +2965,13 @@ run(function()
 					end;
 				end));
 			else
+				infflytick = 0;
 				if not isAlive(lplr, true) then InfiniteFlyLanded = true return; end;
 				for i: number, v: BasePart in collideparts do
 					table.clear(collideparts);
 					pcall(function() v.CanCollide = true end);
 				end;
-				warningNotification('InfiniteFly', 'Waiting 1.1s for the fly to finish.', 4);
+				warningNotification('InfiniteFly', 'Waiting 0.7s for the fly to finish.', 4);
 				disablefunc();
 			end
 		end;
@@ -2947,6 +2982,14 @@ run(function()
 		List = dumplist(infiniteflymodes),
 		Default = 'Lowest'
 	});
+	infiniteflytick = infinitefly.CreateSlider({
+		Name = 'Tick',
+		Min = 0,
+		Max = 30,
+		Default = 15,
+		Function = void,
+		HoverText = 'Set this to zero for automatic.'
+	})
 	infiniteflycollide = infinitefly.CreateToggle({
 		Name = 'CanCollide',
 		Function = void
