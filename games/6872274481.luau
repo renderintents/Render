@@ -133,6 +133,7 @@ local vapeInjected = true;
 local RenderLibrary: table = shared.renderconstructor;
 local render = getgenv().render;
 local renderperformance = shared.renderperformance;
+getgenv().renderperformance = renderperformance;
 local bedwars = {};
 local store = {
 	attackReach = 0,
@@ -226,7 +227,7 @@ end;
 
 local getcustomasset = getsynasset or getcustomasset or function(location) return 'rbxasset://'..location end
 local queueonteleport = syn and syn.queue_on_teleport or queue_on_teleport or void
-local synapsev3 = syn and syn.toast_notification and 'V3' or ''
+local synapsev3 = ''
 local worldtoscreenpoint = function(pos)
 	if synapsev3 == 'V3' then
 		local scr = worldtoscreen({pos})
@@ -409,7 +410,9 @@ do
 		if RunLoops.HeartTable[name] then
 			RunLoops.HeartTable[name]:Disconnect()
 			RunLoops.HeartTable[name] = nil
+			return true
 		end
+		return false
 	end
 end
 
@@ -577,7 +580,7 @@ local function getSpeed(): (number)
 			local val: number = LongJumpVelocitySpeed.Value / 10.5
 			speed += speed > 0 and val * 1.5 or val
 		end;
-		if isEnabled('LongJump') and isEnabled('Desync') and render.clone.new then
+		if isEnabled('LongJump') and isEnabled('Desync') then
 			speed += 30;
 		end;
 		if (tick() - store.lastdamage) < (0.1 * damageboostdur.Value * (speed > 0 and 1.6 or 1)) and isEnabled('DamageBoost') and not isEnabled('LongJump') then 
@@ -2788,24 +2791,63 @@ run(function()
 	local infiniteflyvertical: vapeslider = {Value = 55};
 	local infiniteflymode: vapedropdown = {Value = 'Lowest'}
 	local collideparts: table = {};
-	local raycastparameters: RaycastParams = RaycastParams.new()
+	local raycastparameters: RaycastParams = RaycastParams.new();
 	local flyup: bool;
 	local flydown: bool;
 	local oldroot: BasePart;
 	local newroot: Part;
 	local infiniteflymodes: {() -> ()} = {
 		Highest = function(): (Vector3)
-			local ray: Raycast = workspace:Raycast(oldroot.Position, Vector3.new(0, -100000, 0), store.raycast)
+			local ray: RaycastResult = workspace:Raycast(oldroot.Position, Vector3.new(0, -1000000, 0), store.raycast)
 			return ray and ray.Position or newroot.Position;
 		end,
 		Lowest = function(): (Vector3)
-			local ray: Raycast = workspace:Raycast(newroot.Position, Vector3.new(0, -230, 0), store.raycast)
+			local ray: RaycastResult = workspace:Raycast(newroot.Position, Vector3.new(0, -1e4, 0), store.raycast)
 			return ray and ray.Position or newroot.Position;
 		end,
 		Normal = function(): (Vector3)
 			return newroot.Position;
 		end
 	};
+	local disablefunc = function(): ()
+		local oldposition: Vector3 = infiniteflymodes[infiniteflymode.Value]();
+		local istping: bool;
+		local customylevel: number = nil;
+		task.spawn(function()
+			repeat
+				if istping then
+					oldroot.CFrame = CFrame.new(oldposition.X, customylevel or oldroot.CFrame.Y, oldposition.Z);
+					if customylevel then
+						customylevel = nil;
+					end;
+				end;
+				task.wait(0.05);
+			until InfiniteFlyLanded;
+		end);
+		if not workspace:Raycast(newroot.Position, Vector3.new(0, -1e4, 0), store.raycast) then
+			warningNotification('InfiniteFly', 'Invalid position.', 6);
+		end;
+		task.wait(0.05);
+		customylevel = infiniteflymodes[infiniteflymode.Value]().Y;
+		istping = true;
+		task.delay(0.1, function()
+			if not isnetworkowner(oldroot) then
+				istping = false;
+				alertNotification('InfiniteFly', 'Network ownership disowned, Disabling might take a little longer than expected.', 12)
+				repeat task.wait() until isnetworkowner(oldroot)
+				task.wait(0.15);
+				istping = true;
+				task.wait(1.25);
+			end;
+			local oldcf = oldroot.CFrame
+			clone:destroyCloneInstance('InfiniteFly');
+			InfiniteFlyLanded = true;
+			if clone.cache.__currentclone then 
+				clone.cache.__currentroot.CFrame = oldcf; 
+			end;
+			alertNotification('InfiniteFly', 'Landed to the surface!', 6)
+		end);
+	end;
 	infinitefly = blatant.Api.CreateOptionsButton({
 		Name = 'InfiniteFly',
 		Function = function(call: bool): ()
@@ -2813,8 +2855,11 @@ run(function()
 				if store.matchState == 0 then 
 					return infinitefly.ToggleButton();
 				end;
+				clone:destroyCloneInstance('InfiniteFly');
+				flyup = false;
+				flydown = false;
 				InfiniteFlyLanded = false;
-				table.insert(infinitefly.Connections, inputservice.InputBegan:Connect(function(input1)
+				table.insert(infinitefly.Connections, inputservice.InputBegan:Connect(function(input1): ()
 					if inputservice:GetFocusedTextBox() == nil then
 						if input1.KeyCode == Enum.KeyCode.Space or input1.KeyCode == Enum.KeyCode.ButtonA then
 							flyup = true;
@@ -2824,7 +2869,7 @@ run(function()
 						end;
 					end;
 				end));
-				table.insert(infinitefly.Connections, inputservice.InputEnded:Connect(function(input1)
+				table.insert(infinitefly.Connections, inputservice.InputEnded:Connect(function(input1): ()
 					if input1.KeyCode == Enum.KeyCode.Space or input1.KeyCode == Enum.KeyCode.ButtonA then
 						flyup = false;
 					end;
@@ -2843,12 +2888,19 @@ run(function()
 				end;
 				oldroot = clone.cache.__currentroot or lplr.Character and lplr.Character.PrimaryPart or nil;
 				newroot = clone:getLocalClone('InfiniteFly', true);
-				local disowned: bool = false;
-				table.insert(infinitefly.Connections, runservice.Heartbeat:Connect(function(delta): ()
-					if not isAlive(lplr, true) then 
-						infinitefly.ToggleButton(false); 
+				if not infiniteflycollide.Enabled then
+					for i: number, v: BasePart in lplr.Character:GetDescendants() do
+						if v.ClassName == 'BasePart' and v.CanCollide then
+							table.insert(collideparts, v);
+							v.CanCollide = false;
+						end;
 					end;
-
+				end;
+				local disowned: bool = false;
+				table.insert(infinitefly.Connections, runservice.Heartbeat:Connect(function(delta: number): ()
+					if not isAlive(lplr, true) then 
+						return infinitefly.ToggleButton(false); 
+					end;
 					local speedCFrame = entityLibrary.character.Humanoid.MoveDirection * ((SpeedValue.Value + getSpeed()) - 20) * delta
 					raycastparameters.FilterDescendantsInstances = {lplr.Character}
 					local ray = workspace:Raycast(entityLibrary.character.HumanoidRootPart.Position, speedCFrame, raycastparameters)
@@ -2859,15 +2911,17 @@ run(function()
 					local flyVelocity = entityLibrary.character.Humanoid.MoveDirection * 20
 					entityLibrary.character.HumanoidRootPart.Velocity = flyVelocity + (Vector3.new(0, playerMass + (flyup and infiniteflyvertical.Value or 0) + (flydown and -infiniteflyvertical.Value or 0), 0))
 					if isnetworkowner(oldroot) then
+						local maincframe: Vector3 = newroot.Position
 						if disowned then
 							disowned = false;
+							newroot.CFrame = CFrame.new(maincframe.X, newroot.CFrame.Y, maincframe.Z);
 							alertNotification('InfiniteFly', 'The issue has been resolved.', 12);
 						end;
 						if (newroot.Position - oldroot.Position).magnitude < 10000 then
 							if RenderIntents and RenderIntents.DebugSession then warningNotification('InfiniteFly', 'Teleported up', 4) end
 							oldroot.CFrame = CFrame.new(oldroot.CFrame.X, 100000, oldroot.CFrame.Z);
 						end;
-						oldroot.CFrame = CFrame.new(newroot.CFrame.X, oldroot.CFrame.Y, newroot.CFrame.Z);
+						oldroot.CFrame = CFrame.new(maincframe.X, oldroot.CFrame.Y, maincframe.Z);
 					else
 						newroot.CFrame = CFrame.new(oldroot.CFrame.X, newroot.CFrame.Y, oldroot.CFrame.Z);
 						if not disowned then
@@ -2877,26 +2931,13 @@ run(function()
 					end;
 				end));
 			else
-				if not isAlive(lplr, true) then return; end;
-				warningNotification('InfiniteFly', 'Waiting 1.2s for the fly to finish.', 4);
-				local oldposition: Vector3 = infiniteflymodes[infiniteflymode.Value]();
-				for _: number = 1, 12 do
-					if not isnetworkowner(oldroot) then
-						warningNotification('InfiniteFly', 'Network ownership disowned, Might take a little longer than expected.', 10);
-						repeat task.wait() until isnetworkowner(oldroot);
-						task.wait(0.05);
-					end;
-					oldroot.CFrame = CFrame.new(oldposition.X, oldposition.Y, oldposition.Z);
-					task.wait(0.1);
+				if not isAlive(lplr, true) then InfiniteFlyLanded = true return; end;
+				for i: number, v: BasePart in collideparts do
+					table.clear(collideparts);
+					pcall(function() v.CanCollide = true end);
 				end;
-				oldroot.Velocity = Vector3.zero; 
-				oldroot = nil;
-				newroot = nil;
-				clone:destroyCloneInstance('InfiniteFly');
-				flyup = false;
-				flydown = false;
-				InfiniteFlyLanded = true;
-				warningNotification('InfiniteFly', 'Landed', 5);
+				warningNotification('InfiniteFly', 'Waiting 1.1s for the fly to finish.', 4);
+				disablefunc();
 			end
 		end;
 	});
@@ -5405,6 +5446,9 @@ run(function()
 		Name = 'ChestESP',
 		Function = function(callback)
 			if callback then
+				if store.matchState == 0 then
+					repeat task.wait() until store.matchState ~= 0;
+				end;
 				task.spawn(function()
 					table.insert(ChestESP.Connections, collection:GetInstanceAddedSignal('chest'):Connect(chestfunc))
 					for i,v in (collection:GetTagged('chest')) do chestfunc(v) end
@@ -11948,13 +11992,13 @@ run(function()
 					end
 				end));
 				repeat 
-					if store.matchState == 0 then 
+					if store.matchState == 0 or not InfiniteFlyLanded then 
 						task.wait(0.25);
 						continue;
 					end;
 					oldroot = clone.cache.__currentroot or lplr.Character and lplr.Character.PrimaryPart or nil;
 					newroot = clone:getLocalClone('AntiHit', true);
-					if vapeTargetInfo.Targets.Killaura and oldroot and InfiniteFlyLanded and isnetworkowner(oldroot) then 
+					if vapeTargetInfo.Targets.Killaura and oldroot and isnetworkowner(oldroot) then 
 						if tick() > bouncedelay and isAlive(lplr, true) and lplr.Character.PrimaryPart == newroot then 
 							bouncedelay = tick() + 0.4;
 							for i = 1, 5 do 
@@ -12927,6 +12971,7 @@ run(function()
 	table.insert(renderconnections, task.spawn(function()
 		repeat
 			task.wait();
+			if not InfiniteFlyLanded or isEnabled('InfiniteFly') then continue end
 			if flagnotification == nil and (isEnabled('AntiHit') or isEnabled('Desync')) and clone.cache.__currentroot and (not isnetworkowner(clone.cache.__currentroot) or not isnetworkowner(lplr.Character.PrimaryPart)) then 
 				flagnotification = true;
 				clone.cache.__currentclone.CFrame = clone.cache.__currentroot.CFrame
@@ -12935,7 +12980,7 @@ run(function()
 					clone.cache.__currentclone.CFrame = clone.cache.__currentroot.CFrame
 					task.wait() 
 				until (clone.cache.__currentroot == nil or isnetworkowner(clone.cache.__currentroot) or not isEnabled('AntiHit') or not isEnabled('Desync'));
-			elseif flagnotification and (clone.cache.__currentroot and isnetworkowner(clone.cache.__currentroot) or isnetworkowner(lplr.Character.PrimaryPart)) then
+			elseif flagnotification and (isEnabled('AntiHit') or isEnabled('Desync')) and isnetworkowner(clone.cache.__currentroot) then
 				flagnotification = nil;
 				alertNotification('Clone', 'The issue has been resolved', 13)
 			end;
