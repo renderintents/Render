@@ -1,1 +1,1 @@
-[=] Render now runs on Seliware
+[=] Render now runs on Seliware (installation process may crash for some people but 2-3 tries you'll get it working)
