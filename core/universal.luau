@@ -6352,7 +6352,7 @@ run(function()
 	
 	local songartist: TextLabel = Instance.new('TextLabel', main);
 	songartist.BackgroundTransparency = 1;
-	songartist.Size = UDim2.new(0, 200, 0, 14);
+	songartist.Size = UDim2.new(0, 140, 0, 14);
 	songartist.Position = UDim2.new(0.323, 0, 0.41, 0);
 	songartist.Font = Enum.Font.Arimo;
 	songartist.TextSize = 11;
@@ -6717,6 +6717,8 @@ run(function()
 	local targethuds: table = loadstring(RenderLibrary.http:getfile('libraries/targethuds.luau'))();
 	local newhudvisible: boolean = false;
 	local healthnumbers: securetable = Performance.new();
+	local vapeaccentcolortoggle: vapeminimodule = {};
+	local vapeaccentcolor: vapecolorslider = {getcolor = function() return Color3.new() end};
 	local lastTarget: BasePart?;
 	local mainhudframe: Frame = targethuds.instance.MainHUD;
 	local vapehudui: Frame = vapeTargetInfo.Object.aa
@@ -6724,9 +6726,17 @@ run(function()
 	local newhudoption: vapemodule;
 	local selectfuncs: {[string]: () -> ()} = {
 		nextgen = function(): ()
+			pcall(function()
+				vapeaccentcolortoggle.Object.Visible = false;
+				vapeaccentcolor.Object.Visible = false;
+			end);
 			selectedhud = mainhudframe;
 		end;
 		vape = function(): ()
+			pcall(function()
+				vapeaccentcolortoggle.Object.Visible = true;
+				vapeaccentcolor.Object.Visible = vapeaccentcolortoggle.Enabled;
+			end);
 			selectedhud = vapehudui;
 		end;
 	};
@@ -6767,6 +6777,25 @@ run(function()
 		Default = true;
 	});
 
+	vapeaccentcolortoggle = newhudoption.CreateToggle({
+		Name = 'Accent Color?',
+		HoverText = 'HUD accent color',
+		Function = function(calling: boolean): ()
+			vapeaccentcolor.Object.Visible = calling;
+		end;
+	});
+
+	vapeaccentcolor = newhudoption.CreateColorSlider({
+		Name = 'Accent Color',
+		Function = function(value: boolean): ()
+			if vapeaccentcolortoggle.Enabled then 
+				vapetarget.Object.TargetInfoMainInfo.BackgroundColor3 = Color3.fromHSV(value, 1, 1);
+			    vapetarget.Object.MainInfo.BackgroundColor3 = Color3.fromHSV(value, 1, 1);
+			end;
+		end;
+	});
+
+	vapeaccentcolor.Object,Visible = false;
 	vapetarget.Object.nig.Parent = newhudoption.GetCustomChildren();
 
 	task.spawn(function()
@@ -8030,7 +8059,9 @@ run(function()
 					if renderperformance.reducelag then 
 						continue;
 					end;
-					if not isAlive(lplr, true) then return end;
+					if not isAlive(lplr, true) then 
+						continue; 
+					end;
 					local hum: Humanoid = lplr.Character:FindFirstChildOfClass('Humanoid');
 					if motionblurkillaura.Enabled and vapeTargetInfo.Targets.Killaura == nil then 
 					    pcall(function() blur:Destroy() end);
@@ -9487,23 +9518,10 @@ run(function()
 		Function = function(call: bool): () -> ()
 			sessioninfo.SetVisible(call);
 			sessionvisible = call;
-			if call then 
-				for i: number, v: {vapecolorslider} in {sessionhudTextColor, sessionhudColor1, sessionhudColor2} do 
-					table.insert(sessionhud.Connections, v.ColorChanged:Connect(function()
-						sessionname.TextColor3 = Color3.fromHSV(sessionhudTextColor.Hue, sessionhudTextColor.Sat, sessionhudTextColor.Value)
-						gradient.Color = ColorSequence.new({
-							ColorSequenceKeypoint.new(0, Color3.fromHSV(sessionhudColor1.Hue, sessionhudColor1.Sat, sessionhudColor1.Value)),
-							ColorSequenceKeypoint.new(0.36, Color3.fromRGB(255, 255, 255)),
-							ColorSequenceKeypoint.new(0.635, Color3.fromHSV(sessionhudColor2.Hue, sessionhudColor2.Sat, sessionhudColor2.Value)),
-							ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255));
-						});
-					end));
-				end;
-				repeat
-					gradient.Rotation += 0.45
-					task.wait(0)
-				until (not sessionhud.Enabled);
-			end;
+			repeat
+				gradient.Rotation += 0.45
+				task.wait(0);
+			until (not sessionhud.Enabled);
 		end;
 	});
 
@@ -9524,6 +9542,17 @@ run(function()
 			session.Visible = true;
 		end;
 	end));
+	for i: number, v: {vapecolorslider} in {sessionhudTextColor, sessionhudColor1, sessionhudColor2} do 
+		table.insert(sessionhud.Connections, v.ColorChanged:Connect(function()
+			sessionname.TextColor3 = Color3.fromHSV(sessionhudTextColor.Hue, sessionhudTextColor.Sat, sessionhudTextColor.Value)
+			gradient.Color = ColorSequence.new({
+				ColorSequenceKeypoint.new(0, Color3.fromHSV(sessionhudColor1.Hue, sessionhudColor1.Sat, sessionhudColor1.Value)),
+				ColorSequenceKeypoint.new(0.36, Color3.fromRGB(255, 255, 255)),
+				ColorSequenceKeypoint.new(0.635, Color3.fromHSV(sessionhudColor2.Hue, sessionhudColor2.Sat, sessionhudColor2.Value)),
+				ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255));
+			});
+		end));
+	end;
 end)
 
 task.spawn(function()

@@ -133,7 +133,6 @@ local vapeInjected = true;
 local RenderLibrary: table = shared.renderconstructor;
 local render = getgenv().render;
 local renderperformance = shared.renderperformance;
-getgenv().renderperformance = renderperformance;
 local bedwars = {};
 local store = {
 	attackReach = 0,
@@ -227,7 +226,7 @@ end;
 
 local getcustomasset = getsynasset or getcustomasset or function(location) return 'rbxasset://'..location end
 local queueonteleport = syn and syn.queue_on_teleport or queue_on_teleport or void
-local synapsev3 = ''
+local synapsev3 = syn and syn.toast_notification and 'V3' or ''
 local worldtoscreenpoint = function(pos)
 	if synapsev3 == 'V3' then
 		local scr = worldtoscreen({pos})
@@ -410,9 +409,7 @@ do
 		if RunLoops.HeartTable[name] then
 			RunLoops.HeartTable[name]:Disconnect()
 			RunLoops.HeartTable[name] = nil
-			return true
 		end
-		return false
 	end
 end
 
@@ -580,11 +577,11 @@ local function getSpeed(): (number)
 			local val: number = LongJumpVelocitySpeed.Value / 10.5
 			speed += speed > 0 and val * 1.5 or val
 		end;
-		if isEnabled('LongJump') and isEnabled('Desync') then
+		if isEnabled('LongJump') and isEnabled('Desync') and render.clone.new then
 			speed += 30;
 		end;
 		if (tick() - store.lastdamage) < (0.1 * damageboostdur.Value * (speed > 0 and 1.6 or 1)) and isEnabled('DamageBoost') and not isEnabled('LongJump') then 
-			speed += damageboostspeed.Value;
+			speed += workspace:Raycast(entityLibrary.LocalPosition, Vector3.new(0, -2000, 0), store.blockRaycast) and damageboostspeed.Value or damageboostspeed.Value / 2;
 		end;
 		if render.clone.old and not isnetworkowner(render.clone.old) then 
 			speed = 0;
@@ -1984,7 +1981,6 @@ run(function()
 	end
 end)
 
-print('bruh')
 vape.RemoveObject('SilentAimOptionsButton')
 vape.RemoveObject('ReachOptionsButton')
 vape.RemoveObject('MouseTPOptionsButton')
@@ -2787,92 +2783,28 @@ local SpeedValue: vapeslider = {Value = 1}
 local InfiniteFlyLanded: boolean = true;
 run(function()
 	local infinitefly: vapemodule = {Enabled = false};
-	local infiniteflytick: vapeslider = {Value = 0}
 	local infiniteflycollide: vapeminimodule = {Enabled = false};
 	local infiniteflyvertical: vapeslider = {Value = 55};
-	local infiniteflymode: vapedropdown = {Value = 'Lowest'};
-	local infiniteflyfirstpos: Vector3;
-	local infflytick: number = 0;
+	local infiniteflymode: vapedropdown = {Value = 'Lowest'}
 	local collideparts: table = {};
-	local raycastparameters: RaycastParams = RaycastParams.new();
+	local raycastparameters: RaycastParams = RaycastParams.new()
 	local flyup: bool;
 	local flydown: bool;
 	local oldroot: BasePart;
 	local newroot: Part;
 	local infiniteflymodes: {() -> ()} = {
 		Highest = function(): (Vector3)
-			local ray: RaycastResult = workspace:Raycast(oldroot.Position, Vector3.new(0, -1000000, 0), store.raycast)
+			local ray: RaycastResult = workspace:Raycast(oldroot.Position, Vector3.new(0, -100000, 0), store.raycast)
 			return ray and ray.Position or newroot.Position;
 		end,
 		Lowest = function(): (Vector3)
-			local ray: RaycastResult = workspace:Raycast(newroot.Position, Vector3.new(0, -1e4, 0), store.raycast)
+			local ray: RaycastResult = workspace:Raycast(newroot.Position, Vector3.new(0, -230, 0), store.raycast)
 			return ray and ray.Position or newroot.Position;
 		end,
 		Normal = function(): (Vector3)
 			return newroot.Position;
 		end
 	};
-	local disablefunc = function(): ()
-		local oldposition: Vector3 = infiniteflymodes[infiniteflymode.Value]();
-		local istping: bool;
-		local customylevel: number = nil;
-		local magnitude: number = (infiniteflyfirstpos - oldposition).magnitude
-		infiniteflyfirstpos = nil;
-		task.spawn(function()
-			print(magnitude);
-			if magnitude <= 200 then
-				repeat
-					if istping then
-						oldroot.CFrame = CFrame.new(oldposition.X, customylevel or oldroot.CFrame.Y, oldposition.Z);
-						if customylevel then
-							oldroot.Velocity = Vector3.zero
-							customylevel = nil;
-						end;
-					end;
-					task.wait(0.05);
-				until InfiniteFlyLanded;
-			end;
-		end);
-		--task.wait(0.05);
-		customylevel = infiniteflymodes[infiniteflymode.Value]().Y;
-		istping = true;
-		task.delay(0.1, function()
-			oldroot.Velocity = Vector3.zero
-			if magnitude >= 200 then
-				alertNotification('InfiniteFly', 'Calculated the magnitude.', 10)
-				for _: number = 1, 12 do
-					task.wait(0.01);
-					if not isnetworkowner(oldroot) then
-						alertNotification('InfiniteFly', 'Might take a little longer than expected.', 6);
-						repeat task.wait() until isnetworkowner(oldroot);
-					end;
-					oldroot.CFrame = CFrame.new(oldposition.X, newroot.CFrame.Y, oldposition.Z);
-					oldroot.Velocity = Vector3.zero
-				end
-			end;
-			if not isnetworkowner(oldroot) then
-				istping = false;
-				alertNotification('InfiniteFly', 'Network ownership disowned, Disabling might take a little longer than expected.', 12)
-				repeat task.wait() until isnetworkowner(oldroot)
-				task.wait(0.15);
-				istping = true;
-				task.wait(1.25);
-			end;
-			oldroot.Velocity = Vector3.zero
-			oldroot.Velocity = Vector3.zero
-			clone:destroyCloneInstance('InfiniteFly');
-			lplr.Character.PrimaryPart.Anchored = true;
-			task.wait(0.1)
-			lplr.Character.PrimaryPart.Anchored = false;
-			task.wait(0.1)
-			lplr.Character.PrimaryPart.Anchored = true
-			delay(0.6, function()
-				lplr.Character.PrimaryPart.Anchored = false;
-			end);
-			InfiniteFlyLanded = true;
-			alertNotification('InfiniteFly', 'Landed on the surface!', 6)
-		end);
-	end;
 	infinitefly = blatant.Api.CreateOptionsButton({
 		Name = 'InfiniteFly',
 		Function = function(call: bool): ()
@@ -2880,11 +2812,8 @@ run(function()
 				if store.matchState == 0 then 
 					return infinitefly.ToggleButton();
 				end;
-				clone:destroyCloneInstance('InfiniteFly');
-				flyup = false;
-				flydown = false;
 				InfiniteFlyLanded = false;
-				table.insert(infinitefly.Connections, inputservice.InputBegan:Connect(function(input1): ()
+				table.insert(infinitefly.Connections, inputservice.InputBegan:Connect(function(input1)
 					if inputservice:GetFocusedTextBox() == nil then
 						if input1.KeyCode == Enum.KeyCode.Space or input1.KeyCode == Enum.KeyCode.ButtonA then
 							flyup = true;
@@ -2894,7 +2823,7 @@ run(function()
 						end;
 					end;
 				end));
-				table.insert(infinitefly.Connections, inputservice.InputEnded:Connect(function(input1): ()
+				table.insert(infinitefly.Connections, inputservice.InputEnded:Connect(function(input1)
 					if input1.KeyCode == Enum.KeyCode.Space or input1.KeyCode == Enum.KeyCode.ButtonA then
 						flyup = false;
 					end;
@@ -2913,20 +2842,12 @@ run(function()
 				end;
 				oldroot = clone.cache.__currentroot or lplr.Character and lplr.Character.PrimaryPart or nil;
 				newroot = clone:getLocalClone('InfiniteFly', true);
-				infiniteflyfirstpos = newroot.Position;
-				if not infiniteflycollide.Enabled then
-					for i: number, v: BasePart in lplr.Character:GetDescendants() do
-						if v.ClassName == 'BasePart' and v.CanCollide then
-							table.insert(collideparts, v);
-							v.CanCollide = false;
-						end;
-					end;
-				end;
 				local disowned: bool = false;
-				table.insert(infinitefly.Connections, runservice.Heartbeat:Connect(function(delta: number): ()
+				table.insert(infinitefly.Connections, runservice.Heartbeat:Connect(function(delta): ()
 					if not isAlive(lplr, true) then 
-						return infinitefly.ToggleButton(false); 
+						infinitefly.ToggleButton(false); 
 					end;
+
 					local speedCFrame = entityLibrary.character.Humanoid.MoveDirection * ((SpeedValue.Value + getSpeed()) - 20) * delta
 					raycastparameters.FilterDescendantsInstances = {lplr.Character}
 					local ray = workspace:Raycast(entityLibrary.character.HumanoidRootPart.Position, speedCFrame, raycastparameters)
@@ -2937,25 +2858,15 @@ run(function()
 					local flyVelocity = entityLibrary.character.Humanoid.MoveDirection * 20
 					entityLibrary.character.HumanoidRootPart.Velocity = flyVelocity + (Vector3.new(0, playerMass + (flyup and infiniteflyvertical.Value or 0) + (flydown and -infiniteflyvertical.Value or 0), 0))
 					if isnetworkowner(oldroot) then
-						local maincframe: Vector3 = newroot.Position
 						if disowned then
 							disowned = false;
-							newroot.CFrame = CFrame.new(maincframe.X, newroot.CFrame.Y, maincframe.Z);
 							alertNotification('InfiniteFly', 'The issue has been resolved.', 12);
 						end;
-						if infiniteflytick.Value == 0 then
-							if (newroot.Position - oldroot.Position).magnitude < 10000 then
-								if RenderIntents and RenderIntents.DebugSession then warningNotification('InfiniteFly', 'Teleported Up', 5) end
-								oldroot.CFrame = CFrame.new(oldroot.CFrame.X, 100000, oldroot.CFrame.Z);
-							end;
-						else
-							if (tick() - infflytick) >= (0.35 * infiniteflytick.Value) then
-								infflytick = tick();
-								oldroot.CFrame = CFrame.new(oldroot.CFrame.X, 100000, oldroot.CFrame.Z);
-								warningNotification('InfiniteFly', 'Teleported Up', 5);
-							end;
+						if (newroot.Position - oldroot.Position).magnitude < 10000 then
+							if RenderIntents and RenderIntents.DebugSession then warningNotification('InfiniteFly', 'Teleported up', 4) end
+							oldroot.CFrame = CFrame.new(oldroot.CFrame.X, 100000, oldroot.CFrame.Z);
 						end;
-						oldroot.CFrame = CFrame.new(maincframe.X, oldroot.CFrame.Y, maincframe.Z);
+						oldroot.CFrame = CFrame.new(newroot.CFrame.X, oldroot.CFrame.Y, newroot.CFrame.Z);
 					else
 						newroot.CFrame = CFrame.new(oldroot.CFrame.X, newroot.CFrame.Y, oldroot.CFrame.Z);
 						if not disowned then
@@ -2965,14 +2876,26 @@ run(function()
 					end;
 				end));
 			else
-				infflytick = 0;
-				if not isAlive(lplr, true) then InfiniteFlyLanded = true return; end;
-				for i: number, v: BasePart in collideparts do
-					table.clear(collideparts);
-					pcall(function() v.CanCollide = true end);
+				if not isAlive(lplr, true) then return; end;
+				warningNotification('InfiniteFly', 'Waiting 1.2s for the fly to finish.', 4);
+				local oldposition: Vector3 = infiniteflymodes[infiniteflymode.Value]();
+				for _: number = 1, 12 do
+					if not isnetworkowner(oldroot) then
+						warningNotification('InfiniteFly', 'Network ownership disowned, Might take a little longer than expected.', 10);
+						repeat task.wait() until isnetworkowner(oldroot);
+						task.wait(0.05);
+					end;
+					oldroot.Velocity = Vector3.zero;
+					oldroot.CFrame = CFrame.new(oldposition.X, oldposition.Y + 5, oldposition.Z);
+					task.wait(0.1);
 				end;
-				warningNotification('InfiniteFly', 'Waiting 0.7s for the fly to finish.', 4);
-				disablefunc();
+				oldroot = nil;
+				newroot = nil;
+				clone:destroyCloneInstance('InfiniteFly');
+				flyup = false;
+				flydown = false;
+				InfiniteFlyLanded = true;
+				warningNotification('InfiniteFly', 'Landed', 5);
 			end
 		end;
 	});
@@ -2982,14 +2905,6 @@ run(function()
 		List = dumplist(infiniteflymodes),
 		Default = 'Lowest'
 	});
-	infiniteflytick = infinitefly.CreateSlider({
-		Name = 'Tick',
-		Min = 0,
-		Max = 30,
-		Default = 15,
-		Function = void,
-		HoverText = 'Set this to zero for automatic.'
-	})
 	infiniteflycollide = infinitefly.CreateToggle({
 		Name = 'CanCollide',
 		Function = void
@@ -3426,7 +3341,7 @@ run(function()
 				if killauraparticlepart then killauraparticlepart.Parent = camera end
 
 				table.insert(Killaura.Connections, runservice.Heartbeat:Connect(function()
-					if not vapeTargetInfo.Targets.Killaura then 
+					if not vapeTargetInfo.Targets.Main then 
 						return;
 					end;
 					if killaurauseabilities.Enabled and kitabilities[store.equippedKit] then
@@ -3539,7 +3454,7 @@ run(function()
 						task.wait()
 						if not Killaura.Enabled then break end;
 						--render.targets:updatehuds();
-						vapeTargetInfo.Targets.Killaura = nil;
+						vapeTargetInfo.Targets.Main = nil;
 						local plrs: {rendertarget} = GetActiveTargets({
 							origin = isEnabled('AntiHit') == false and clone.cache.__currentroot and clone.cache.__currentroot.CFrame.Position or nil,
 							sort = killaurasortmethods[killaurasortmethod.Value] or nil,
@@ -4978,7 +4893,7 @@ run(function()
 							entityLibrary.character.HumanoidRootPart.CFrame = entityLibrary.character.HumanoidRootPart.CFrame + speedCFrame
 						end
 
-						if SpeedJump.Enabled and not Scaffold.Enabled and (not SpeedJumpAlways.Enabled and vapeTargetInfo.Targets.Killaura or SpeedJumpAlways.Enabled) then
+						if SpeedJump.Enabled and not Scaffold.Enabled and (not SpeedJumpAlways.Enabled and vapeTargetInfo.Targets.Main or SpeedJumpAlways.Enabled) then
 							if (entityLibrary.character.Humanoid.FloorMaterial ~= Enum.Material.Air) and entityLibrary.character.Humanoid.MoveDirection ~= Vector3.zero then
 								if SpeedJumpSound.Enabled then
 									pcall(function() entityLibrary.character.HumanoidRootPart.Jumping:Play() end)
@@ -5489,9 +5404,6 @@ run(function()
 		Name = 'ChestESP',
 		Function = function(callback)
 			if callback then
-				if store.matchState == 0 then
-					repeat task.wait() until store.matchState ~= 0;
-				end;
 				task.spawn(function()
 					table.insert(ChestESP.Connections, collection:GetInstanceAddedSignal('chest'):Connect(chestfunc))
 					for i,v in (collection:GetTagged('chest')) do chestfunc(v) end
@@ -9880,7 +9792,8 @@ run(function()
 				custompacket = true,
 			}
 		});
-	end))
+	end));
+
 	table.insert(renderconnections, vapeEvents.EntityDamageEvent.Event:Connect(function(damagedata: table)
 		task.spawn(function()
 			if not damagedata.entityInstance then return end;
@@ -9960,15 +9873,6 @@ pcall(function()
 		end;
 		return res;
 	end;
-end)
-
-pcall(function()
-	local oldconstructor: (Instance, ...any) -> (...any); oldconstructor = hookmetamethod(game, '__namecall', function(self: Instance, ...)
-		if getnamecallmethod() == 'BindAction' and vapeInjected and ({identifyexecutor()})[1] == 'Wave' then 
-			return;
-		end;
-		return oldconstructor(self, ...);
-	end);
 end);
 
 task.spawn(function()
@@ -10614,19 +10518,19 @@ run(function()
 			if calling then 
 				for i,v in players:GetPlayers() do 
 					if v ~= lplr then 
-						task.spawn(clanloops, v)
-					end
-				end
-				table.insert(clandetector.Connections, players.PlayerAdded:Connect(clanloops))
-			end
-		end
-	})
+						task.spawn(clanloops, v);
+					end;
+				end;
+				table.insert(clandetector.Connections, players.PlayerAdded:Connect(clanloops));
+			end;
+		end;
+	});
 	clandetectorclans = clandetector.CreateTextList({
 		Name = 'Clans',
 		TempText = 'clan tags',
 		Function = void
-	})
-end)
+	});
+end);
 
 run(function()
 	local bedtp = {};
@@ -12020,8 +11924,8 @@ run(function()
 	local bouncedelay = tick();
 	local notificationTick = tick();
 	local bounceskytime = {Value = 4};
-	local oldclone: BasePart;
-	local newclone: BasePart;
+	local oldroot: BasePart;
+	local newroot: BasePart;
 	antihit = blatant.Api.CreateOptionsButton({
 		Name = 'AntiHit',
 		HoverText = 'Makes it harder for your opp to hit you.',
@@ -12035,17 +11939,22 @@ run(function()
 					end
 				end));
 				repeat 
-					if store.matchState == 0 or not InfiniteFlyLanded then 
+					if store.matchState == 0 then 
 						task.wait(0.25);
+						continue;
+					end;
+					if not vapeTargetInfo.Targets.Main then 
+						clone:destroyCloneInstance('AntiHit');
+						task.wait();
 						continue;
 					end;
 					oldroot = clone.cache.__currentroot or lplr.Character and lplr.Character.PrimaryPart or nil;
 					newroot = clone:getLocalClone('AntiHit', true);
-					if vapeTargetInfo.Targets.Killaura and oldroot and isnetworkowner(oldroot) then 
+					if vapeTargetInfo.Targets.Main and oldroot and InfiniteFlyLanded and isnetworkowner(oldroot) then 
 						if tick() > bouncedelay and isAlive(lplr, true) and lplr.Character.PrimaryPart == newroot then 
 							bouncedelay = tick() + 0.4;
 							for i = 1, 5 do 
-								if isEnabled('InfiniteFly') or not vapeTargetInfo.Targets.main then 
+								if isEnabled('InfiniteFly') or not vapeTargetInfo.Targets.Main then 
 									bouncedelay = tick();
 									break 
 								end;
@@ -12180,7 +12089,9 @@ run(function()
 	local hackerdetectordatabase: vapeminimodule = {};
 	local hackerdetectorinvisiblity: vapeminimodule = {};
 	local hackerdetectorinfinitefly: vapeminimodule = {};
-	local hackerdetectorability: vapeminimodules = {};
+	local hackerdetectorability: vapeminimodule = {};
+    local hackerdetectoraura: vapeminimodule = {};
+    local hackerdetectorscaffold: vapeminimodule = {};
 	local hackerdetectorconnections: securetable = Performance.new();
 	local hackerdetectorthreads: securetable = Performance.new();
 	local cheaterdatabase: table = {};
@@ -12254,8 +12165,43 @@ run(function()
 				end;
 			end);
 			table.insert(connections, abilityconnection);
-		end;
-	};
+		end,
+        Killaura = function(player: Player, connections: {RBXScriptConnection}): ()
+            local validhit: boolean = true;
+            local hitconnection: RBXScriptConnections; hitconnection = vapeEvents.EntityDamageEvent.Event:Connect(function(damagetab: table): ()
+                local suspect: Player? = players:GetPlayerFromCharacter(damagetab.fromEntity);
+                if suspect and player == player then
+                    if damagetab.extra and damagetab.extra.chargeRatio == 0.999 then
+                        validhit = false;
+                        for i: number, v: table in bedwars.getInventory(player).items do 
+                            if v.sword and v.sword.chargedAttack and v.sword.chargedAttack.maxChargeTimeSec then
+                                validhit = true;
+                                break;
+                            end;
+                        end;
+                        if not validhit then 
+                            hitconnection:Disconnect();
+                            RenderLibrary:tagplayer(player, 'CHEATER', 'FF0000');
+                            return InfoNotification('HackerDetector', `{player.DisplayName} is using Killaura!`, 30);
+                        end;
+                    end;
+                end;
+            end);
+            table.insert(connections, hitconnection);
+        end;
+        Scaffold = function(player: Player, connections: {RBXScriptConnection}): ()
+            local blockconnection: RBXScriptConnection; blockconnection = vapeEvents.PlaceBlockEvent.Event:Connect(function(blocktab: table): ()
+                pcall(function()
+                    if blocktab.player == player and player.Character.HandInvItem.Value.Name ~= blocktab.blockType then 
+                        blockconnection:Disconnect();
+                        RenderLibrary:tagplayer(player, 'CHEATER', 'FF0000');
+                        return InfoNotification('HackerDetector', `{player.DisplayName} is using Scaffold!`, 30);
+                    end;
+                end);
+            end);
+            table.insert(connections, blockconnection);
+        end;
+	};  
 	local bootdetection: (Player) -> () = function(plr)
 		local detectionfuncs: table = {
 			[hackerdetectornuker] = hackerdetectormethods.Nuker;
@@ -12263,6 +12209,8 @@ run(function()
 			[hackerdetectorinfinitefly] = hackerdetectormethods.InfiniteFly;
 			[hackerdetectorinvisiblity] = hackerdetectormethods.Invisibility;
 			[hackerdetectorability] = hackerdetectormethods.Abilities;
+            [hackerdetectoraura] = hackerdetectormethods.Killaura;
+            [hackerdetectorscaffold] = hackerdetectormethods.Scaffold;
 		};
 		for i: vapeminimodule, v: () -> any in detectionfuncs do 
 			if i.Enabled then 
@@ -12324,6 +12272,20 @@ run(function()
 			hackerdetector:retoggle()
 		end
 	});
+    hackerdetectoraura = hackerdetector.CreateToggle({
+		Name = 'Killaura',
+		Default = true,
+		Function = function(calling: boolean)
+			hackerdetector:retoggle();
+		end;
+	});
+    killaurascaffold = hackerdetector.CreateToggle({
+		Name = 'Scaffold',
+		Default = true,
+		Function = function(calling: boolean)
+			hackerdetector:retoggle();
+		end;
+	});
 	hackerdetectordatabase = hackerdetector.CreateToggle({
 		Name = 'Exploit Databases',
 		HoverText = 'Checks whitelists of certain exploits.',
@@ -12358,10 +12320,9 @@ run(function()
 	table.insert(renderconnections, task.spawn(function()
 		repeat 
 			pcall(function() cheaterdatabase = RenderLibrary.http:request({path = 'getcheaters'}).json().result end);
-			task.wait(60)
-		until (not getgenv().render)
+			task.wait(60);
+		until (not getgenv().render);
 	end));
-
 end);
 
 run(function()
@@ -12394,15 +12355,15 @@ run(function()
 						if comparison >= antideathmin.Value and isnetworkowner(lplr.Character.PrimaryPart) and not antideathtriggered then 
 							InfoNotification('AntiDeath', 'Threshold reach, you\'ve been sent into the air.', 7);
 							antideathtriggered = true;
-							pcall(antideathfuncs[antideathmethod.Value])
+							pcall(antideathfuncs[antideathmethod.Value]);
 						end;
 						if comparison < antideathmin.Value then 
 							antideathtriggered = false;
 						end;
-					end
-				end))
-			end
-		end
+					end;
+				end));
+			end;
+		end;
 	});
 	antideathmin = antideath.CreateSlider({
 		Name = 'Threshold',
@@ -12457,7 +12418,7 @@ run(function()
 						if render.ping > 500 then 
 							continue 
 						end;
-						if funnyexploitkillaura.Enabled and not vapeTargetInfo.Targets.Killaura then 
+						if funnyexploitkillaura.Enabled and not vapeTargetInfo.Targets.Main then 
 							continue
 						end;
 						if funnyexploitconfetti.Enabled and bedwars.AbilityController:canUseAbility('PARTY_POPPER') then 
@@ -12468,7 +12429,7 @@ run(function()
 						end;
 						local sentAt: number = tick();
 						local delay: number = funnyexploitdelay.Value;
-						repeat task.wait() until (vapeTargetInfo.Targets.Killaura and funnyexploitkillaura.Enabled or delay ~= funnyexploitdelay.Value or (tick() - sentAt) >= (0.1 * funnyexploitdelay.Value))
+						repeat task.wait() until (vapeTargetInfo.Targets.Main and funnyexploitkillaura.Enabled or delay ~= funnyexploitdelay.Value or (tick() - sentAt) >= (0.1 * funnyexploitdelay.Value))
 					until (not funnyexploit.Enabled)
 				end)
 			else
@@ -12923,7 +12884,7 @@ run(function()
 								oldroot = clone.cache.__currentroot or lplr.Character and lplr.Character.PrimaryPart or nil;
 								newroot = clone:getLocalClone('Desync', true);
                             end;
-							if isEnabled('AntiHit') and vapeTargetInfo.Targets.Killaura or not isnetworkowner(oldroot) then
+							if isEnabled('AntiHit') and vapeTargetInfo.Targets.Main or not isnetworkowner(oldroot) then
 								lastTeleport = tick();
 							end;
                             local lastTeleportSeconds: number = tick() - lastTeleport;
@@ -13014,7 +12975,6 @@ run(function()
 	table.insert(renderconnections, task.spawn(function()
 		repeat
 			task.wait();
-			if not InfiniteFlyLanded or isEnabled('InfiniteFly') then continue end
 			if flagnotification == nil and (isEnabled('AntiHit') or isEnabled('Desync')) and clone.cache.__currentroot and (not isnetworkowner(clone.cache.__currentroot) or not isnetworkowner(lplr.Character.PrimaryPart)) then 
 				flagnotification = true;
 				clone.cache.__currentclone.CFrame = clone.cache.__currentroot.CFrame
@@ -13023,7 +12983,7 @@ run(function()
 					clone.cache.__currentclone.CFrame = clone.cache.__currentroot.CFrame
 					task.wait() 
 				until (clone.cache.__currentroot == nil or isnetworkowner(clone.cache.__currentroot) or not isEnabled('AntiHit') or not isEnabled('Desync'));
-			elseif flagnotification and (isEnabled('AntiHit') or isEnabled('Desync')) and isnetworkowner(clone.cache.__currentroot) then
+			elseif flagnotification and (clone.cache.__currentroot and isnetworkowner(clone.cache.__currentroot) or isnetworkowner(lplr.Character.PrimaryPart)) then
 				flagnotification = nil;
 				alertNotification('Clone', 'The issue has been resolved', 13)
 			end;

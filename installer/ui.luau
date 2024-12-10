@@ -155,7 +155,7 @@ function installer.engine:makedraggable(gui: Frame?): ()
             dragfunc(input);
         end;
     end);
-end
+end;
 
 function installer.engine:createwindow(): (windowengine)
     local windowengine: windowengine = {};

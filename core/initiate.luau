@@ -2054,11 +2054,8 @@ local function initiaterender()
 	end;
     pcall(function()
 		if true then -- don't ask why :)
-		    getgenv().rendervapeload = {file = 'universal.luau', step = 3};
-			getgenv().renderloadui:setprogress(2, 4, 'Loading the universal modules...');
 			customload(vapeGithubRequest("core/universal.luau"), "universal");
 			shared.vapegamesloaded = true;
-			getgenv().renderloadui:setprogress(3, 4, 'Loading the game modules...');
 			if bedwars then 
 				customload(vapeGithubRequest("games/6872274481.luau"), "6872274481")
 			else
@@ -2076,19 +2073,7 @@ local function initiaterender()
 		end
 	end)
 	shared.renderconstructor.runtime:initiate();
-	task.spawn(function()
-		repeat task.wait() until shared.VapeFullyLoaded;
-		getgenv().renderloadui:setprogress(4, 4, 'the Script has been loaded, enjoy!');
-		task.wait(0.5);
-		for i: number, v: GuiObject in getgenv().renderloadui.instance:GetDescendants() do 
-			pcall(function() tweenservice:Create(v, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play() end);
-			pcall(function() tweenservice:Create(v, TweenInfo.new(0.4), {TextTransparency = 1}):Play() end);
-			pcall(function() tweenservice:Create(v, TweenInfo.new(0.4), {ImageTransparency = 1}):Play() end);
-		end;
-		task.wait(0.4);
-		getgenv().renderloadui.instance:Destroy();
-	end);
-	getgenv().renderloadui:setprogress(3, 4, 'Loading configuration...');
+	shared.renderbutton:stopAniamtion();
 	pcall(function()
 		if #ProfilesTextList.ObjectList == 0 then
 			table.insert(ProfilesTextList.ObjectList, 'default')

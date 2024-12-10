@@ -7501,16 +7501,7 @@ if shared.VapeExecuted then
 	local uninjected = false
 
 	if inputService.TouchEnabled then
-		local button = Instance.new("TextButton")
-		button.Position = UDim2.new(1, -30, 0, 0)
-		button.Text = "Vape"
-		button.BackgroundColor3 = Color3.fromRGB(26, 25, 26)
-		button.TextColor3 = Color3.new(1, 1, 1)
-		button.Size = UDim2.new(0, 30, 0, 20)
-		button.BorderSizePixel = 0
-		button.BackgroundTransparency = 0.5
-		button.Parent = lib.MainGui
-		button.MouseButton1Click:Connect(function()
+		shared.renderbutton:setcallback(function()
 			clickgui.Visible = not clickgui.Visible
 			legitgui.Visible = not clickgui.Visible
 			--inputService.OverrideMouseIconBehavior = (clickgui.Visible and Enum.OverrideMouseIconBehavior.ForceShow or game:GetService("VRService").VREnabled and Enum.OverrideMouseIconBehavior.ForceHide or Enum.OverrideMouseIconBehavior.None)
@@ -7526,9 +7517,11 @@ if shared.VapeExecuted then
 					if v:IsA("Frame") then v.BackgroundTransparency = legitgui.Visible and 0.8 or 1 end
 				end
 			end
-		end)
-		shared.VapeButton = button
-	end
+		end);
+		shared.VapeButton = shared.renderbutton.instance.ImageButton;
+	else
+		shared.renderbutton.instance.Visible = false;
+	end;
 
 	lib["KeyInputHandler"] = inputService.InputBegan:Connect(function(input1)
 		if inputService:GetFocusedTextBox() == nil then
