@@ -9,4 +9,4 @@
     [=] DamageBoost will now go slower if you are in the air (speedval / 2)
     [=] InfiniteFly fixes maybe (better ones soon)
 
-(render premium modules fixed soon, reinstall for new updates (unless render works for you))
+(render premium modules fixed soon, reinstall for new updates (unless render works for you)) 
