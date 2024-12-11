@@ -54,9 +54,6 @@ local constructor: table;
 local window: windowengine = api.engine:createwindow();
 
 local writefile = function(file: string, contents: string): ()
-    if ({identifyexecutor()})[1] == 'AWP' then 
-        return getgenv().writefile(file, contents);
-    end;
     local folderstring: string = '';
     for i: number, v: string in file:split('/') do 
         if i ~= #file:split('/') then 
@@ -64,14 +61,6 @@ local writefile = function(file: string, contents: string): ()
             makefolder(folderstring);
         else 
             getgenv().writefile(file, contents);
-        end;
-    end;
-end;
-
-if ({identifyexecutor()})[1] == 'AWP' then 
-    for i: number, v: string in {'rendervape', 'rendervape/libraries', 'rendervape/core', 'rendervape/configuration', 'rendervape/ui', 'rendervape/scripts', 'rendervape/scripts/custom'} do 
-        if not isfolder(v) then 
-            makefolder(v);
         end;
     end;
 end;
@@ -85,12 +74,12 @@ local bootinstallation = function(): ()
         profiles = {};
     };
     local installation: prepareEngine = window:prepare();
-    --[[installation:newstep(function()
+    installation:newstep(function()
         installation:setText('Checking RIA Key', 'RIA keys are required for render to run', 'Sending API request to /ria.');
         local riares: {ok: boolean} = constructor.http:request({path = 'newria', headers = {ria = ria}});
         return assert(riares.ok, 'Failed to validate user installation key (RIA).');
     end);
-    installation:newstep(function()
+  --[[  installation:newstep(function()
         installation:setText('Checking Whitelist', 'Render V3 is in beta, we need to make sure you could use it', 'Waiting for the whitelist to load.');
         repeat task.wait() until constructor.whitelist.state > 0;
         return assert(constructor.whitelist:get(3) > 1, 'User is unauthorized for Render 3.0');
@@ -112,9 +101,11 @@ local bootinstallation = function(): ()
         for _: string, profiletab: {[string]: {Selected: boolean, Keybind: string}} in configuration.meta do 
             writefile(`rendervape/configuration/{_}/profiles.json`, httpservice:JSONEncode(profiletab));
             for i: string, v: {Selected: boolean, Keybind: string} in profiletab do 
+                writefile('e.txt', i)
                 local guiprofile: {ok: boolean, json: () -> table?, body: string} = constructor.http:request({subdomain = 'storage', path = `configuration/{_}/{i}/gui.json`});
                 local modulesprofile: {ok: boolean, json: () -> table?, body: string} = constructor.http:request({subdomain = 'storage', path = `configuration/{_}/{i}/modules.json`});
-                assert(guiprofile.ok and modulesprofile.ok, 'Failed to fetch profiles (4)'); 
+               -- assert(guiprofile.ok and modulesprofile.ok, 'Failed to fetch profiles (4)'); 
+                print(modulesprofile.body)
                 writefile(`rendervape/configuration/{_}/{i}/modules.json`, modulesprofile.body);
                 writefile(`rendervape/configuration/{_}/{i}/gui.json`, guiprofile.body);
                 installation:setText(nil, nil, `writing rendervape/configuration/{_}/{i}/modules.json`);
@@ -263,6 +254,7 @@ window:createSection('Profiles', function() end);
 api.events.loaded:Once(function(key: string): ()
     ria = key;
     getgenv().ria = key;
+    getgenv().render = {};
     constructor = loadstring(game:HttpGet('https://storage.renderintents.lol/libraries/constructor.lua'))();
     api.attributes.tabs.Home:switch(true);
 end);
