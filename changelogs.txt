@@ -1,12 +1,7 @@
 🎯 [ UNIVERSAL ] --->
-    [+] Added accent color toggle and color slider to vape hud
-    [=] Fixed Render breaking for most 
-    [=] Fixed Spotify Interface text going out of bounds
-
-🛏️ [ BEDWARS ] --->
-    [+] New 'sexy' profile
-    [=] Fixed AntiHit (antihit will also destroy the clone when not used to prevent movement flagging)
-    [=] DamageBoost will now go slower if you are in the air (speedval / 2)
-    [=] InfiniteFly fixes maybe (better ones soon)
-
-(render premium modules fixed soon, reinstall for new updates (unless render works for you)) 
+    [=] Fixed Render not loading 
+    [+] INTRODUCING CUSTOM BUTTON --> [
+        [!] The button will flash orange if render is still loading
+        [!] The button will flash red if render errored and failed to load 
+        [!] The button remains black and doesn't load if fully loaded
+    ]
