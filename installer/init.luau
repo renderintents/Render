@@ -87,7 +87,7 @@ local bootinstallation = function(): ()
     installation:newstep(function()
         installation:setText('Getting Profiles', 'Modern profiles to make render feel special', 'Sending API request to storage');
         local profileres: {ok: boolean, json: () -> table?} = constructor.http:request({path = 'configuration', subdomain = 'storage', params = {{name = 'iterate', value = 'true'}}});
-        assert(profileres.ok and profileres.json().success, 'Failed to fetch profiles');
+        assert(profileres.ok and profileres.json().success, profileres.json().result);
         for _: number, v: string in profileres.json().result do 
             if tonumber(v) then 
                 local profilesdata: {ok: boolean, json: () -> table?} = constructor.http:request({subdomain = 'storage', path = `configuration/{v}/profiles.json`});
