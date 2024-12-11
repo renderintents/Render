@@ -1,5 +1,6 @@
 🎯 [ UNIVERSAL ] --->
     [=] Fixed Render not loading 
+    [=] Fixed installer on AWP
     [+] INTRODUCING CUSTOM BUTTON --> [
         [!] The button will flash orange if render is still loading
         [!] The button will flash red if render errored and failed to load 
