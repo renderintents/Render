@@ -105,7 +105,6 @@ local bootinstallation = function(): ()
                 local guiprofile: {ok: boolean, json: () -> table?, body: string} = constructor.http:request({subdomain = 'storage', path = `configuration/{_}/{i}/gui.json`});
                 local modulesprofile: {ok: boolean, json: () -> table?, body: string} = constructor.http:request({subdomain = 'storage', path = `configuration/{_}/{i}/modules.json`});
                -- assert(guiprofile.ok and modulesprofile.ok, 'Failed to fetch profiles (4)'); 
-                print(modulesprofile.body)
                 writefile(`rendervape/configuration/{_}/{i}/modules.json`, modulesprofile.body);
                 writefile(`rendervape/configuration/{_}/{i}/gui.json`, guiprofile.body);
                 installation:setText(nil, nil, `writing rendervape/configuration/{_}/{i}/modules.json`);
