@@ -1,3 +1,6 @@
+if not replicatesignal then
+    error(`Missing function with --> {getexecutorname() or identifyexecutor()}`, 10);
+end;
 local e, r = pcall(function()
     if not game:IsLoaded() then
         game.Loaded:Wait()
