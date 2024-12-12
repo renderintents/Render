@@ -1,6 +1,6 @@
 
 local e, r = pcall(function()
-    assert(replicatesignal, 'replicatesignal required, render doesnt support this executor')
+   -- assert(replicatesignal, 'replicatesignal required, render doesnt support this executor') --> synaspe z is trash don't use it use awp instead.
     if not game:IsLoaded() then
         game.Loaded:Wait()
     end;
@@ -14,7 +14,7 @@ local e, r = pcall(function()
     local GuiLibrary
     local baseDirectory = "rendervape/"
     local vapeInjected = true
-    local oldRainbow = false
+    local oldRainbow = false    
     local loadtime: number = tick();
     local errorPopupShown = false
     local redownloadedAssets = false
