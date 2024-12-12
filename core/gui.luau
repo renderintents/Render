@@ -270,8 +270,11 @@ if shared.VapeExecuted then
 	gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
 	gui.OnTopOfCoreBlur = true
 	gui.ResetOnSpawn = false
-	gui.Parent = game.Players.LocalPlayer.PlayerGui
-	lib["MainGui"] = gui
+	gui.Parent = game:FindService('Players').LocalPlayer:FindFirstChildOfClass('PlayerGui');
+	lib["MainGui"] = gui;
+    shared.renderbutton.instance.ImageButton.Parent = gui;
+
+
 
 
 	local rendersafecall: ((...any) -> (), string?, ...any) -> (table?) = function(func, name, ...)
@@ -285,8 +288,8 @@ if shared.VapeExecuted then
 					icon = 'assets/WarningNotification.png',
 					duration = 10,
 					color = Color3.fromRGB(255, 0, 0)
-				})
-				error(`Callback Exception for {name}: {response}`)
+				});
+				error(`Callback Exception for {name}: {response}`);
 			end;
 		end);
 	end;
@@ -7357,7 +7360,7 @@ if shared.VapeExecuted then
 	notificationwindow.ChildRemoved:Connect(function()
 		local currentqueue: number = queue + 1;
 		queue += 1;
-		if queue > 0 then
+		if queue > 2 then
 			repeat task.wait() until queue > currentqueue or queue == 0
 		end;
 		for i,v in pairs(notificationwindow:GetChildren()) do
@@ -7500,28 +7503,23 @@ if shared.VapeExecuted then
 	local holdingalt = false
 	local uninjected = false
 
-	if inputService.TouchEnabled then
-		shared.renderbutton:setcallback(function()
-			clickgui.Visible = not clickgui.Visible
-			legitgui.Visible = not clickgui.Visible
-			--inputService.OverrideMouseIconBehavior = (clickgui.Visible and Enum.OverrideMouseIconBehavior.ForceShow or game:GetService("VRService").VREnabled and Enum.OverrideMouseIconBehavior.ForceHide or Enum.OverrideMouseIconBehavior.None)
-			--game:GetService("RunService"):SetRobloxGuiFocused(clickgui.Visible and lib["MainBlur"].Size ~= 0 or guiService:GetErrorType() ~= Enum.ConnectionError.OK)
-			for _, mobileButton in pairs(lib.MobileButtons) do mobileButton.Visible = not clickgui.Visible end
-			if OnlineProfilesBigFrame.Visible then
-				OnlineProfilesBigFrame.Visible = false
-			end
-			if LegitModulesBigFrame.Visible then
-				LegitModulesBigFrame.Visible = false
-				legitgui.Visible = not clickgui.Visible
-				for i, v in pairs(legitgui:GetChildren()) do
-					if v:IsA("Frame") then v.BackgroundTransparency = legitgui.Visible and 0.8 or 1 end
-				end
-			end
-		end);
-		shared.VapeButton = shared.renderbutton.instance.ImageButton;
-	else
-		shared.renderbutton.instance.Visible = false;
-	end;
+	shared.renderbutton:setcallback(function()
+        clickgui.Visible = not clickgui.Visible
+        legitgui.Visible = not clickgui.Visible
+        --inputService.OverrideMouseIconBehavior = (clickgui.Visible and Enum.OverrideMouseIconBehavior.ForceShow or game:GetService("VRService").VREnabled and Enum.OverrideMouseIconBehavior.ForceHide or Enum.OverrideMouseIconBehavior.None)
+        --game:GetService("RunService"):SetRobloxGuiFocused(clickgui.Visible and lib["MainBlur"].Size ~= 0 or guiService:GetErrorType() ~= Enum.ConnectionError.OK)
+        for _, mobileButton in pairs(lib.MobileButtons) do mobileButton.Visible = not clickgui.Visible end
+        if OnlineProfilesBigFrame.Visible then
+            OnlineProfilesBigFrame.Visible = false
+        end
+        if LegitModulesBigFrame.Visible then
+            LegitModulesBigFrame.Visible = false
+            legitgui.Visible = not clickgui.Visible
+            for i, v in pairs(legitgui:GetChildren()) do
+                if v:IsA("Frame") then v.BackgroundTransparency = legitgui.Visible and 0.8 or 1 end
+            end
+        end
+    end);
 
 	lib["KeyInputHandler"] = inputService.InputBegan:Connect(function(input1)
 		if inputService:GetFocusedTextBox() == nil then

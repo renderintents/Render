@@ -65,8 +65,8 @@ local startpos: Vector3 = nil;
 
 local dragfunc = function(input: Vector3): ()
     local delta: Vector3 = input.Position - dragstart;
-    tween:Create(buttonbkg, TweenInfo.new(0.1), {Position = UDim2.new(startpos.X.Scale, startpos.X.Offset + delta.X, startpos.Y.Scale, startpos.Y.Offset + delta.Y)}):Play()
-end
+    tween:Create(buttonbkg, TweenInfo.new(0.1), {Position = UDim2.new(startpos.X.Scale, startpos.X.Offset + delta.X, startpos.Y.Scale, startpos.Y.Offset + delta.Y)}):Play();
+end;
 
 buttonbkg.InputBegan:Connect(function(input): ()
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
