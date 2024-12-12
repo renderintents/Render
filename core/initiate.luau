@@ -1,7 +1,6 @@
-if not replicatesignal then
-    error(`Missing function with --> {getexecutorname() or identifyexecutor()}`, 10);
-end;
+
 local e, r = pcall(function()
+    assert(replicatesignal, 'replicatesignal required, render doesnt support this executor')
     if not game:IsLoaded() then
         game.Loaded:Wait()
     end;
