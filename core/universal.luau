@@ -6301,6 +6301,7 @@ end);
 
 task.spawn(function()
 	local discord: {global_name: string?, username: string} = RenderLibrary.http:getdiscord();
+	repeat task.wait() until shared.VapeFullyLoaded;
 	InfoNotification('Render Authentication', `Currently authenticated as {discord.username}`, 10);
 end);
 
@@ -7556,7 +7557,7 @@ pcall(function()
 					if data and data.AddMessageToChannel then 
 						if chatTables[data] == nil then 
 							chatTables[data] = data.AddMessageToChannel 
-						end 
+						end;
 						data.AddMessageToChannel = function(self2, data2)
 							pcall(function()
 								local plr = players:FindFirstChild(data2.FromSpeaker)
@@ -7840,12 +7841,12 @@ run(function()
 				local booststart = tick();
 				repeat 
 					if (tick() - booststart) >= (boostjumpPower.Value / 35) or not isAlive(lplr, true) then 
-						return boostjump.ToggleButton()
-					end
+						return boostjump.ToggleButton();
+					end;
 					boostval += boostjumpPower.Value <= 0 and 1 or boostjumpPower.Value / 10;
 					lplr.Character.PrimaryPart.Velocity = Vector3.new(0, boostval, 0);
-					task.wait()
-				until (not boostjump.Enabled)
+					task.wait();
+				until (not boostjump.Enabled);
 			else
 				boostval = 0
 			end
@@ -8165,11 +8166,11 @@ run(function()
 					if renderperformance.reducelag == false and isAlive(lplr, true) and (lastpos == nil or (lplr.Character.PrimaryPart.Position - lastpos).Magnitude > traildistance.Value) then 
 						createtrailpart();
 					end;
-					task.wait()
-				until (not trails.Enabled)
-			end
-		end
-	})
+					task.wait();
+				until (not trails.Enabled);
+			end;
+		end;
+	});
 	trailanimation = trails.CreateDropdown({
 		Name = 'Out Animation',
 		List = dumplist(trailanims, nil, function(a: string, b: string) return (a == 'Shrink') end),
@@ -9543,7 +9544,7 @@ run(function()
 		end;
 	end));
 	for i: number, v: {vapecolorslider} in {sessionhudTextColor, sessionhudColor1, sessionhudColor2} do 
-		table.insert(sessionhud.Connections, v.ColorChanged:Connect(function()
+		table.insert(renderconnections, v.ColorChanged:Connect(function()
 			sessionname.TextColor3 = Color3.fromHSV(sessionhudTextColor.Hue, sessionhudTextColor.Sat, sessionhudTextColor.Value)
 			gradient.Color = ColorSequence.new({
 				ColorSequenceKeypoint.new(0, Color3.fromHSV(sessionhudColor1.Hue, sessionhudColor1.Sat, sessionhudColor1.Value)),
