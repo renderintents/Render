@@ -581,7 +581,7 @@ local function getSpeed(): (number)
 			speed += 30;
 		end;
 		if (tick() - store.lastdamage) < (0.1 * damageboostdur.Value * (speed > 0 and 1.6 or 1)) and isEnabled('DamageBoost') and not isEnabled('LongJump') then 
-			speed += workspace:Raycast(entityLibrary.LocalPosition, Vector3.new(0, -2000, 0), store.blockRaycast) and damageboostspeed.Value or damageboostspeed.Value / 2;
+			speed += workspace:Raycast(entityLibrary.LocalPosition, Vector3.new(0, -5, 0), store.blockRaycast) and (not isEnabled('InfiniteFly')) and damageboostspeed.Value or damageboostspeed.Value / 2;
 		end;
 		if render.clone.old and not isnetworkowner(render.clone.old) then 
 			speed = 0;
@@ -2685,13 +2685,13 @@ run(function()
 				FlyAnywayProgressBarFrame2.Parent = FlyAnywayProgressBarFrame
 				local FlyAnywayProgressBartext = Instance.new('TextLabel')
 				FlyAnywayProgressBartext.Text = '2s'
-				FlyAnywayProgressBartext.Font = Enum.Font.Gotham
-				FlyAnywayProgressBartext.TextStrokeTransparency = 0
+				FlyAnywayProgressBartext.Font = Enum.Font.Arial
+				FlyAnywayProgressBartext.TextStrokeTransparency = 1
 				FlyAnywayProgressBartext.TextColor3 =  Color3.new(0.9, 0.9, 0.9)
 				FlyAnywayProgressBartext.TextSize = 20
 				FlyAnywayProgressBartext.Size = UDim2.new(1, 0, 1, 0)
 				FlyAnywayProgressBartext.BackgroundTransparency = 1
-				FlyAnywayProgressBartext.Position = UDim2.new(0, 0, -1, 0)
+				FlyAnywayProgressBartext.Position = UDim2.new(0, 0, -1.35, 0)
 				FlyAnywayProgressBartext.Parent = FlyAnywayProgressBarFrame
 			else
 				if FlyAnywayProgressBarFrame then FlyAnywayProgressBarFrame:Destroy() FlyAnywayProgressBarFrame = nil end
@@ -2857,23 +2857,25 @@ run(function()
 					local playerMass = (entityLibrary.character.HumanoidRootPart:GetMass() - 1.4) * (delta * 100)
 					local flyVelocity = entityLibrary.character.Humanoid.MoveDirection * 20
 					entityLibrary.character.HumanoidRootPart.Velocity = flyVelocity + (Vector3.new(0, playerMass + (flyup and infiniteflyvertical.Value or 0) + (flydown and -infiniteflyvertical.Value or 0), 0))
-					if isnetworkowner(oldroot) then
-						if disowned then
-							disowned = false;
-							alertNotification('InfiniteFly', 'The issue has been resolved.', 12);
-						end;
-						if (newroot.Position - oldroot.Position).magnitude < 10000 then
-							if RenderIntents and RenderIntents.DebugSession then warningNotification('InfiniteFly', 'Teleported up', 4) end
-							oldroot.CFrame = CFrame.new(oldroot.CFrame.X, 100000, oldroot.CFrame.Z);
-						end;
-						oldroot.CFrame = CFrame.new(newroot.CFrame.X, oldroot.CFrame.Y, newroot.CFrame.Z);
-					else
-						newroot.CFrame = CFrame.new(oldroot.CFrame.X, newroot.CFrame.Y, oldroot.CFrame.Z);
-						if not disowned then
-							alertNotification('InfiniteFly', 'Network ownership disowned, Resolving the issue.', 7);
-							disowned = true;
-						end;
-					end;
+					pcall(function()
+                        if isnetworkowner(oldroot) then
+                            if disowned then
+                                disowned = false;
+                                alertNotification('InfiniteFly', 'The issue has been resolved.', 12);
+                            end;
+                            if (newroot.Position - oldroot.Position).magnitude < 10000 then
+                                if RenderIntents and RenderIntents.DebugSession then warningNotification('InfiniteFly', 'Teleported up', 4) end
+                                oldroot.CFrame = CFrame.new(oldroot.CFrame.X, 100000, oldroot.CFrame.Z);
+                            end;
+                            oldroot.CFrame = CFrame.new(newroot.CFrame.X, oldroot.CFrame.Y, newroot.CFrame.Z);
+                        else
+                            newroot.CFrame = CFrame.new(oldroot.CFrame.X, newroot.CFrame.Y, oldroot.CFrame.Z);
+                            if not disowned then
+                                alertNotification('InfiniteFly', 'Network ownership disowned, Resolving the issue.', 7);
+                                disowned = true;
+                            end;
+                        end;
+                    end);
 				end));
 			else
 				if not isAlive(lplr, true) then return; end;
@@ -2885,10 +2887,17 @@ run(function()
 						repeat task.wait() until isnetworkowner(oldroot);
 						task.wait(0.05);
 					end;
-					oldroot.Velocity = Vector3.zero;
-					oldroot.CFrame = CFrame.new(oldposition.X, oldposition.Y + 5, oldposition.Z);
 					task.wait(0.1);
 				end;
+				task.wait(1.2);
+				if lplr.Character then 
+					for i: number, v: BodyVelocity? in lplr.Character:GetDescendants() do 
+						if v.ClassName == 'BodyVelocity' then 
+							v:Destroy();
+						end;
+					end;
+				end;
+                oldroot.CFrame = CFrame.new(oldposition.X, oldposition.Y + 5, oldposition.Z);
 				oldroot = nil;
 				newroot = nil;
 				clone:destroyCloneInstance('InfiniteFly');
@@ -2923,7 +2932,7 @@ run(function()
 	local Killaura: vapemodule = {};
 	local killauraboxes: table = Performance.new();
     local killauraAttacked: securetable = Performance.new({
-        maxdir = 0.2;
+        maxdir = 0.25;
     });
 	local killauratargetframe = {Players = {Enabled = false}}
 	local killaurasortmethod = {Value = 'Distance'}
@@ -2950,6 +2959,7 @@ run(function()
 	local killauraparticlecolor = newcolor();
 	local killauraparticlecolor2 = newcolor();
 	local killauracolor = {Value = 0.44};
+	local killauraAnimSpeed: vapeslider = {Value = 0};
 	local killaurauseabilities: vapeminimodule = {};
 	local killauratweenmethod: vapedropdown = {Value = 'Quad'};
 	local killauraparticleicon: vapedropdown = {Value = 'Cross'};
@@ -3034,7 +3044,8 @@ run(function()
 
 	local critparticletextures: {[string]: string} = setmetatable({
 		Cross = 'rbxassetid://97275025184464',
-		Circle = 'rbxassetid://136919192130603',
+		Heart = 'rbxassetid://106448042316075z',
+		Circle = 'rbxassetid://106448042316075',
 		Render = 'rbxassetid://18488550582',
 		Custom = true,
 	}, {
@@ -3052,8 +3063,8 @@ run(function()
 			{CFrame = CFrame.new(0.69, -0.71, 0.6) * CFrame.Angles(math.rad(200), math.rad(60), math.rad(1)), Time = 0.05}
 		},
 		Slow = {
-			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(295), math.rad(55), math.rad(290)), Time = 0.15},
-			{CFrame = CFrame.new(0.69, -0.71, 0.6) * CFrame.Angles(math.rad(200), math.rad(60), math.rad(1)), Time = 0.15}
+			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(295), math.rad(55), math.rad(290)), Time = 0.14},
+			{CFrame = CFrame.new(0.69, -0.71, 0.6) * CFrame.Angles(math.rad(200), math.rad(60), math.rad(1)), Time = 0.13}
 		},
 		New = {
 			{CFrame = CFrame.new(0.69, -0.77, 1.47) * CFrame.Angles(math.rad(-33), math.rad(57), math.rad(-81)), Time = 0.12},
@@ -3267,6 +3278,11 @@ run(function()
 		Remake4 = {
 			{CFrame = CFrame.new(0.3, -2, 0.5) * CFrame.Angles(-math.rad(190), math.rad(110), -math.rad(90)), Time = 0.3},
 			{CFrame = CFrame.new(0.3, -1.5, 1.5) * CFrame.Angles(math.rad(120), math.rad(140), math.rad(320)), Time = 0.1}
+		},
+		Gangsta = {
+			{CFrame = CFrame.new(0.7, -0.7, 0.6) * CFrame.Angles(math.rad(-16), math.rad(60), math.rad(-80)), Time = 0},
+			{CFrame = CFrame.new(0.69, -0.7, 0.6) * CFrame.Angles(math.rad(16), math.rad(59), math.rad(-90)), Time = 0.156},
+			{CFrame = CFrame.new(0.7, -0.7, 0.6) * CFrame.Angles(math.rad(-16), math.rad(60), math.rad(-80)), Time = 0.075}
 		};
 	};
 
@@ -3367,9 +3383,9 @@ run(function()
 												camera.Viewmodel.RightHand.RightWrist.C0 = originalArmC0 * v.CFrame
 												continue
 											end
-											killauracurrentanim = tween:Create(camera.Viewmodel.RightHand.RightWrist, TweenInfo.new(v.Time, Enum.EasingStyle[killauratweenmethod.Value]), {C0 = originalArmC0 * v.CFrame})
+											killauracurrentanim = tween:Create(camera.Viewmodel.RightHand.RightWrist, TweenInfo.new(v.Time + (0.1 * killauraAnimSpeed.Value), Enum.EasingStyle[killauratweenmethod.Value]), {C0 = originalArmC0 * v.CFrame})
 											killauracurrentanim:Play()
-											task.wait(v.Time - 0.01)
+											task.wait((v.Time + (0.1 * killauraAnimSpeed.Value)) - 0.01)
 										end
 										killauraplaying = false
 									end
@@ -3491,10 +3507,10 @@ run(function()
                                         continue;
                                     end;
 									for i,v in killauraboxes do 
-										if i ~= root then 
-											tween:Create(v, TweenInfo.new(0.15), {Transparency = 1}):Play()
-											v:Destroy()
-										end
+										if i ~= root and killaurasortmethod.Value ~= 'Switch' then 
+											tween:Create(v, TweenInfo.new(0.15), {Transparency = 1}):Play();
+											v:Destroy();
+										end;
 									end;
 									if killauratarget.Enabled and not renderperformance.reducelag then 
 										local box: Part = killauraboxes[root] or Instance.new('Part', workspace);
@@ -3596,7 +3612,14 @@ run(function()
 			else
 				vapeTargetInfo.Targets.Killaura = nil;
 				render.targets:updatehuds();
-				killauraboxes:clear(game.Destroy);
+				killauraboxes:clear(function(box: Instance)
+                    tween:Create(box, TweenInfo.new(0.18), {Size = (box.Size + Vector3.new(3, 3, 3))}):Play();
+                    task.wait(0.18);
+                    local fadeout: Tween = tween:Create(box, TweenInfo.new(0.4), {Size = Vector3.zero});
+                    fadeout:Play();
+                    fadeout.Completed:Wait();
+                    box:Destroy();
+                end);
 				RunLoops:UnbindFromHeartbeat('Killaura')
 				killauraNearPlayer = false
 				if killauraaimcirclepart then killauraaimcirclepart.Parent = nil end
@@ -3634,7 +3657,15 @@ run(function()
 			end
 		end,
 		HoverText = 'Attack players around you\nwithout aiming at them.'
-	})
+	});
+    killauraboxes.oncleanevent:Connect(function(box: Instance)
+        tween:Create(box, TweenInfo.new(0.18), {Size = (box.Size + Vector3.new(3, 3, 3))}):Play();
+        task.wait(0.18);
+        local fadeout: Tween = tween:Create(box, TweenInfo.new(0.4), {Size = Vector3.zero});
+        fadeout:Play();
+        fadeout.Completed:Wait();
+        box:Destroy();
+    end);
 	killauratargetframe = Killaura.CreateTargetWindow({})
 	local sortmethods = {'Distance'}
 	for i,v in (killaurasortmethods) do if i ~= 'Distance' then table.insert(sortmethods, i) end end
@@ -3678,6 +3709,12 @@ run(function()
 		Function = function(): ()
 			vape.UpdateHudEvent:Fire()
 		end
+	});
+	killauraAnimSpeed = Killaura.CreateSlider({
+		Name = 'Anim Extra Speed',
+		Min = 0,
+		Max = 20,
+		Function = void;
 	});
 	killauratweenmethod = Killaura.CreateDropdown({
 		Name = 'Anim Tween Method',
@@ -3944,6 +3981,8 @@ run(function()
 		
 
 	local silentaura: vapemodule = {};
+    local silentauracooldownmode: vapedropdown = {Value = 'Chances'};
+    local silentauracooldown: vapeslider = {Value = 2.5};
 	local silentaurarange: vapeslider = {Value = 10};
 	local silentaurahitchance: vapeslider = {Value = 70};
 	local silentauranpc: vapeminimodule = {Enabled = true};
@@ -3955,6 +3994,9 @@ run(function()
 	silentaura = combat.Api.CreateOptionsButton({
 		Name = 'SilentAura',
 		HoverText = 'A killaura for closet cheaters.',
+        ExtraText = function(): (string)
+            return silentauracooldownmode.Value;
+        end,
 		Function = function(calling: boolean): ()
 			if calling then 
 				repeat
@@ -3965,10 +4007,14 @@ run(function()
 						if not sword then 
 							continue;
 						end;
-						if random:NextInteger(1, 100) > silentaurahitchance.Value then 
+						if silentauracooldownmode.Value == 'Chances' and random:NextInteger(1, 100) > silentaurahitchance.Value then 
 							swordanimdelay = tick() + (swordmeta.sword.respectAttackSpeedForEffects and swordmeta.sword.attackSpeed or 0.14);
 							continue;
 						end;
+                        if silentauracooldownmode.Value == 'Cooldown' and (workspace:GetServerTimeNow() - bedwars.SwordController.lastAttack) < silentauracooldown.Value then 
+                            swordanimdelay = tick() + (swordmeta.sword.respectAttackSpeedForEffects and swordmeta.sword.attackSpeed or 0.14);
+							continue;
+                        end;
 						if silentauramouse.Enabled and not inputservice:IsMouseButtonPressed(0) then 
 							continue;
 						end;
@@ -4006,6 +4052,15 @@ run(function()
 			end;
 		end;
 	});
+    silentauracooldownmode = silentaura.CreateDropdown({
+        Name = 'Delay Mode',
+        List = {'Chances', 'Cooldown'},
+        Function = function(value: string): ()
+            vape.UpdateHudEvent:Fire();
+            silentaurahitchance.Object.Visible = (value == 'Chances');
+            silentauracooldown.Object.Visible = (value == 'Cooldown');
+        end;
+    });
 	silentaurarange = silentaura.CreateSlider({
 		Name = 'Range',
 		Min = 0,
@@ -4018,6 +4073,13 @@ run(function()
 		Min = 1,
 		Max = 100,
 		Default = 70,
+		Function = void;
+	});
+    silentauracooldown = silentaura.CreateSlider({
+		Name = 'Hit Cooldown',
+		Min = 0,
+		Max = 10,
+		Default = 2.5,
 		Function = void;
 	});
 	silentauramaxangle = silentaura.CreateSlider({
@@ -4037,7 +4099,9 @@ run(function()
 		HoverText = 'only attacks when mouse is down.',
 		Function = void;
 	});
-end)
+    silentaurahitchance.Object.Visible = false;
+    silentauracooldown.Object.Visible = false;
+end);
 
 local LongJump = {Enabled = false}
 run(function()
@@ -9821,7 +9885,7 @@ run(function()
 				}
 			});
 		end);
-		if lplr.Character and damagedata.entityInstance == lplr.Character then
+		if lplr.Character and damagedata.entityInstance == lplr.Character and (not damagedata.knockbackMultiplier or not damageTable.knockbackMultiplier.disabled) then
 			store.lastdamage = tick();
 		end;
 		if lplr.Character and damagedata.fromEntity == lplr.Character and damagedata.entityInstance ~= lplr.Character then 
@@ -11562,13 +11626,13 @@ run(function()
 		local matchtag = function(tag: StringValue?): (boolean?)
 			if tag.ClassName ~= 'StringValue' or tag.Value:find(tag.Parent.Parent:GetAttribute('ClanTag')) then 
 				return; 
-			end
+			end;
 			if tag.Value:lower():find('mod') or tag.Value:lower():find('dev') or tag.Value:lower():find('owner') then 
 				return true;
-			end
+			end;
 			if staffdetectorfamous.Enabled and tag.Value:lower():find('famous') then 
 				return true;
-			end
+			end;
 		end;
 		local getfriends = function(player: Player)
 			local friends = {};
@@ -11598,38 +11662,40 @@ run(function()
 		local staffdetectorLoop = function(player: Player, connections: table, threads: table): ()
 			local newconnection: RBXScriptConnection;
 			if bedwars.PermissionController:isStaffMember(player) then
+                task.spawn(staffdetectionfuncs[staffdetectoraction.Value]);
 				RenderLibrary:tagplayer(player, 'GAME STAFF', 'D22B2B');
 				savestaffdata(player, 'GROUP');
-				errorNotification('StaffDetector', `A special player has been detected in your match (@{player.DisplayName}).`, 60);
+				alertNotification('StaffDetector', `A special player has been detected in your match (@{player.DisplayName}).`, 60);
 				return staffdetectionfuncs[staffdetectoraction.Value]();
 			end;
-			local tags: Folder = player:WaitForChild('Tags', math.huge)
+			local tags: Folder = player:WaitForChild('Tags', 9e9)
 			for i: number, v: StringValue in tags:GetChildren() do 
 				local match = matchtag(v);
 				if match then
+                    task.spawn(staffdetectionfuncs[staffdetectoraction.Value]);
 					RenderLibrary:tagplayer(player, match.Value:find('famous') and 'FAMOUS' or 'GAME STAFF', v.Value:find('famous') and '00FFFF' or 'D22B2B');
 					savestaffdata(player, 'TAG');
-					errorNotification('StaffDetector', `A special player has been detected in your match (@{player.DisplayName} [{v.Value:upper()}]).`, 60);
-					return staffdetectionfuncs[staffdetectoraction.Value]();
+					alertNotification('StaffDetector', `A special player has been detected in your match (@{player.DisplayName} [{v.Value:upper()}]).`, 60);
 				end
 			end;
 			newconnection = tags.ChildAdded:Connect(function(v: StringValue?)
 				local match = matchtag(v);
 				if match then
+                    task.spawn(staffdetectionfuncs[staffdetectoraction.Value]);
 					RenderLibrary:tagplayer(player, match.Value:find('famous') and 'FAMOUS' or 'GAME STAFF', v.Value:find('famous') and '00FFFF' or 'D22B2B');
-					errorNotification('StaffDetector', `A special player has been detected in your match (@{player.DisplayName} [{v.Value:upper()}]).`, 60);
+					alertNotification('StaffDetector', `A special player has been detected in your match (@{player.DisplayName} [{v.Value:upper()}]).`, 60);
 					savestaffdata(player, 'TAG');
 					newconnection:Disconnect();
-					staffdetectionfuncs[staffdetectoraction.Value]();
 				end
 			end);
-			table.insert(connections, newconnection)
+			table.insert(connections, newconnection);
 		end;
 		staffdetector = utility.Api.CreateOptionsButton({
 			Name = 'StaffDetector',
 			HoverText = 'Automatically takes action on staff join.',
 			Function = function(calling)
 				if calling then 
+					repeat task.wait() until shared.VapeFullyLoaded;
 					if staffdetectorinitiated then return end;
 					for i: number, v: Player in players:GetPlayers() do 
 						if v ~= lplr then 
@@ -11651,9 +11717,9 @@ run(function()
 					end));
 					staffdetectorthreads.oncleanevent:Connect(function(threads: table)
 						for i: number, v: thread in threads do 
-							pcall(task.cancel, v)
+							pcall(task.cancel, v);
 						end;
-						table.clear(threads)
+						table.clear(threads);
 					end)
 				else 
 					staffdetectorconnections:clear(function(connections: table)
@@ -11897,8 +11963,8 @@ run(function()
 						repeat 
 							indicator.FillColor = Color3.fromHSV(highlightcolor.Hue, highlightcolor.Sat, highlightcolor.Value);
 							indicator.FillTransparency = (0.1 * highlightinvis.Value);
-							task.wait()
-						until (indicator.Parent == nil)
+							task.wait();
+						until (indicator.Parent == nil);
 					end;
 				end))
 			end
@@ -12059,7 +12125,7 @@ run(function()
 	})
 end);
 
-run(function()
+--[[run(function()
 	local AutoExcalibur: vapemodule = {};
 	AutoExcalibur = utility.Api.CreateOptionsButton({
 		Name = 'AutoExcalibur',
@@ -12081,7 +12147,7 @@ run(function()
 			end
 		end
 	})
-end);
+end);]]
 
 run(function()
 	local hackerdetector: vapemodule = {};
@@ -12111,7 +12177,7 @@ run(function()
 					if hand == nil or (tostring(hand.Value):find('_pickaxe') == nil and tostring(hand.Value):find('_axe') == nil and tostring(hand.Value) ~= 'shears') then 
 						breakconnection:Disconnect();
 						RenderLibrary:tagplayer(player, 'CHEATER', 'FF0000');
-						return InfoNotification('HackerDetector', `{player.DisplayName} is using Nuker!`, 30);
+						return alertNotification('HackerDetector', `{player.DisplayName} is using Nuker!`, 30);
 					end;
 				end
 			end);
@@ -12122,7 +12188,7 @@ run(function()
 				for i: number, v: {name: string, type: number, hashed: boolean} in cheaterdatabase do 
 					if v.name == player.Name or v.name == tostring(player.UserId) or v.name == whitelist:hash(player.Name..player.UserId) then
 						RenderLibrary:tagplayer(player, 'CHEATER', 'FF0000');
-						return InfoNotification('HackerDetector', `{player.DisplayName} is on the {cheaterdatabaseEnums[v.type] or v.type} whitelist!`, 30) 
+						return alertNotification('HackerDetector', `{player.DisplayName} is on the {cheaterdatabaseEnums[v.type] or v.type} whitelist!`, 30) 
 					end
 				end
 				task.wait(1)
@@ -12134,7 +12200,7 @@ run(function()
 					local uplevel = (player.Character.PrimaryPart.Position - entityLibrary.LocalPosition).Y;
 					if uplevel >= 5000 and workspace:Raycast(entityLibrary.LocalPosition, Vector3.new(0, -100, 0), store.raycast) then
 						RenderLibrary:tagplayer(player, 'CHEATER', 'FF0000');
-						return InfoNotification('HackerDetector', `{player.DisplayName} is using InfiniteFly!`, 30) 
+						return alertNotification('HackerDetector', `{player.DisplayName} is using InfiniteFly!`, 30) 
 					end
 				end
 				task.wait()
@@ -12148,7 +12214,7 @@ run(function()
 						for i: number, v: AnimationTrack in animator:GetPlayingAnimationTracks() do 
 							if (v.Animation.AnimationId == 'rbxassetid://11335949902' or v.Animation.AnimationId == 'rbxassetid://11360825341') then 
 								RenderLibrary:tagplayer(player, 'CHEATER', 'FF0000');
-						        return InfoNotification('HackerDetector', `{player.DisplayName} is using Invisibility!`, 30) 
+						        return alertNotification('HackerDetector', `{player.DisplayName} is using Invisibility!`, 30) 
 							end;
 						end; 
 					end;
@@ -12161,7 +12227,7 @@ run(function()
 				if player.Character and player.Character == character and ability == 'PARTY_POPPER' and character:FindFirstChild('party_popper') == nil then 
 					abilityconnection:Disconnect();
 					RenderLibrary:tagplayer(player, 'CHEATER', 'FF0000');
-					return InfoNotification('HackerDetector', `{player.DisplayName} is using Confetti Exploit!`, 30) 
+					return alertNotification('HackerDetector', `{player.DisplayName} is using Confetti Exploit!`, 30) 
 				end;
 			end);
 			table.insert(connections, abilityconnection);
@@ -12182,7 +12248,7 @@ run(function()
                         if not validhit then 
                             hitconnection:Disconnect();
                             RenderLibrary:tagplayer(player, 'CHEATER', 'FF0000');
-                            return InfoNotification('HackerDetector', `{player.DisplayName} is using Killaura!`, 30);
+                            return alertNotification('HackerDetector', `{player.DisplayName} is using Killaura!`, 30);
                         end;
                     end;
                 end;
@@ -12195,7 +12261,7 @@ run(function()
                     if blocktab.player == player and player.Character.HandInvItem.Value.Name ~= blocktab.blockType then 
                         blockconnection:Disconnect();
                         RenderLibrary:tagplayer(player, 'CHEATER', 'FF0000');
-                        return InfoNotification('HackerDetector', `{player.DisplayName} is using Scaffold!`, 30);
+                        return alertNotification('HackerDetector', `{player.DisplayName} is using Scaffold!`, 30);
                     end;
                 end);
             end);
@@ -12657,7 +12723,7 @@ run(function()
 						end;
 					end;
 					local tweenspeed: number = (autorewindautospeed.Enabled and (((pos - lastposition).Magnitude / 1e3)) or (0.1 * autorewindspeed.Value))
-					local rewindtween: Tween = tween:Create(lplr.Character.PrimaryPart, TweenInfo.new(tweenspeed), {Position = lastposition});
+					local rewindtween: Tween = tween:Create(lplr.Character.PrimaryPart, TweenInfo.new(tweenspeed), {CFrame = CFrame.new(lastposition)});
 					lastposition = nil;
 					rewindtween:Play();
 					rewindtween.Completed:Wait();
@@ -13011,6 +13077,11 @@ run(function()
 		Max = 10,
 		Default = damageboostdur.Value;
 	});
+	table.insert(renderconnections, lplr:GetAttributeChangedSignal('LastTeleported'):Connect(function()
+		if (tick() - store.lastdamage) > 0.1 then 
+			store.lastdamage = tick() - damageboostdur.Value;
+		end;
+	end));
 end);
 
 run(function()

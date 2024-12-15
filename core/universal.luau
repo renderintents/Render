@@ -4763,14 +4763,14 @@ run(function()
 				table.insert(Cape.Connections, lplr.CharacterAdded:Connect(function(char)
 					task.spawn(function()
 						pcall(function()
-							capeFunction(char, (successfulcustom or 'rbxassetid://98506551216383'))
+							capeFunction(char, (successfulcustom or 'rbxassetid://122120817820954'))
 						end)
 					end)
 				end))
 				if lplr.Character then
 					task.spawn(function()
 						pcall(function()
-							capeFunction(lplr.Character, (successfulcustom or 'rbxassetid://98506551216383'))
+							capeFunction(lplr.Character, (successfulcustom or 'rbxassetid://122120817820954'))
 						end)
 					end)
 				end
@@ -4794,7 +4794,7 @@ run(function()
 			end
 		end
 	})
-end)
+end);
 
 run(function()
 	local ChinaHat = {Enabled = false}
@@ -9492,7 +9492,7 @@ run(function()
 	render.session.remove = function(object: string): (string) -> ()
 		if sessions[object] then
 			sessions[object]:Remove();
-			table.remove(sessions, table.find(sessions, sessions[object]))
+			table.remove(sessions, table.find(sessions, sessions[object]));
 		end;
 	end;
 
