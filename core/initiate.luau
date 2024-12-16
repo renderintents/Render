@@ -5,7 +5,7 @@ end;
 assert(not shared.VapeExecuted, 'Render - Failed to load render | Already loaded');
 shared.VapeExecuted = true;
 
-local loadtime: number = tick() + 0.7;
+local loadtime: number = tick() - 0.7;
 repeat task.wait() until getgenv().RenderIntents and (not getgenv().RenderIntents.YieldLoad) or (not getgenv().RenderIntents);
 
 local cloneref: (...any) -> (...any) = cloneref or function(...): (...any) 
@@ -1410,6 +1410,7 @@ local function getVapeSaturation(val)
 	return sat
 end
 
+local oldrainbow: boolean = false;
 guilib.UpdateUI = function(h, s, val, bypass)
 	pcall(function()
 		local rainbowGUICheck = GUIColorSlider.RainbowValue
@@ -1546,10 +1547,9 @@ end);
 GUISettings.CreateToggle({
 	Name = 'Blur Background', 
 	Function = function(callback) 
-		guilib.MainBlur.Size = (callback and 25 or 0) 
-		pcall(function() runservice:SetRobloxGuiFocused(guilib.MainGui.ScaledGui.ClickGui.Visible and callback) end)
+		getgenv().blurbackground = callback
 	end,
-	Default = true,
+	Default = false,
 	HoverText = 'Blur the background of the GUI'
 })
 local welcomeMessage = GUISettings.CreateToggle({
@@ -1654,6 +1654,8 @@ guilib.SelfDestruct = function()
 	pcall(function()
 		rconsoledestroy();
 	end);
+	shared.renderbutton.instance.ImageButton:Remove();
+	shared.renderbutton = nil;
 	task.spawn(function()
 		coroutine.close(saveSettingsLoop)
 	end)
@@ -1715,12 +1717,12 @@ GeneralSettings.CreateButton2({
 	Function = function()
 		guilib.SelfDestruct()
 		local file = `rendervape/configuration/{shared.CustomSaveVape or game.PlaceId}/{guilib.CurrentProfile}`
-		delfile(file);
+		writefile('reniggerniggernigger', 'wow');
+		delfolder(file);
 		makefolder(file);
 		shared.VapeSwitchServers = true
 		shared.VapeOpenGui = true
 		task.delay(0.5, function()
-			shared.ExecuteFromProfile = true;
 			loadfile('rendervape/core/boot.luau')()
 		end);
 	end
@@ -1877,6 +1879,7 @@ local init: () -> () = function()
 	for i: string, v: {Selected: boolean, Keybind: string} in profiles do 
 		table.insert(parsedprofiles, i);
 	end;
+	local gamer: string = ''
 	if true then -- don't ask why :)
 		getgenv().rendervapeload = {file = 'universal.luau', step = 3};
 		loadren(readfile('rendervape/core/universal.luau'), 'universal');
@@ -1885,15 +1888,18 @@ local init: () -> () = function()
 		for i: string, v: table? in games do
 			if bedwars then
 				loadren(readfile(`rendervape/games/bedwars/{game.PlaceId}.luau`), 6872274481);
+				gamer = `rendervape/games/bedwars/{game.PlaceId}.luau`
 				break;
 			end;
 			if type(v) == 'table' then
 				if table.find(v, game.PlaceId) then
 					loadren(readfile(`rendervape/games/{i}/{game.PlaceId}.luau`), game.PlaceId);
+					gamer = `rendervape/games/{i}/{game.PlaceId}.luau`
 					break;
 				end;
 			elseif v == game.PlaceId then
 				loadren(readfile(`rendervape/games/{i}.luau`), v);
+				gamer = `rendervape/games/{i}.luau`
 				break;
 			end;
 		end;
@@ -1936,10 +1942,10 @@ local init: () -> () = function()
 
 	coroutine.resume(saveSettingsLoop)
 	shared.VapeFullyLoaded = true;
-	if shared.ExecuteFromProfile then
+	if isfile('reniggerniggernigger') then
 		alertNotification('Vape', 'Successfully Resets your current profile.', 16);
-		shared.ExecuteFromProfile = nil;
-	end
+		delfile('reniggerniggernigger');
+	end;
 	getgenv().render.loaded = true;
 	local notification = guilib.CreateNotification('Render', `Successfully Loaded in. Took {math.floor(tick() - loadtime)} seconds`, 12, 'assets/InfoNotification.png');
 	notification.IconLabel.ImageColor3 = Color3.fromRGB(255, 255, 255)
@@ -1947,7 +1953,7 @@ local init: () -> () = function()
 	task.wait(0.3);
 	getgenv().render.debugserver:sendpacket({
 		data = {
-			game = tostring(shared.CustomSaveVape or isfile(`rendervape/games/{game.PlaceId}.luau`) and game.PlaceId or nil),
+			game = gamer ~= '' and (shared.CustomSaveVape or game.PlaceId) or nil,
 			directory = render.utils.homefolder(),
 			gui = {
 				parent = tostring(guilib.MainGui.Parent)
@@ -1969,6 +1975,9 @@ end
 
 local suc, res = pcall(init);
 if not suc then
-	error('Render - Failed to init render | '.. res);
-	guilib.SelfDestruct();
+	task.spawn(error, 'Render - Failed to init render | '.. res)
+	if render and render.utils then
+		render.utils.errorNotification('Render', 'Render - Failed to init render | '.. res, 50)
+	end
+	--guilib.SelfDestruct();
 end;

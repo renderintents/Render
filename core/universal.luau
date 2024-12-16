@@ -9355,57 +9355,6 @@ run(function() --> working on this later
 		Function = void
     });]]
 end);
-
-run(function()
-	if not isfolder('rendervape/fonts') then 
-		makefolder('rendervape/fonts'); 
-	end;
-	if not isfile('rendervape/fonts/product_sans_bold_italic.ttf') then
-		alertNotification('Render', 'Sending storage a request to fetch render fonts.', 10);
-		local getfonts: table = RenderLibrary.http:request({
-			path = 'fonts',
-			subdomain = 'storage',
-			params = {{name = 'iterate', value = 'true'}}
-		});
-		if not getfonts.ok then
-			alertNotification('Render', 'Failed to fetch render fonts', 30);
-			return error('Failed to fetch render fonts');
-		end;
-		for _: number, v: string in getfonts.json().result do
-			RenderLibrary.http:getfile(`fonts/{v}`);
-		end;
-		alertNotification('Render', 'Successfully fetched render fonts', 15);
-	end;
-	writefile('rendervape/fonts/productsans.json', getservice('HttpService'):JSONEncode({
-		name = 'ProductSans',
-		faces = {
-			{
-				name = 'Light',
-				weight = 300,
-				style = 'normal',
-				assetId = getcustomasset('rendervape/fonts/product_sans_light.ttf')
-			},
-			{
-				name = 'Regular',
-				weight = 400,
-				style = 'normal',
-				assetId = getcustomasset('rendervape/fonts/product_sans_regular.ttf')
-			},
-			{
-				name = 'Medium',
-				weight = 500,
-				style = 'normal',
-				assetId = getcustomasset('rendervape/fonts/product_sans_medium.ttf')
-			},
-		}
-	}));
-	render.fonts.productsans = {
-		regular = Font.new(getcustomasset('rendervape/fonts/productsans.json'), Enum.FontWeight.Regular),
-		medium = Font.new(getcustomasset('rendervape/fonts/productsans.json'), Enum.FontWeight.Medium),
-		light = Font.new(getcustomasset('rendervape/fonts/productsans.json'), Enum.FontWeight.Light)
-	};	
-end)
-
 run(function()
 	local sessionhud: vapemodule = {Enabled = false};
     local sessionhudTextColor: vapecolorslider = newcolor();

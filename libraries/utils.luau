@@ -278,7 +278,11 @@ functions.GetAllTargets = function(distance: number?, mobs: boolean?, sort: (tab
             if not targetvalidation(v) then 
                 continue 
             end;
-			local playerdistance = (lplr.Character.PrimaryPart.Position - v.Character.PrimaryPart.Position).Magnitude
+            local targetpos = v.Character.PrimaryPart.Position
+            if targetpos.Y >= 90 then
+                targetpos = Vector3.new(targetpos.X, lplr.Character.PrimaryPart.Position.Y, targetpos.Z);
+            end;
+			local playerdistance = (lplr.Character.PrimaryPart.Position - targetpos).Magnitude
 			if playerdistance <= (distance or math.huge) then 
 				table.insert(targets, {Human = true, RootPart = v.Character.PrimaryPart, Humanoid = v.Character.Humanoid, Player = v, JumpTick = tick(), Distance = playerdistance})
 			end

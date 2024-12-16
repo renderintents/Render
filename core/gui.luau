@@ -273,10 +273,8 @@ if shared.VapeExecuted then
 	gui.ResetOnSpawn = false
 	gui.Parent = game:FindService('Players').LocalPlayer:FindFirstChildOfClass('PlayerGui');
 	lib["MainGui"] = gui;
-    shared.renderbutton.instance.ImageButton.Parent = gui;
-
-
-
+    shared.renderbutton.instance.ImageButton.Parent = game:GetService("CoreGui").TopBarApp.UnibarLeftFrame;
+	shared.renderbutton.instance.ImageButton.Position = UDim2.new(0, 108, 0, 0)
 
 	local rendersafecall: ((...any) -> (), string?, ...any) -> (table?) = function(func, name, ...)
 		local args: table = {...};
@@ -7506,6 +7504,7 @@ if shared.VapeExecuted then
 
 	shared.renderbutton:setcallback(function()
         clickgui.Visible = not clickgui.Visible
+		lib.MainBlur.Size = getgenv().blurbackground and clickgui.Visible and 25 or 0
         legitgui.Visible = not clickgui.Visible
         --inputService.OverrideMouseIconBehavior = (clickgui.Visible and Enum.OverrideMouseIconBehavior.ForceShow or game:GetService("VRService").VREnabled and Enum.OverrideMouseIconBehavior.ForceHide or Enum.OverrideMouseIconBehavior.None)
         --game:GetService("RunService"):SetRobloxGuiFocused(clickgui.Visible and lib["MainBlur"].Size ~= 0 or guiService:GetErrorType() ~= Enum.ConnectionError.OK)
@@ -7527,6 +7526,8 @@ if shared.VapeExecuted then
 			if input1.KeyCode == Enum.KeyCode[lib["GUIKeybind"]] and lib["KeybindCaptured"] == false then
 				clickgui.Visible = not clickgui.Visible
 				legitgui.Visible = not clickgui.Visible
+				lib.MainBlur.Size = getgenv().blurbackground and clickgui.Visible == true and 25 or 0
+				game['Run Service']:SetRobloxGuiFocused(getgenv().blurbackground and clickgui.Visible == true) 
 				--inputService.OverrideMouseIconBehavior = (clickgui.Visible and Enum.OverrideMouseIconBehavior.ForceShow or game:GetService("VRService").VREnabled and Enum.OverrideMouseIconBehavior.ForceHide or Enum.OverrideMouseIconBehavior.None)
 				--game:GetService("RunService"):SetRobloxGuiFocused(clickgui.Visible and lib["MainBlur"].Size ~= 0 or guiService:GetErrorType() ~= Enum.ConnectionError.OK)
 				for _, mobileButton in pairs(lib.MobileButtons) do mobileButton.Visible = not clickgui.Visible end

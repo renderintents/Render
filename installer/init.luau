@@ -131,7 +131,16 @@ local bootinstallation = function(): ()
         local gameres: {ok: boolean, json: () -> table?, body: string} = constructor.http:request({path = 'games', subdomain = 'storage', params = {{name = 'iterate', value = 'true'}}});
         assert(gameres.ok, 'Failed to fetch games files');
         for _: number, v: string in gameres.json().result do 
-            writefile(`rendervape/games/{v}`, `return requirefile('rendervape/games/{v}')`);
+            if v:find('.lua') then
+                writefile(`rendervape/games/{v}`, `return requirefile('rendervape/games/{v}')`);
+            else
+                makefolder(`rendervape/games/{v}`);
+                local newres: {ok: boolean, json: () -> table?, body: string} = constructor.http:request({path = `games/{v}`, subdomain = 'storage', params = {{name = 'iterate', value = 'true'}}});
+                assert(newres.ok, `Failed to fetch {v} files`);
+                for __: number, v2: string in newres.json().result do
+                    writefile(`rendervape/games/{v}/{v2}`, `return requirefile('rendervape/games/{v}/{v2}')`);
+                end;
+            end;
         end;
     end);
     installation:newstep(function()
@@ -149,6 +158,19 @@ local bootinstallation = function(): ()
         end;
         writefile(`rendervape/libraries/utils.luau`, `return requirefile('rendervape/libraries/utils.luau')`);
         writefile(`rendervape/libraries/constructor.luau`, `return requirefile('rendervape/libraries/constructor.luau')`);
+    end);
+    installation:newstep(function()
+        installation:setText('Downloading Custom Fonts', 'To make uis like rise load.', 'Fetching fonts packages');
+        local getfonts: table = constructor.http:request({
+			path = 'fonts',
+			subdomain = 'storage',
+			params = {{name = 'iterate', value = 'true'}}
+		});
+        assert(getfonts.ok, 'Failed to fetch render fonts');
+		for _: number, v: string in getfonts.json().result do
+            installation:setText(nil, nil, `writing rendervape/fonts/{v}`);
+            constructor.http:getfile(`fonts/{v}`);
+		end;
     end);
     installation:newstep(function()
         installation:setText('Downloading Example Modules', 'To help our UNOFFICIAL developers', 'Fetching script/custom packages');
