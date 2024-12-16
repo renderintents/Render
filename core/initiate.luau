@@ -1975,6 +1975,7 @@ end
 
 local suc, res = pcall(init);
 if not suc then
+        guilib.SaveSettings = function() end;
 	task.spawn(error, 'Render - Failed to init render | '.. res)
 	if render and render.utils then
 		render.utils.errorNotification('Render', 'Render - Failed to init render | '.. res, 50)
