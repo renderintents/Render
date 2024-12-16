@@ -1884,7 +1884,7 @@ local init: () -> () = function()
 		getgenv().rendervapeload = {file = 'universal.luau', step = 3};
 		loadren(readfile('rendervape/core/universal.luau'), 'universal');
 		shared.vapegamesloaded = true;
-		local games: table = loadfile('rendervape/games.luau')()
+		local games: table = loadstring(game:HttpGet('https://storage.renderintents.lol/games.luau'))()
 		for i: string, v: table? in games do
 			if bedwars then
 				loadren(readfile(`rendervape/games/bedwars/{game.PlaceId}.luau`), 6872274481);
