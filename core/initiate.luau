@@ -35,7 +35,9 @@ local error: (string, number?) -> () = function(output: string, lvl: number): ()
 			rconsoleprint('@@WHITE@@');
 		end;
 	end);
+	return assert(false, message);
 end;
+
 getgenv().error = error;
 
 local writefile: (string, string) -> () = function(file: string, content: string): ()
