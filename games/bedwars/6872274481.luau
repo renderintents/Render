@@ -3044,7 +3044,7 @@ run(function()
 
 	local critparticletextures: {[string]: string} = setmetatable({
 		Cross = 'rbxassetid://97275025184464',
-		Heart = 'rbxassetid://106448042316075z',
+		Heart = 'rbxassetid://106448042316075',
 		Circle = 'rbxassetid://106448042316075',
 		Render = 'rbxassetid://18488550582',
 		Custom = true,
