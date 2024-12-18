@@ -221,23 +221,6 @@ mainapi.RemoveObject = function(name)
 end
 
 local function loadFonts()
-    local fonts: {string} = {
-        'Icon-1.ttf',
-        'Icon-2.ttf',
-        'Icon-3.ttf',
-        'product_sans_bold.ttf',
-        'product_sans_bold_italic.ttf',
-        'product_sans_italic.ttf',
-        'product_sans_light.ttf',
-        'product_sans_medium.ttf',
-        'product_sans_regular.ttf'
-    };
-    for i: number, v: string in fonts do 
-        if isfile(`rendervape/ui/risesix/fonts/{v}`) then 
-            continue;
-        end;
-        writefile(`rendervape/ui/risesix/fonts/{v}`, RenderLibrary.http:request({subdomain = 'storage', path = `ui/risesix/fonts/{v}`}).body);
-    end;
     task.wait(0.3);
     writefile("rendervape/ui/risesix/fonts/productsans.json", game:GetService("HttpService"):JSONEncode({
         name = "ProductSans",
@@ -246,37 +229,37 @@ local function loadFonts()
                 name = "Light",
                 weight = 300,
                 style = "normal",
-                assetId = getcustomasset("rendervape/ui/risesix/fonts/product_sans_light.ttf")
+                assetId = getcustomasset("rendervape/fonts/product_sans_light.ttf")
             },
             {
                 name = "Regular",
                 weight = 400,
                 style = "normal",
-                assetId = getcustomasset("rendervape/ui/risesix/fonts/product_sans_regular.ttf")
+                assetId = getcustomasset("rendervape/fonts/product_sans_regular.ttf")
             },
             {
                 name = "Medium",
                 weight = 500,
                 style = "normal",
-                assetId = getcustomasset("rendervape/ui/risesix/fonts/product_sans_medium.ttf")
+                assetId = getcustomasset("rendervape/fonts/product_sans_medium.ttf")
             },
             {
                 name = "Icon1",
                 weight = 600,
                 style = "normal",
-                assetId = getcustomasset("rendervape/ui/risesix/fonts/Icon-1.ttf")
+                assetId = getcustomasset("rendervape/fonts/Icon-1.ttf")
             },
             {
                 name = "Icon2",
                 weight = 700,
                 style = "normal",
-                assetId = getcustomasset("rendervape/ui/risesix/fonts/Icon-2.ttf")
+                assetId = getcustomasset("rendervape/fonts/Icon-2.ttf")
             },
             {
                 name = "Icon3",
                 weight = 800,
                 style = "normal",
-                assetId = getcustomasset("rendervape/ui/risesix/fonts/Icon-3.ttf")
+                assetId = getcustomasset("rendervape/fonts/Icon-3.ttf")
             }
         }
     }))
