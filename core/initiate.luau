@@ -2005,6 +2005,8 @@ local init: () -> () = function()
 	});
 end
 
+task.wait(0.25);
+
 local suc, res = pcall(init);
 if not suc then
         guilib.SaveSettings = function() end;
