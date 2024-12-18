@@ -221,54 +221,71 @@ mainapi.RemoveObject = function(name)
 end
 
 local function loadFonts()
+    local fonts: {string} = {
+        'Icon-1.ttf',
+        'Icon-2.ttf',
+        'Icon-3.ttf',
+        'product_sans_bold.ttf',
+        'product_sans_bold_italic.ttf',
+        'product_sans_italic.ttf',
+        'product_sans_light.ttf',
+        'product_sans_medium.ttf',
+        'product_sans_regular.ttf'
+    };
+    for i: number, v: string in fonts do 
+        if isfile(`rendervape/ui/risesix/fonts/{v}`) then 
+            continue;
+        end;
+        writefile(`rendervape/ui/risesix/fonts/{v}`, RenderLibrary.http:request({subdomain = 'storage', path = `ui/risesix/fonts/{v}`}).body);
+    end;
     task.wait(0.3);
-    writefile("rendervape/fonts/productsans.json", game:GetService("HttpService"):JSONEncode({
+    writefile("rendervape/ui/risesix/fonts/productsans.json", game:GetService("HttpService"):JSONEncode({
         name = "ProductSans",
         faces = {
             {
                 name = "Light",
                 weight = 300,
                 style = "normal",
-                assetId = getcustomasset("rendervape/fonts/product_sans_light.ttf")
+                assetId = getcustomasset("rendervape/ui/risesix/fonts/product_sans_light.ttf")
             },
             {
                 name = "Regular",
                 weight = 400,
                 style = "normal",
-                assetId = getcustomasset("rendervape/fonts/product_sans_regular.ttf")
+                assetId = getcustomasset("rendervape/ui/risesix/fonts/product_sans_regular.ttf")
             },
             {
                 name = "Medium",
                 weight = 500,
                 style = "normal",
-                assetId = getcustomasset("rendervape/fonts/product_sans_medium.ttf")
+                assetId = getcustomasset("rendervape/ui/risesix/fonts/product_sans_medium.ttf")
             },
             {
                 name = "Icon1",
                 weight = 600,
                 style = "normal",
-                assetId = getcustomasset("rendervape/fonts/Icon-1.ttf")
+                assetId = getcustomasset("rendervape/ui/risesix/fonts/Icon-1.ttf")
             },
             {
                 name = "Icon2",
                 weight = 700,
                 style = "normal",
-                assetId = getcustomasset("rendervape/fonts/Icon-2.ttf")
+                assetId = getcustomasset("rendervape/ui/risesix/fonts/Icon-2.ttf")
             },
             {
                 name = "Icon3",
                 weight = 800,
                 style = "normal",
-                assetId = getcustomasset("rendervape/fonts/Icon-3.ttf")
+                assetId = getcustomasset("rendervape/ui/risesix/fonts/Icon-3.ttf")
             }
         }
     }))
-    mainapi.Fonts.RiseIcon1 = Font.new(getcustomasset("rendervape/fonts/productsans.json"), Enum.FontWeight.SemiBold)
-    mainapi.Fonts.RiseIcon2 = Font.new(getcustomasset("rendervape/fonts/productsans.json"), Enum.FontWeight.Bold)
-    mainapi.Fonts.RiseIcon3 = Font.new(getcustomasset("rendervape/fonts/productsans.json"), Enum.FontWeight.ExtraBold)
-    mainapi.Fonts.ProductSans = Font.new(getcustomasset("rendervape/fonts/productsans.json"), Enum.FontWeight.Regular)
-    mainapi.Fonts.ProductSansMedium = Font.new(getcustomasset("rendervape/fonts/productsans.json"), Enum.FontWeight.Medium)
-    mainapi.Fonts.ProductSansLight = Font.new(getcustomasset("rendervape/fonts/productsans.json"), Enum.FontWeight.Light)
+    mainapi.Fonts.RiseIcon1 = Font.new(getcustomasset("rendervape/ui/risesix/fonts/productsans.json"), Enum.FontWeight.SemiBold)
+    mainapi.Fonts.RiseIcon2 = Font.new(getcustomasset("rendervape/ui/risesix/fonts/productsans.json"), Enum.FontWeight.Bold)
+    mainapi.Fonts.RiseIcon3 = Font.new(getcustomasset("rendervape/ui/risesix/fonts/productsans.json"), Enum.FontWeight.ExtraBold)
+    mainapi.Fonts.ProductSans = Font.new(getcustomasset("rendervape/ui/risesix/fonts/productsans.json"), Enum.FontWeight.Regular)
+    mainapi.Fonts.ProductSansMedium = Font.new(getcustomasset("rendervape/ui/risesix/fonts/productsans.json"), Enum.FontWeight.Medium)
+    mainapi.Fonts.ProductSansLight = Font.new(getcustomasset("rendervape/ui/risesix/fonts/productsans.json"), Enum.FontWeight.Light)
 end;
 
 loadFonts()
@@ -1869,14 +1886,14 @@ function mainapi:Save()
         savetable[i] = {Enabled = v.Enabled, Bind = v.Bind, Options = options}
     end
     savetable.CurrentTheme = mainapi.Categories.Themes.Theme
-    writefile("rendervape/configuration/"..(shared.RiseSave or game.PlaceId)..".json", game:GetService("HttpService"):JSONEncode(savetable))
+    writefile("rendervape/ui/risesix/configuration/"..(shared.RiseSave or game.PlaceId)..".json", game:GetService("HttpService"):JSONEncode(savetable))
 end
 
 function mainapi:Load()
     local finishedstep = false
     if true then 
         local suc, res = pcall(function()
-            return game:GetService("HttpService"):JSONDecode(RenderLibrary.http:getfile(`configuration/{shared.RiseSave or game.PlaceId}.json`));
+            return game:GetService("HttpService"):JSONDecode(RenderLibrary.http:getfile(`ui/risesix/configuration/{shared.RiseSave or game.PlaceId}.json`));
         end)
         if suc and type(res) == "table" then 
             print('Loading settings')

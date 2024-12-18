@@ -35,7 +35,9 @@ local error: (string, number?) -> () = function(output: string, lvl: number): ()
 			rconsoleprint('@@WHITE@@');
 		end;
 	end);
+	return assert(false, message);
 end;
+
 getgenv().error = error;
 
 local writefile: (string, string) -> () = function(file: string, content: string): ()
@@ -544,6 +546,7 @@ local TextGUIOffsets = {
 }
 TextGUIOffsets[Enum.Platform.IOS] = TextGUIOffsets[Enum.Platform.Android]
 local textguiupd: number = 0;
+local fadeoutTween
 local function TextGUIUpdate(moduleToggled: {Enabled: boolean, ExtraText: () -> (), Name: string}): ()
 	moduleToggled = moduleToggled or {Enabled = nil, Name = 'nil', ExtraText = function()
 		return ''
@@ -1714,9 +1717,8 @@ GeneralSettings.CreateToggle({
 GeneralSettings.CreateButton2({
 	Name = 'RESET CURRENT PROFILE', 
 	Function = function()
-		local file = `rendervape/configuration/{shared.CustomSaveVape or game.PlaceId}/{guilib.CurrentProfile}`
 		guilib.SelfDestruct()
-		task.wait(0.05)
+		local file = `rendervape/configuration/{shared.CustomSaveVape or game.PlaceId}/{guilib.CurrentProfile}`
 		writefile('reniggerniggernigger', 'wow');
 		delfolder(file);
 		makefolder(file);
@@ -1884,8 +1886,37 @@ local init: () -> () = function()
 		getgenv().rendervapeload = {file = 'universal.luau', step = 3};
 		loadren(readfile('rendervape/core/universal.luau'), 'universal');
 		shared.vapegamesloaded = true;
-		getgenv().RenderLibrary.http:getfile('games.luau');
-		local games: table = loadfile('rendervape/games.luau')()
+		local games: table = {
+    murdermystery = 142823291,
+    prisonlife = 155615604,
+    babft = 537413528,
+    jailbreak = 606849621,
+    fleefacility = 893973440,
+    zombieattack = 1240123653,
+    navalwarfare = 2210085102,
+    doors = 6839171747,
+    bedwarslobby = 6872265039,
+    undergroundwar = 3232996272,
+    thestrongestbg = 10449761463,
+    dandysworld = 16116270224,
+    dustytrip = 16389398622,
+    fisch = 16732694052,
+    bedwarz = 17750024818,
+    petsgo = 18901165922,
+    assgame = 18879239467,
+    slapbattles = {
+        6403373529,
+        11520107397
+    },
+    legendspeed = {
+        3101667897,
+        3232996272
+    },
+    bedwars = {
+        6872274481,
+        8444591321
+    }
+}
 		for i: string, v: table? in games do
 			if bedwars then
 				loadren(readfile(`rendervape/games/bedwars/{game.PlaceId}.luau`), 6872274481);
@@ -1976,6 +2007,7 @@ end
 
 local suc, res = pcall(init);
 if not suc then
+        guilib.SaveSettings = function() end;
 	task.spawn(error, 'Render - Failed to init render | '.. res)
 	if render and render.utils then
 		render.utils.errorNotification('Render', 'Render - Failed to init render | '.. res, 50)
