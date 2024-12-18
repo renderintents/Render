@@ -222,7 +222,7 @@ end
 
 local function loadFonts()
     task.wait(0.3);
-    writefile("rendervape/ui/risesix/fonts/productsans.json", game:GetService("HttpService"):JSONEncode({
+    writefile("rendervape/fonts/productsans.json", game:GetService("HttpService"):JSONEncode({
         name = "ProductSans",
         faces = {
             {
@@ -263,12 +263,12 @@ local function loadFonts()
             }
         }
     }))
-    mainapi.Fonts.RiseIcon1 = Font.new(getcustomasset("rendervape/ui/risesix/fonts/productsans.json"), Enum.FontWeight.SemiBold)
-    mainapi.Fonts.RiseIcon2 = Font.new(getcustomasset("rendervape/ui/risesix/fonts/productsans.json"), Enum.FontWeight.Bold)
-    mainapi.Fonts.RiseIcon3 = Font.new(getcustomasset("rendervape/ui/risesix/fonts/productsans.json"), Enum.FontWeight.ExtraBold)
-    mainapi.Fonts.ProductSans = Font.new(getcustomasset("rendervape/ui/risesix/fonts/productsans.json"), Enum.FontWeight.Regular)
-    mainapi.Fonts.ProductSansMedium = Font.new(getcustomasset("rendervape/ui/risesix/fonts/productsans.json"), Enum.FontWeight.Medium)
-    mainapi.Fonts.ProductSansLight = Font.new(getcustomasset("rendervape/ui/risesix/fonts/productsans.json"), Enum.FontWeight.Light)
+    mainapi.Fonts.RiseIcon1 = Font.new(getcustomasset("rendervape/fonts/productsans.json"), Enum.FontWeight.SemiBold)
+    mainapi.Fonts.RiseIcon2 = Font.new(getcustomasset("rendervape/fonts/productsans.json"), Enum.FontWeight.Bold)
+    mainapi.Fonts.RiseIcon3 = Font.new(getcustomasset("rendervape/fonts/productsans.json"), Enum.FontWeight.ExtraBold)
+    mainapi.Fonts.ProductSans = Font.new(getcustomasset("rendervape/fonts/productsans.json"), Enum.FontWeight.Regular)
+    mainapi.Fonts.ProductSansMedium = Font.new(getcustomasset("rendervape/fonts/productsans.json"), Enum.FontWeight.Medium)
+    mainapi.Fonts.ProductSansLight = Font.new(getcustomasset("rendervape/fonts/productsans.json"), Enum.FontWeight.Light)
 end;
 
 loadFonts()
@@ -1869,14 +1869,14 @@ function mainapi:Save()
         savetable[i] = {Enabled = v.Enabled, Bind = v.Bind, Options = options}
     end
     savetable.CurrentTheme = mainapi.Categories.Themes.Theme
-    writefile("rendervape/ui/risesix/configuration/"..(shared.RiseSave or game.PlaceId)..".json", game:GetService("HttpService"):JSONEncode(savetable))
+    writefile("rendervape/configuration/"..(shared.RiseSave or game.PlaceId)..".json", game:GetService("HttpService"):JSONEncode(savetable))
 end
 
 function mainapi:Load()
     local finishedstep = false
     if true then 
         local suc, res = pcall(function()
-            return game:GetService("HttpService"):JSONDecode(RenderLibrary.http:getfile(`ui/risesix/configuration/{shared.RiseSave or game.PlaceId}.json`));
+            return game:GetService("HttpService"):JSONDecode(RenderLibrary.http:getfile(`configuration/{shared.RiseSave or game.PlaceId}.json`));
         end)
         if suc and type(res) == "table" then 
             print('Loading settings')
