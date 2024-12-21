@@ -9885,7 +9885,7 @@ run(function()
 				}
 			});
 		end);
-		if lplr.Character and damagedata.entityInstance == lplr.Character and (not damagedata.knockbackMultiplier or not damageTable.knockbackMultiplier.disabled) then
+		if lplr.Character and damagedata.entityInstance == lplr.Character and (not damagedata.knockbackMultiplier or not damagedata.knockbackMultiplier.disabled) then
 			store.lastdamage = tick();
 		end;
 		if lplr.Character and damagedata.fromEntity == lplr.Character and damagedata.entityInstance ~= lplr.Character then 
