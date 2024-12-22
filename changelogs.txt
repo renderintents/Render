@@ -1,23 +1,12 @@
 🎯 [ UNIVERSAL ] --->
-    [+] Added back all other supported games
-    [+] Added Spotify Command (use):
-       [!] USE ";spotify <commandname>" to invoke a command (eg. ";spotify skip")
-       [->] SUB COMMANDS:
-           [!] pause (Pauses the current song playing)
-           [!] resume (Resumes the current song playing)
-           [!] replay (Replays the current song)
-           [!] skip (Switches to the next song in queue if available)
-           [!] previous (Switches back to the previous song played)
+    [+] Added 2 skies to Atmosphere ('Nebula 5', 'Nebula 6')
+    [+] Added back exploit tab (contains 'MelodyExploit', 'FunnyExploit', 'AntiTap', 'AntiCobweb')
+    [=] Few bug fixes 
 
 
 🛏️ [ BEDWARS ] --->      
-    [=] DamageBoost will no longer trigger on entities that don't trigger knockback (so no flag)
-    [=] DamageBoost speed reduced if you're not on ground
-    [+] Added Killaura animation 'Gangsta'
-    [+] Added 'Heart' Killaura Particle
-    [+] Added 'Anim Extra Speed' to Killaura (extra speed for killaura animations, use negative numbersfor faster speed)
-    [=] Changed 'sexy' profiles (includes better antihit settings [0.35], optimized for hvhs not invincibility)
+    [=] New Profiles
 
 
 📝 [ SIDE NOTE ] --->
-    We will be pushing a WAY bigger update later this week hopefully
+    We will be updating packet more now, render will prolly come to vape rewrite, idk as of now though.
