@@ -7263,6 +7263,22 @@ run(function()
 			skyobj.SkyboxRt = 'rbxassetid://17103636666'
 			skyobj.SkyboxUp = 'rbxassetid://17103639457'
 		end,
+		Nebula5 = function()
+			skyobj.SkyboxBk = 'rbxassetid://17124357467'
+			skyobj.SkyboxDn = 'rbxassetid://17124359797'
+			skyobj.SkyboxFt = 'rbxassetid://17124362093'
+			skyobj.SkyboxLf = 'rbxassetid://17124365127'
+			skyobj.SkyboxRt = 'rbxassetid://17124367200'
+			skyobj.SkyboxUp = 'rbxassetid://17124369657'
+		end,
+		Nebula6 = function()
+			skyobj.SkyboxBk = 'rbxassetid://16694187412'
+			skyobj.SkyboxDn = 'rbxassetid://16694190947'
+			skyobj.SkyboxFt = 'rbxassetid://16694194795'
+			skyobj.SkyboxLf = 'rbxassetid://16694197080'
+			skyobj.SkyboxRt = 'rbxassetid://16694200892'
+			skyobj.SkyboxUp = 'rbxassetid://16694204069'
+		end,
 		NewYork = function()
 			skyobj.SkyboxBk = 'rbxassetid://11333973069'
 			skyobj.SkyboxDn = 'rbxassetid://11333969768'
@@ -7396,7 +7412,8 @@ run(function()
 			skyobj.SkyboxUp = 'rbxassetid://16876552681';
 			skyobj.SunAngularSize = 21;
 			skyobj.StarCount = 3000;
-		end
+		end,
+
 	}
 
 	Atmosphere = rendervape.ObjectsThatCanBeSaved.RenderWindow.Api.CreateOptionsButton({
@@ -7419,7 +7436,8 @@ run(function()
 				skyatmosphereobj = Instance.new('ColorCorrectionEffect')
 			    skyatmosphereobj.TintColor = Color3.fromHSV(SkyColor.Hue, SkyColor.Sat, SkyColor.Value)
 			    skyatmosphereobj.Parent = lighting
-				table.insert(Atmosphere.Connections, task.spawn(themetable[AtmosphereMethod.Value]))
+				table.insert(Atmosphere.Connections, task.spawn(themetable[AtmosphereMethod.Value]));
+				task.wait(0.1);
 				table.insert(Atmosphere.Connections, lighting.ChildAdded:Connect(function(object: Sky?)
 					if object.ClassName == 'Sky' then 
 						skyobj:Destroy();

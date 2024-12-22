@@ -128,6 +128,11 @@ local pretabs: {table} = {
 		Icon = 'rendervape/assets/InventoryIcon.png'
 	},
 	[7] = {
+		Name = 'Exploit',
+		IconSize = 16,
+		Icon = 'rendervape/assets/ExploitIcon.png'
+	},
+	[8] = {
 		Name = 'Minigames',
 		IconSize = 19.5,
 		Icon = 'rendervape/assets/MinigamesIcon.png',
@@ -135,7 +140,7 @@ local pretabs: {table} = {
 		CustomSize2 = UDim2.new(0, 18, 0, 18)
 	}
 }
-table.foreach(pretabs, print)
+
 for i: string, v: table in pretabs do
 	local tab = guilib.CreateWindow(v)
 	mainwin.CreateButton({
