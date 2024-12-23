@@ -1785,9 +1785,9 @@ function mainapi:CreateNotification(name, text, duration, continued)
     end
     local notification = Instance.new("Frame")
     notification.Name = "Notification"
-    notification.AnchorPoint = Vector2.new(0.5, 0.5)
+    notification.AnchorPoint = Vector2.new(0.3, 0.5)
     notification.Size = UDim2.fromOffset(self:GetTextSize(text, 17, self.Fonts.ProductSansMedium).X + 80, 60)
-    notification.Position = UDim2.fromOffset(150 + ((#text / 2) * 3), 84)
+    notification.Position = UDim2.fromOffset(0, 84)
     notification.BackgroundTransparency = 1
     notification.BackgroundColor3 = Color3.new()
     
