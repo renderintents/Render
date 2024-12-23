@@ -1851,7 +1851,7 @@ function mainapi:CreateNotification(name, text, duration, continued)
         task.wait(0.3)
         table.remove(notifs, 1)
         if notifs[1] then
-            mainapi:CreateNotification(notifs[1][1], notifs[1][2], notifs[1][3], true)
+            mainapi:CreateNotification(notifs[1][1], notifs[1][2], 1, true)
         end
     end)
 end
