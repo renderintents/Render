@@ -6864,7 +6864,43 @@ rendertext.Size = UDim2.new(1, 0, 0, 0);
 rendertext.Font = Enum.Font.GothamMedium;
 rendertext.TextColor3 = Color3.fromRGB(255, 255, 255);
 rendertext.AnchorPoint = Vector2.new(0.5, 0.5);
-rendertext.Position = UDim2.new(0.5, 0, 0.75, 0);
+
+do
+    local textlabel = Instance.new("TextLabel")
+    textlabel.Size = UDim2.new(1, 0, 0, 36)
+    local xmastime = 1735106400
+    textlabel.Text = "Christmas Countdown: "
+    textlabel.BackgroundTransparency = 1
+    textlabel.ZIndex = 10
+    textlabel.TextStrokeTransparency = 0
+    textlabel.TextScaled = true
+    textlabel.Font = Enum.Font.SourceSans
+    textlabel.TextColor3 = Color3.new(1, 1, 1)
+    textlabel.Position = UDim2.new(1, 0, 0.01, 0)
+    textlabel.AnchorPoint = Vector2.new(0.5, 0.5)
+    textlabel.Parent = rendervape.MainGui.ScaledGui.ClickGui
+    task.spawn(function()
+        repeat
+            local diff = xmastime - tick()
+            local days = math.floor(diff / 86400)
+            diff = diff % 86400
+            
+            local hours = math.floor(diff / 3600)
+            diff = diff % 3600
+            
+            local minutes = math.floor(diff / 60)
+            local seconds = math.floor(diff % 60)
+            
+            local dayStamp = days ~= 1 and " days" or " day"
+            local hourStamp = hours ~= 1 and " hours" or " hour"
+            local minuteStamp = minutes ~= 1 and " minutes" or " minute"
+            local secondStamp = seconds ~= 1 and " seconds" or " second"
+            
+            textlabel.Text = "Christmas Countdown: "..days..dayStamp..", "..hours..hourStamp..", "..minutes..minuteStamp..", and "..seconds..secondStamp
+            task.wait()
+        until (not textlabel)
+    end)
+end
 
 run(function()
 	local Atmosphere = {}
