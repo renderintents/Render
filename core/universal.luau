@@ -6863,7 +6863,7 @@ rendertext.ZIndex = 10;
 rendertext.Size = UDim2.new(0, 0, 0, 0);
 rendertext.Font = Enum.Font.GothamMedium;
 rendertext.TextColor3 = Color3.fromRGB(255, 255, 255);
-rendertext.AnchorPoint = Vector2.new(-0.5, 0.5);
+rendertext.AnchorPoint = Vector2.new(0.5, 0.5);
 
 do
     local textlabel = Instance.new("TextLabel")
