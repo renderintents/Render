@@ -1777,15 +1777,15 @@ end
 local notifs = {}
 function mainapi:CreateNotification(name, text, duration, continued)
     if #notifs > 0 and not continued then 
-        --table.insert(notifs, {name, text, duration})
-       -- return
+        table.insert(notifs, {name, text, duration})
+        return
     end
     if not continued then
         table.insert(notifs, {name, text, duration})
     end
     local notification = Instance.new("Frame")
     notification.Name = "Notification"
-    notification.AnchorPoint = Vector2.new(-0.2, 0.5)
+    notification.AnchorPoint = Vector2.new(0, 0.5)
     notification.Size = UDim2.fromOffset(self:GetTextSize(text, 17, self.Fonts.ProductSansMedium).X + 80, 60)
     notification.Position = UDim2.fromOffset(0, 84)
     notification.BackgroundTransparency = 1
