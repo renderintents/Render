@@ -1046,7 +1046,7 @@ function mainapi:CreateCategory(name, font, icon)
         end)
         modulebutton.MouseButton2Click:Connect(function()
             moduleframe.Visible = not moduleframe.Visible
-            modulebutton.Size = UDim2.fromOffset(570, moduleframe.Visible and moduleframe.Size.Y.Offset + 66 or 76)
+            tweenService:Create(modulebutton, TweenInfo.new(0.35), {Size = UDim2.fromOffset(570, moduleframe.Visible and moduleframe.Size.Y.Offset + 66 or 76)}):Play();
         end)
 
         mainapi.Modules[name] = moduleapi
