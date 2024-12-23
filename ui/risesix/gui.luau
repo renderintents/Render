@@ -1783,6 +1783,9 @@ function mainapi:CreateNotification(name, text, duration, continued)
     if not continued then
         table.insert(notifs, {name, text, duration})
     end
+    if name == 'Toggled' then 
+        duration = 1;
+    end;
     local notification = Instance.new("Frame")
     notification.Name = "Notification"
     notification.AnchorPoint = Vector2.new(0, 0.5)
