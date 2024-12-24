@@ -6863,6 +6863,7 @@ rendertext.ZIndex = 10;
 rendertext.Size = UDim2.new(0, 0, 0, 0);
 rendertext.Font = Enum.Font.GothamMedium;
 rendertext.TextColor3 = Color3.fromRGB(255, 255, 255);
+rendertext.Position = UDim2.fromScale(0.5, 0.5);
 rendertext.AnchorPoint = Vector2.new(0.5, 0.5);
 
 do
@@ -6876,7 +6877,7 @@ do
     textlabel.TextScaled = true
     textlabel.Font = Enum.Font.SourceSans
     textlabel.TextColor3 = Color3.new(1, 1, 1)
-    textlabel.Position = UDim2.new(1, 0, 0.01, 0)
+    rendertext.Position = UDim2.fromScale(0.5, 0.7);
     textlabel.AnchorPoint = Vector2.new(0.5, 0.5)
     textlabel.Parent = rendervape.MainGui.ScaledGui.ClickGui
     task.spawn(function()
