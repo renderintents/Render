@@ -6872,10 +6872,10 @@ do
     local xmastime = 1735106400
     textlabel.Text = "Christmas Countdown: "
     textlabel.BackgroundTransparency = 1
-    textlabel.ZIndex = 10
-    textlabel.TextStrokeTransparency = 0
-    textlabel.TextScaled = true
-    textlabel.Font = Enum.Font.SourceSans
+    textlabel.ZIndex = 10;
+	textlabel.TextSize = 20;
+    textlabel.TextStrokeTransparency = 1;
+    textlabel.Font = Enum.Font.GothamMedium;
     textlabel.TextColor3 = Color3.new(1, 1, 1)
     textlabel.Position = UDim2.fromScale(0.5, 0.75);
     textlabel.AnchorPoint = Vector2.new(0.5, 0.5);
