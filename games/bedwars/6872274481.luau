@@ -177,6 +177,7 @@ local store = {
 	},
 	zephyrOrb = 0,
 	auraAttacks = 0,
+    knockbackAcks = {},
 	switchdelay = tick(),
 	lastHit = tick()
 };
@@ -1472,6 +1473,17 @@ run(function()
 		getmetatable(Client).Get = function(self, remoteName)
 			if not vapeInjected then return OldGet(self, remoteName) end
 			local originalRemote = OldGet(self, remoteName)
+            if remoteName == 'AckKnockback' then 
+                return {
+                    instance = originalRemote.instance,
+                    SendToServer = function(self: table, kbdata: {knockbackId: number, playerPosition: Vector3}): ()
+                        if not inputservice.TouchEnabled then 
+							InfoNotification('Render', `Successfully received float packet`, 3);
+						end;
+                        table.insert(store.knockbackAcks, kbdata.knockbackId);
+                    end;
+                };
+            end;
 			if remoteName == bedwars.AttackRemote then
 				return {
 					instance = originalRemote.instance,
@@ -2386,6 +2398,7 @@ run(function()
 	local groundtime = tick()
 	local onground = false
 	local lastonground = false;
+    local lastkbacknowledged: number = tick() - 2.4;
 	local alternatelist = {'Normal', 'AntiCheat A', 'AntiCheat B'}
 
 	local function inflateBalloon()
@@ -2472,12 +2485,21 @@ run(function()
 				groundtime = tick() + (2.6 + (entityLibrary.groundTick - tick()))
 				FlyCoroutine = coroutine.create(function()
 					repeat
-						repeat task.wait() until (groundtime - tick()) < 0.6 and not onground
+						repeat task.wait() until (groundtime - tick()) < 0.5 and not onground
 						flyAllowed = ((lplr.Character and lplr.Character:GetAttribute('InflatedBalloons') and lplr.Character:GetAttribute('InflatedBalloons') > 0) or store.matchState == 2 or megacheck) and 1 or 0
 						if (not Fly.Enabled) then break end
 						local Flytppos = -99999
 						if flyAllowed <= 0 and FlyTP.Enabled and isAlive(lplr, true) then
 							local ray = workspace:Raycast(lplr.Character.PrimaryPart.Position, Vector3.new(0, -1000, 0), store.raycast)
+                            if #store.knockbackAcks > 0 and (tick() - lastkbacknowledged) >= 2.5 and not ray then
+                                lastkbacknowledged = tick();
+                                bedwars.Client:Get('AckKnockback').instance:FireServer({
+                                    playerPosition = lplr.Character.PrimaryPart.Position,
+                                    knockbackId = store.knockbackAcks[1];
+                                });
+                                InfoNotification('Fly', `{#store.knockbackAcks - 1} float packets left`, 3); 
+                                table.remove(store.knockbackAcks, 1);
+                            end;
 							if ray then
 								Flytppos = lplr.Character.PrimaryPart.Position.Y
 								local args = {lplr.Character.PrimaryPart.CFrame:GetComponents()}

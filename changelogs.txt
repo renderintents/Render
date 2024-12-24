@@ -1,11 +1,10 @@
 🎯 [ UNIVERSAL ] --->
-    [+] Added 2 skies to Atmosphere ('Nebula 5', 'Nebula 6')
-    [+] Added back exploit tab (contains 'MelodyExploit', 'FunnyExploit', 'AntiTap', 'AntiCobweb')
-    [=] Few bug fixes 
+    nothing
 
 
 🛏️ [ BEDWARS ] --->      
-    [=] New Profiles
+    [+] Made Animation when you expand module in rise 
+    [+] Added the fly packet system from vape rewrite (extended float time)
 
 
 📝 [ SIDE NOTE ] --->
