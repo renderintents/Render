@@ -1,1 +1,0 @@
-{"simple":{"Selected":false,"Keybind":""},"Halloween":{"Keybind":"","Selected":true},"default":{"Selected":false,"Keybind":""}}
