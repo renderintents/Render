@@ -17,8 +17,10 @@ local isfile = isfile or function(file)
 	return suc and res ~= nil and res ~= ''
 end
 
+if not isfile('rendervape/profiles/commit.txt') then
+
 local getcommit = function()
-	return isfile('rendervape/profiles/commit.txt') and readfile('rendervape/profiles/commit.txt') or 'production'
+	return isfile('rendervape/profiles/commit.txt') and readfile('rendervape/profiles/commit.txt') or 'main'
 end
 
 local cloneref = cloneref or function(obj)
