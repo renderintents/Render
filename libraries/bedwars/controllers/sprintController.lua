@@ -1,3 +1,4 @@
+--This watermark is used to delete the file if its cached, remove it to make the file persist after vape updates.
 local ContextActionService = game:GetService('ContextActionService')
 local tweenService = game:GetService('TweenService')
 local gameCamera = workspace.CurrentCamera

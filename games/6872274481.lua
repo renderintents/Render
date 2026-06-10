@@ -362,8 +362,9 @@ run(function()
 		return self.Controllers[Name];
 	end}
 
-	for _, value in listfiles('rendervape/libraries/bedwars/controllers') do
-		value = loadfile(value)()
+	for _, value in {'sprint', 'ability', 'app', 'block', 'match', 'queue', 'sword'} do
+		print(value)
+		value = loadstring(downloadFile('rendervape/libraries/bedwars/controllers/' .. value .. 'Controller.lua'))()
 
 		Knit.Controllers[value.Name] = value;
 	end
@@ -371,8 +372,8 @@ run(function()
 	bedwars = {
 		Knit = Knit,
 		Client = Client,
-		ItemMeta = httpService:JSONDecode(readfile('rendervape/libraries/bedwars/itemmeta.json')).items,
-		ProjectileMeta = loadstring(readfile('rendervape/libraries/bedwars/projectilemeta.lua'))().ProjectileMeta,
+		ItemMeta = httpService:JSONDecode(downloadFile('rendervape/libraries/bedwars/itemmeta.json')).items,
+		ProjectileMeta = loadstring(downloadFile('rendervape/libraries/bedwars/projectilemeta.lua'))().ProjectileMeta,
 
 		KnockbackUtil = replicatedStorage:WaitForChild('TS').damage['knockback-util'],
 		ProjectileController = lplr.PlayerScripts:WaitForChild('TS').controllers.global.combat.projectile['projectile-controller']

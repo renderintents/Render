@@ -67,6 +67,8 @@ local function finishLoading()
 				if json.result == readfile('rendervape/profiles/commit.txt') then return end
 				writefile('rendervape/profiles/commit.txt', json.result or 'production')
 				delfolder('rendervape/games')
+				delfolder('rendervape/guis')
+				delfolder('rendervape/libraries')
 				vape:CreateNotification('Updated', 'A new update will be applied on reload')
 			end
 		until not vape.Loaded

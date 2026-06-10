@@ -357,7 +357,8 @@ end
 
 local function loadJson(path)
 	local suc, res = pcall(function()
-		return httpService:JSONDecode(downloadFile(readfile(path)))
+		downloadFile(path:gsub('rendervape/', ''))
+		return httpService:JSONDecode(readfile(path:gsub('rendervape/', '')))
 	end)
 	return suc and type(res) == 'table' and res or nil
 end
@@ -5456,7 +5457,7 @@ function mainapi:Load(skipgui, profile)
 			local object = self.Modules[i]
 			if not object then continue end
 			if object.Options and v.Options then
-				self:LoadOptions(object, v.Options)
+				pcall(function() self:LoadOptions(object, v.Options) end)
 			end
 			if v.Enabled ~= object.Enabled then
 				if skipgui then
@@ -5464,7 +5465,7 @@ function mainapi:Load(skipgui, profile)
 				end
 				object:Toggle(true)
 			end
-			object:SetBind(v.Bind)
+			pcall(function() object:SetBind(v.Bind) end)
 			object.Object.Bind.Visible = #v.Bind > 0
 		end
 
@@ -5472,10 +5473,10 @@ function mainapi:Load(skipgui, profile)
 			local object = self.Legit.Modules[i]
 			if not object then continue end
 			if object.Options and v.Options then
-				self:LoadOptions(object, v.Options)
+				pcall(function() self:LoadOptions(object, v.Options) end)
 			end
 			if object.Enabled ~= v.Enabled then
-				object:Toggle()
+				pcall(function() object:Toggle() end)
 			end
 			if v.Position and object.Children then
 				object.Children.Position = UDim2.fromOffset(v.Position.X, v.Position.Y)

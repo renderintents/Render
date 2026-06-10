@@ -1,3 +1,4 @@
+--This watermark is used to delete the file if its cached, remove it to make the file persist after vape updates.
 local getcommit = function()
 	return isfile('rendervape/profiles/commit.txt') and readfile('rendervape/profiles/commit.txt') or 'main'
 end

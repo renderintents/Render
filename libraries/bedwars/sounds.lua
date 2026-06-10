@@ -1,3 +1,4 @@
+--This watermark is used to delete the file if its cached, remove it to make the file persist after vape updates.
 return {["GameSound"] = {
     ["QUEUE_JOIN"] = "rbxassetid://6691735519",
     ["QUEUE_MATCH_FOUND"] = "rbxassetid://6768247187",
