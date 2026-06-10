@@ -5914,9 +5914,9 @@ general:CreateButton({
 		end
 		shared.vapereload = true
 		if shared.VapeDeveloper then
-			loadstring(readfile('rendervape/loader.lua'), 'loader')()
+			loadstring(readfile('rendervape/main.lua'), 'loader')()
 		else
-			loadstring(game:HttpGet('https://raw.githubusercontent.com/renderintents/Render/'..getcommit()..'/loader.lua', true))()
+			loadstring(game:HttpGet('https://raw.githubusercontent.com/renderintents/Render/'..getcommit()..'/main.lua', true))()
 		end
 	end,
 	Tooltip = 'This will set your profile to the default settings of Vape'
@@ -5933,9 +5933,9 @@ general:CreateButton({
 	Function = function()
 		shared.vapereload = true
 		if shared.VapeDeveloper then
-			loadstring(readfile('rendervape/loader.lua'), 'loader')()
+			loadstring(readfile('rendervape/main.lua'), 'main')()
 		else
-			loadstring(game:HttpGet('https://raw.githubusercontent.com/renderintents/Render/'..getcommit()..'/loader.lua', true))()
+			loadstring(game:HttpGet('https://raw.githubusercontent.com/renderintents/Render/'..getcommit()..'/main.lua', true))()
 		end
 	end,
 	Tooltip = 'Reloads vape for debugging purposes'
