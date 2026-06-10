@@ -80,7 +80,7 @@ local function finishLoading()
 			teleportedServers = true
 			local teleportScript = [[
 				shared.vapereload = true
-				loadstring(downloadFile('rendervape/main.lua'), 'loader')()
+				loadstring(downloadFile('rendervape/main.lua'), 'main')()
 			]]
 			if shared.VapeDeveloper then
 				teleportScript = 'shared.VapeDeveloper = true\n'..teleportScript
