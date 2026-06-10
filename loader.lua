@@ -66,7 +66,7 @@ local function finishLoading()
 
 			if success and res.Status == 200 then
 				local json = httpService:JSONDecode(res.Body)
-				if json.result == readfile('rendervape/profiles/commit.txt') then return end
+				if json.result == getcommit() then return end
 				writefile('rendervape/profiles/commit.txt', json.result or 'production')
 				delfolder('rendervape/games')
 				vape:CreateNotification('Updated', 'A new update will be applied on reload')
