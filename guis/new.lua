@@ -6041,9 +6041,9 @@ guipane:CreateDropdown({
 			writefile('rendervape/profiles/gui.txt', val)
 			shared.vapereload = true
 			if shared.VapeDeveloper then
-				loadstring(readfile('rendervape/loader.lua'), 'loader')()
+				loadstring(readfile('rendervape/main.lua'), 'main')()
 			else
-				loadstring(game:HttpGet('https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/'..getcommit()..'/loader.lua', true))()
+				loadstring(game:HttpGet('https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/'..getcommit()..'/main.lua', true))()
 			end
 		end
 	end,
