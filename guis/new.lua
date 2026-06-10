@@ -1,5 +1,3 @@
---This watermark is used to delete the file if its cached, remove it to make the file persist after vape updates.
---This watermark is used to delete the file if its cached, remove it to make the file persist after vape updates.
 local mainapi = {
 	Categories = {},
 	GUIColor = {
@@ -357,8 +355,7 @@ end
 
 local function loadJson(path)
 	local suc, res = pcall(function()
-		downloadFile(path:gsub('rendervape/', ''))
-		return httpService:JSONDecode(readfile(path:gsub('rendervape/', '')))
+		return httpService:JSONDecode(downloadFile(path))
 	end)
 	return suc and type(res) == 'table' and res or nil
 end
